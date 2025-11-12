@@ -14,11 +14,11 @@
 <meta property="og:title"            content="{{ page.seo.title or page.title }} • {{ meta.title }}" />
 <meta property="og:description"      content="{{ page.seo.description or meta.description }}" />
 {% if hero %}
-    <meta property="og:image"          content="{{ meta.siteUrl }}{{ hero | og }}" />
+    <meta property="og:image"          content="{{ page.seo.image.jmd or meta.siteOgImage.jmd }}" />
     <meta property="og:image:type"     content="image/jpeg" />
     <meta property="og:image:width"    content="1600" />
 {% else %}
-    <meta property="og:image"          content="{{ page.seo.image.jlg }}" />
+    <meta property="og:image"          content="{{ page.seo.image.jmd or meta.siteOgImage.jmd }}" />
     <meta property="og:image:type"     content="image/jpeg" />
     <meta property="og:image:width"    content="1600" />
 {% endif %}
@@ -32,7 +32,7 @@
     <meta name="twitter:image"         content="{{ meta.siteUrl }}{{ hero | og }}" />
 {% else %}
     <meta name="twitter:image:alt"     content="{{ page.seo.title or page.title }} • {{ meta.title }}" />
-    <meta name="twitter:image"         content="{{ page.seo.image.jlg }}" />
+    <meta name="twitter:image"         content="{{ page.seo.image.jmd or meta.siteOgImage.jmd }}" />
 {% endif %}
 
 <meta name="generator" content="{{ eleventy.generator }}">
