@@ -77,4 +77,16 @@ footer {
             border-bottom: 1px solid currentColor;
         }
     }
+
+    .copyright {
+        grid-column: 1/-1;
+        color: var(--white-100);
+        text-align: center;
+        padding: var(--s-s);
+
+        p {
+            font-size: var(--fs-xs);
+            margin: 0;
+        }
+    }
 }
