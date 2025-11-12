@@ -1,0 +1,29 @@
+#insta-feed {
+    grid-column: 1/-1;
+    padding: 0 var(--s-l);
+}
+
+.insta-overlay {
+    grid-column: 1/-1;
+    position: relative;
+    top: -56px;
+    min-height: var(--s-xxl);
+    padding: var(--s-l) var(--s-l) 0 var(--s-l);
+    margin-bottom: -56px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: var(--white-100);
+    z-index: 10;
+
+    @media screen and (min-width: 706px) {
+        top: -70px;
+        margin-bottom: -70px;
+    }
+
+    @media screen and (min-width: 1266px) {
+        top: -56px;
+        margin-bottom: -56px;
+    }
+}

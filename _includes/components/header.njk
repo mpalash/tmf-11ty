@@ -1,0 +1,102 @@
+<header>
+    <a href="/" class="home-link" title="{{ meta.siteName }}">
+        <img eleventy:ignore src="{{ meta.headerLogo.url }}" alt="{{ meta.headerLogo.caption }}" />
+    </a>
+    <a class="toggle-nav" href="#">
+        <img eleventy:ignore class="icon menu" src="/img/icon-menu.svg" />
+        <img eleventy:ignore class="icon close" src="/img/icon-close.svg" />
+    </a>
+    <nav>
+        <h2 class="visually-hidden">Top level navigation menu</h2>
+        <ul class="nav">
+            {% for link in meta.headerNavLinks %}
+                {% if link.url %}
+                    <li class="nav-item"><a href="{{ link.url }}" {% if link.url == page.url %} aria-current="page"{% endif %}>{{ link.title }}</a></li>
+                {% endif %}
+                {%- if link.page -%}
+                    <li class="nav-item"><a href="/{{ link.page.title | slugify }}" {% if link.page.title == page.title %} aria-current="page"{% endif %}>{{ link.title | safe }}</a></li>
+                {%- endif -%}
+            {% endfor %}
+            {# <li class="nav-item">
+                <a href="/search/" title="Search site">
+                    <img eleventy:ignore class="icon search" src="/img/icon-search.svg" />
+                    <span>Search</span>
+                </a>
+            </li> #}
+        </ul>
+    </nav>
+</header>
+<script>
+    const body = document.querySelector('body');
+    const toggleNav = document.querySelector('a.toggle-nav');
+    const nav = document.querySelector('nav');
+
+    toggleNav.addEventListener('click', (e) => {
+        e.preventDefault();
+        nav.classList.toggle('active');
+        toggleNav.classList.toggle('active');
+        // body.classList.toggle('disable-scroll');
+    });
+
+    class ScrollHeaderController {
+        constructor(options = {}) {
+            this.options = {
+                header: document.querySelector('header'),
+                hiddenClass: 'header-hidden',
+                visibleClass: 'header-visible',
+                ...options
+            };
+
+            // Initial state
+            this.lastScrollY = window.scrollY;
+            this.handleScroll = this.handleScroll.bind(this);
+            this.init();
+        }
+
+        init() {
+            this.options.header.classList.add(this.options.visibleClass);            
+            window.addEventListener('scroll', this.handleScroll, { passive: true });
+        }
+
+        handleScroll() {
+            const currentScrollY = window.scrollY;
+
+            // Always show header when scrolled to top
+            if (currentScrollY < 100) {
+                this.options.header.classList.remove(this.options.hiddenClass);
+                this.options.header.classList.add(this.options.visibleClass);
+                this.lastScrollY = currentScrollY;
+                return;
+            }
+            
+            // Determine scroll direction and update immediately
+            if (currentScrollY > this.lastScrollY) {
+                // Scrolling down - hide header
+                if (!this.options.header.classList.contains(this.options.hiddenClass)) {
+                    this.options.header.classList.remove(this.options.visibleClass);
+                    this.options.header.classList.add(this.options.hiddenClass);
+                }
+            } else if (currentScrollY < this.lastScrollY) {
+                // Scrolling up - show header
+                if (!this.options.header.classList.contains(this.options.visibleClass)) {
+                    this.options.header.classList.remove(this.options.hiddenClass);
+                    this.options.header.classList.add(this.options.visibleClass);
+                }
+            }
+
+            this.lastScrollY = currentScrollY;
+        }
+
+        destroy() {
+            window.removeEventListener('scroll', this.handleScroll);
+            this.options.header.classList.remove(this.options.hiddenClass);
+            this.options.header.classList.remove(this.options.visibleClass);
+        }
+    }
+
+    const header = new ScrollHeaderController({
+        header: document.querySelector('header'),
+        hiddenClass: 'hidden',
+        visibleClass: 'visible',
+    });
+</script>

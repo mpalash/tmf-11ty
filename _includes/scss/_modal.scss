@@ -1,0 +1,123 @@
+.modal {
+    position: fixed;
+    z-index: 15;
+    left: 0;
+    top: var(--nav-height);
+    width: 100vw;
+    height: calc(100vh - var(--nav-height));
+    background-color: var(--color-grey-light);
+    opacity: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: calc(100vh - var(--nav-height) - 8rem) max-content;
+    place-items: center;
+    transition: opacity var(--transition-timing);
+    display: none;
+
+    &.show {
+        display: grid;
+        opacity: 1;
+    }
+
+    .modal-prev,
+    .modal-next {
+        position: absolute;
+        top: calc(50% - 4rem);
+        transform: translateY(-50%);
+        z-index: 1;
+        background: transparent;
+        color: transparent;
+        opacity: 1;
+        height: auto;
+        width: auto;
+        border: 0;
+        border-radius: 20px;
+        padding: 0;
+        mix-blend-mode: screen;
+
+        svg {
+            fill: none;
+            height: auto;
+            width: 40px;
+            transform: none !important;
+        }
+    }
+    .modal-prev {
+        left: 1.5em;
+    }
+    .modal-next {
+        right: 1.5em;
+    }
+
+    .modal-content {
+        height: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        object-position: center;
+        opacity: 0;
+        transition: opacity var(--transition-timing);
+    }
+
+    &.show .modal-content,
+    &.show #imageCaption {
+        opacity: 1;
+    }
+
+    .modal-footer {
+        position: relative;
+        display: grid;
+        grid-template-columns: 10vw 1fr 10vw;
+        gap: var(--s-b);
+        justify-content: center;
+        place-items: center;
+        min-height: 8rem;
+        width: 100vw;
+        border-top: var(--border-major);
+        font-size: var(--fs-md);
+        text-align: center;
+    }
+    
+    #imageCaption {
+        grid-column: 2/3;
+        transition: opacity var(--transition-timing);
+    }
+
+    .modal-close-button {
+        grid-column: 3/-1;
+        cursor: pointer;
+        font-size: var(--fs-sm);
+        font-weight: bold;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+}
+
+#subscribe-modal {
+    &.modal {
+        grid-template-rows: 1fr;
+    }
+    .modal-close-button {
+        align-self: start;
+        margin: var(--s-l) 0;
+    }
+
+    .modal-content {
+        display: grid;
+        grid-template-columns: 15vw 1fr 15vw;
+        gap: var(--s-b);
+        justify-content: center;
+        place-items: center;
+        width: 100vw;
+        // font-size: var(--fs-md);
+
+        >div {
+            grid-column: 2/3;
+        }
+    }
+
+    #mc_embed_shell {
+        margin: var(--s-l) 0;
+    }
+}

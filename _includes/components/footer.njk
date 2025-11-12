@@ -1,0 +1,46 @@
+<footer>
+    <a href="#top" id="back-to-top"><img eleventy:ignore src="/img/icon-arrow-up.svg" alt="Back to top" eleventy:ignore /></a>
+    <div>
+        <a href="/" class="home-link" title="{{ meta.siteName }}">
+            <img eleventy:ignore src="{{ meta.footerLogo.url }}" alt="{{ meta.footerLogo.caption }}" />
+        </a>
+        {% for e in meta.emails %}
+            <a href="mailto:{{ e }}">{{ e }}</a>
+        {% endfor %}
+        {% for a in meta.addresses %}
+            {{ a | md | safe }}
+        {% endfor %}
+    </div>
+    <nav>
+        <h2 class="visually-hidden">Footer navigation menu</h2>
+        <ul class="nav">
+            {% for link in meta.headerNavLinks %}
+                {% if link.url %}
+                    <li class="nav-item"><a href="{{ link.url }}" {% if link.url == page.url %} aria-current="page"{% endif %}>{{ link.title }}</a></li>
+                {% endif %}
+                {%- if link.page -%}
+                    <li class="nav-item"><a href="/{{ link.page.title | slugify }}" {% if link.page.title == page.title %} aria-current="page"{% endif %}>{{ link.title | safe }}</a></li>
+                {%- endif -%}
+            {% endfor %}
+        </ul>
+    </nav>
+    <nav>
+        <h2 class="visually-hidden">Social media navigation menu</h2>
+        <ul class="nav">
+            {% for link in meta.socialMediaLinks %}
+                <li class="nav-item"><a href="{{ link.url }}" target="_blank" rel="noopener noreferrer" {% if link.url == page.url %} aria-current="page"{% endif %}>{{ link.title }}</a></li>
+            {% endfor %}
+        </ul>
+    </nav>
+</footer>
+<script>
+    var btn = document.getElementById('back-to-top');
+
+    btn.addEventListener('click', function(e) {
+    e.preventDefault();
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+    });
+</script>

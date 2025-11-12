@@ -1,0 +1,47 @@
+.subscribe-form {
+    width: 100%;
+    max-width: 480px;
+    mix-blend-mode: multiply;
+
+    #mc-embedded-subscribe-form {
+        margin-bottom: var(--s-s);
+
+        input[type="email"] {
+            margin: var(--s-s) 0;
+            padding: 4px 4px 0 var(--s-m);
+            max-width: 420px;
+        }
+        input[type="submit"] {
+            margin: var(--s-s) 0;
+            padding: 4px 0;
+            max-width: 420px;
+            color: var(--color-black) !important;
+
+            @media only screen and (min-width: 1024px) {
+                display: none;
+            }
+        }
+    }
+
+    #mc_embed_signup div.mce_inline_error {
+        margin: 0;
+        padding: var(--s-s);
+        color: var(--color-red);
+        background-color: transparent;
+        font-weight: 500;
+        font-size: var(--fs-sm);
+    }
+
+    #mc_embed_signup div.mce_inline_success {
+        margin: 0;
+        padding: var(--s-s);
+        color: var(--color-black);
+        background-color: transparent;
+        font-weight: 500;
+        font-size: var(--fs-sm);
+    }
+
+    .mc-field-group {
+        margin-bottom: var(--s-s);
+    }
+}

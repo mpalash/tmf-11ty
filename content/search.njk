@@ -1,0 +1,160 @@
+---
+layout: layouts/base.njk
+permalink: /search/
+title: Search
+excludeFromSearch: true
+---
+
+<div class="search-container">
+    <div class="search-input-wrapper">
+        <input type="text" id="search-input" placeholder="Search">
+        <a id="clear-search" href="#">
+            <img eleventy:ignore class="icon close" src="/img/icon-close.svg" />
+        </a>
+    </div>
+    <div id="search-results"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+<script>
+// Search functionality with URL parameter support
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.getElementById('search-input');
+  const searchResults = document.getElementById('search-results');
+  const clearButton = document.getElementById('clear-search');
+  let fuse;
+  let searchTimeout;
+
+  // Get search term from URL parameters
+  function getSearchParam() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('q') || '';
+  }
+
+  // Update URL with search term
+  function updateURL(query) {
+    const url = new URL(window.location);
+    if (query) {
+      url.searchParams.set('q', query);
+    } else {
+      url.searchParams.delete('q');
+    }
+    window.history.replaceState({}, '', url);
+  }
+
+  // Set initial search value from URL
+  const initialQuery = getSearchParam();
+  searchInput.value = initialQuery;
+
+  // Show/hide clear button based on input value
+  function toggleClearButton() {
+    clearButton.style.display = searchInput.value ? 'block' : 'none';
+  }
+
+  // Clear search
+  function clearSearch() {
+    searchInput.value = '';
+    searchResults.innerHTML = '';
+    updateURL('');
+    toggleClearButton();
+    searchInput.focus();
+  }
+
+  // Initial clear button visibility
+  toggleClearButton();
+
+  // Fetch search index
+  fetch('/search-index.json')
+    .then(response => response.json())
+    .then(data => {
+      // Initialize Fuse.js
+      const options = {
+        keys: ['title', 'excerpt', 'content'],
+        includeScore: true,
+        threshold: 0.3,
+        ignoreLocation: true
+      };
+      fuse = new Fuse(data.searchIndex, options);
+
+      // Perform initial search if URL has query
+      if (initialQuery) {
+        performSearch(initialQuery);
+      }
+
+      // Handle search input
+      searchInput.addEventListener('input', function(e) {
+        const query = e.target.value;
+        toggleClearButton();
+
+        // Debounce search for better performance
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+          performSearch(query);
+          updateURL(query);
+        }, 150);
+      });
+
+      // Handle clear button click
+      clearButton.addEventListener('click', clearSearch);
+
+      // Handle escape key to clear search
+      searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          clearSearch();
+        }
+      });
+
+      // Handle back/forward browser navigation
+      window.addEventListener('popstate', function() {
+        const query = getSearchParam();
+        searchInput.value = query;
+        toggleClearButton();
+        performSearch(query);
+      });
+    })
+    .catch(error => console.error('Error loading search index:', error));
+
+  function performSearch(query) {
+    if (query.length < 2) {
+      searchResults.innerHTML = '';
+      return;
+    }
+
+    const results = fuse.search(query);
+    displayResults(results, query);
+  }
+
+  function displayResults(results, query) {
+    if (results.length === 0) {
+      searchResults.innerHTML = `<p class="no-search-result">No results found for "${escapeHTML(query)}"</p>`;
+      return;
+    }
+
+    // <p>${results.length} result${results.length !== 1 ? 's' : ''} for "${escapeHTML(query)}"</p>
+    const html = `
+      ${results.map(result => {
+        const item = result.item;
+        return `
+          <a href="${item.url}" class="search-result">
+            <div class="meta">
+                <h3>${escapeHTML(item.title)}</h3>
+                <span class="date">${item.date}</span>
+                <span class="read-more">Read more</span>
+            </div>
+            <p>${escapeHTML(item.excerpt)}</p>
+          </a>
+        `;
+      }).join('')}
+    `;
+
+    searchResults.innerHTML = html;
+  }
+
+  // Helper function to escape HTML for security
+  function escapeHTML(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+});
+</script>

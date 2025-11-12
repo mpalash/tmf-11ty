@@ -1,0 +1,146 @@
+// _data/meta.js
+
+import fetch from 'node-fetch';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
+
+const token = process.env.GRAPH_TOKEN;
+const path = process.env.GRAPH_PATH;
+const rootURL = process.env.ROOT_URL;
+const isDevelopment = process.env.NODE_ENV !== 'production';
+
+// Debug logging function
+function debug(...args) {
+    if (isDevelopment) {
+        console.log('\x1b[36m%s\x1b[0m', '[Meta Data]', ...args);
+    }
+}
+
+async function getMeta() {
+    debug('Fetching meta data from CMS...');
+    // debug('Using endpoint:', path);
+    // debug('Using token:', token);
+    try {
+        const startTime = Date.now();
+
+        const data = await fetch(path, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                query: `{
+                    metas(first: 1000, where: {id: "cmhuevoj4aigk07pbnc7bx1ls"}) {
+                        title
+                        description
+                        siteUrl
+                        emails
+                        addresses
+                        headerLogo {
+                            id
+                            url
+                            height
+                            width
+                            caption
+                        }
+                        headerNavLinks {
+                            id
+                            title
+                            url
+                            page {
+                                id
+                                title
+                            }
+                        }
+                        footerLogo {
+                            id
+                            url
+                            height
+                            width
+                            caption
+                        }
+                        footerNavLinks {
+                            id
+                            title
+                            url
+                            page {
+                                id
+                                title
+                            }
+                        }
+                        socialMediaLinks {
+                            id
+                            title
+                            url
+                        }
+                        homepage {
+                            id
+                        }
+                    }
+                }`
+            })
+        });
+
+        const response = await data.json();
+        const fetchTime = Date.now() - startTime;
+        debug(`Fetch completed in ${fetchTime}ms`);
+
+        if (response.errors) {
+            debug('CMS Errors:', response.errors);
+            throw new Error("Error fetching meta data");
+        }
+
+        const meta = response.data.metas[0];
+
+        if (!meta) {
+            debug('No meta data found!');
+            throw new Error("No meta data returned");
+        }
+
+        debug('Meta data retrieved successfully');
+        debug('Site Name:', meta.title);
+        debug('Description:', meta.description);
+        debug('Site URL:', meta.siteUrl);
+
+        if (rootURL) {
+            debug('Overriding siteUrl with rootURL:', rootURL);
+            meta.siteUrl = rootURL;
+        }
+
+        // Log empty or missing fields
+        Object.entries(meta).forEach(([key, value]) => {
+            if (!value || (Array.isArray(value) && value.length === 0)) {
+                debug(`Warning: ${key} is empty or missing`);
+            }
+        });
+
+        return meta;
+
+    } catch (error) {
+        debug('Error occurred:', error.message);
+        debug('Returning fallback data');
+
+        const fallbackData = {
+            title: "Tyeb Mehta Foundation",
+            description: "Established in 2013, the Foundation endeavours to expand the legacy of Tyeb Mehta by fostering a deeper understanding of his practice and broadening the ongoing discourse on Indian Modern and Contemporary art.Established in 2013, the Foundation endeavours to expand the legacy of Tyeb Mehta by fostering a deeper understanding of his practice and broadening the ongoing discourse on Indian Modern and Contemporary art.",
+            siteUrl: rootURL || "http://localhost:8080",
+        };
+
+        debug('Fallback data:', fallbackData);
+        return fallbackData;
+    }
+}
+
+// Development mode: Add timestamp for cache busting
+const getData = isDevelopment ?
+    async () => {
+        const data = await getMeta();
+        data._timestamp = new Date().toISOString();
+        return data;
+    } :
+    getMeta;
+
+export default getData;

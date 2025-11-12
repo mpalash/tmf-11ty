@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="{{ metadata.language }}">
+	<head>
+		{% include "components/head-seo.njk" %}
+	</head>
+	<body>
+		<a href="#skip" class="visually-hidden">Skip to main content</a>
+
+		{% include "components/header.njk" %}
+
+		<main id="skip">
+			{{ content | safe }}
+			{# {% include "components/test-markup.njk" %} #}
+		</main>
+
+		{% include "components/footer.njk" %}
+
+		<!-- This page `{{ page.url | htmlBaseUrl }}` was built on {% currentBuildDate %} -->
+		<script type="module" src="{% getBundleFileUrl "js" %}"></script>
+	</body>
+	<script src="/js/imgFadeIn.js"></script>
+	<script src="/js/animateOnScroll.js"></script>
+	{% if page.url == '/search/' %}
+		<script>
+			const searchIndexPromise = fetch('/search-index.json')
+				.then(response => response.json());
+		</script>
+	{% endif %}
+</html>

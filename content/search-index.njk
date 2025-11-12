@@ -1,0 +1,32 @@
+---
+permalink: /search-index.json
+eleventyExcludeFromCollections: true
+---
+{
+  "searchIndex": [
+    {%- for p in pages -%}
+        {
+            "id": "{{ p.id }}",
+            "url": "{%- if p.id !== meta.homepage.id -%}{{ p.title | slugify }}/{%- endif -%}",
+            "title": "{{ p.title }}",
+            "date": "",
+            "tags": "",
+            "excerpt": "{{ p.seo.description | md | striptags | safe }}",
+            "content": "{%- for s in p.section-%}{%- for c in s.content -%}
+                {%- if c.subHeading -%}
+                    {{ c.subHeading }}
+                {%- endif -%}
+                {%- if c.text -%}
+                    {{ c.text | md | striptags | safe }}
+                {%- endif -%}
+                {%- if c.largeText -%}
+                    {{ c.largeText | md | striptags | safe }}
+                {%- endif -%}
+                {%- if c.pullquote -%}
+                    {{ c.pullquote | md | striptags | safe }}
+                {%- endif -%}
+            {%- endfor -%}{%- endfor -%}"
+        },
+    {%- endfor -%}
+  ]
+}

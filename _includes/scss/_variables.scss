@@ -1,0 +1,104 @@
+:root {
+    --black-10: #0000001a;
+    --black-30: #0000004d;
+    --black-60: #00000099;
+    --black-80: #000000aa;
+    --black-100: #000000;
+
+    --white-10: #ffffff1a;
+    --white-30: #ffffff4d;
+    --white-60: #ffffff99;
+    --white-80: #ffffffaa;
+    --white-100: #ffffff;
+
+    --sky-50: #e1f2f8;
+    --sky-100: #c3e6f2;
+    --sky-200: #9edaec;
+    --sky-300: #82cae0;
+    --sky-400: #70b2c9;
+    --sky-500: #5a94aa;
+    --sky-600: #45768a;
+    --sky-700: #294b5b;
+    --sky-800: #203d4b;
+    --sky-900: #122834;
+    --sky-950: #07161f;
+
+    --blue-700: #215CD4;
+    
+    --grey-50: #f6f4ee;
+    --grey-100: #e7e4d5;
+    --grey-200: #d7d4c5;
+    --grey-300: #c0beb0;
+    --grey-400: #a4a297;
+    --grey-500: #838178;
+    --grey-600: #5f5e57;
+    --grey-700: #403f3a;
+    --grey-800: #302f2b;
+    --grey-900: #21201d;
+    --grey-950: #151512;
+    
+    --red-50: #fee5e9;
+    --red-100: #fdd0d5;
+    --red-200: #fab4bd;
+    --red-300: #f699a5;
+    --red-400: #f27787;
+    --red-500: #e95469;
+    --red-600: #c12640;
+    --red-700: #9b1c28;
+    --red-800: #731212;
+    --red-900: #4c0f09;
+    --red-950: #2c0803;
+    
+    --yellow-50: #fff0de;
+    --yellow-100: #ffdba9;
+    --yellow-200: #ffc032;
+    --yellow-300: #f5b000;
+    --yellow-400: #e09b00;
+    --yellow-500: #bf7f00;
+    --yellow-600: #8e5a00;
+    --yellow-700: #6a3f00;
+    --yellow-800: #573000;
+    --yellow-900: #3d1e00;
+    --yellow-950: #250f00;
+
+    --color-red: #c20a0a;
+
+    // SPACING
+    // Use these variables for padding & margin
+    --s-xxxl: 128px;
+    --s-xxl: 64px;
+    --s-xl: 48px;
+    --s-l: 32px;
+    --s-m: 24px;
+    --s-d: 18px;
+    --s-b: 16px;
+    --s-s: 12px;
+    --s-xs: 8px;
+    --s-xxs: 4px;
+
+    // TRANSITION
+    --transition-all: all 0.3s ease-in;
+    --transition-timing: 0.3s ease-in;
+
+    --nav-height: 4.5rem;
+
+    @media only screen and (max-width: 1024px) {
+        --s-xxxl: 72px;
+        --s-xxl: 56px;
+        --s-xl: 48px;
+        --s-l: 32px;
+        --s-m: 24px;
+        --s-d: 18px;
+        --s-b: 16px;
+        --s-s: 12px;
+        --s-xs: 8px;
+        --s-xxs: 4px;
+    }
+}
+
+/* InclusiveColors-2025-06-24-21-46-25.tokens.json */
+:root {
+    /* Default */
+    /* color */
+    
+}

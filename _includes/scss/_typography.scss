@@ -1,0 +1,90 @@
+// @import url("https://use.typekit.net/roq4hhp.css");
+
+:root {
+    --fs-xs:    clamp(0.625rem, 0.6028rem + 0.0847vw, 0.6875rem); // 10-11
+    --fs-sm:    clamp(0.75rem, 0.7055rem + 0.1695vw, 0.875rem); // 12-14
+    --fs-b:     clamp(0.875rem, 0.8305rem + 0.1695vw, 1rem); // 14-16
+    --fs-md:    clamp(0.875rem, 0.786rem + 0.339vw, 1.125rem); // 14-18
+    --fs-lg:    clamp(1.125rem, 0.9915rem + 0.5085vw, 1.5rem); // 18-24
+    --fs-xl:    clamp(1.5rem, 1.322rem + 0.678vw, 2rem); // 24-32
+    --fs-xxl:   clamp(2rem, 1.822rem + 0.678vw, 2.5rem); // 32-40
+    --fs-xxxl:  clamp(2.25rem, 1.9831rem + 1.0169vw, 3rem); // 36-48
+    --fs-mega:  clamp(3rem, 2.6441rem + 1.3559vw, 4rem); // 48-64
+}
+
+// 48px
+h1 {
+    font-size: var(--fs-xxxl);
+    line-height: 0.95;
+}
+// 40px
+// h2 {
+//     font-size: var(--fs-xxl);
+//     line-height: 0.95;    
+// }
+// 24px
+h2, h3 {
+    font-size: var(--fs-lg);
+    line-height: 0.95;
+    color: var(--grey-700);
+}
+// 24px
+h4 {
+    font-size: var(--fs-lg);
+    line-height: 0.95;
+}
+// 18px
+h5 {
+    font-size: var(--fs-md);
+}
+
+h1, h2 {
+    font-weight: 400;
+}
+h3, h4 {
+    font-weight: 600;
+}
+strong, b {
+    font-weight: 700;
+}
+header,
+footer {
+    font-size: var(--fs-sm);
+}
+
+// 12-14px
+main,
+p,
+.text {
+  font-size: var(--fs-sm);
+
+    sub,
+    sup {
+        font-size: var(--fs-xs);
+    }
+}
+
+main {
+    p,
+    blockquote {
+        margin: 1em 0;
+        &:first-child {
+            margin-top: 0;
+        }
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+    ul,
+    ol {
+        margin: 2rem 0;
+        padding-left: 2.5rem;
+        &:first-child {
+            margin-top: 0;
+        }
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+}
