@@ -35,6 +35,8 @@ footer {
 
         @media screen and (min-width: 1024px) {
             grid-column: span 8;
+        }
+        @media screen and (min-width: 600px) {
             border: 0;
         }
     }
@@ -82,7 +84,7 @@ footer {
         grid-column: 1/-1;
         color: var(--white-100);
         text-align: center;
-        padding: var(--s-s);
+        padding: var(--s-s) 0 var(--s-m) 0;
 
         p {
             font-size: var(--fs-xs);
