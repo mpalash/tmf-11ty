@@ -59,6 +59,7 @@ layout: layouts/base.njk
     {%- endfor -%}
 
     {% if page.id == meta.homepage.id %}
+        {% include "components/subscribe.njk" %}
         {% include "components/insta-feed.njk" %}
     {% endif %}
 </article>

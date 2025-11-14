@@ -1,0 +1,63 @@
+<section class="subscribe-form">
+    <div class="form-wrapper">
+        {{ meta.subscribeFormText | md | safe }}
+    
+        <form id="subscribeForm" action="https://formspree.io/f/mzzydndd" method="POST">
+            <div class="form-group">
+                <label for="name" class="visually-hidden">Full Name</label>
+                <input type="text" name="name" id="name" placeholder="Full name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email" class="visually-hidden">Email</label>
+                <input type="email" name="email" id="email" placeholder="Email" required>
+            </div>
+
+            <button id="submitBtn" class="button" type="submit">Submit</button>
+        </form>
+
+        <p id="formMessage" class="hidden"></p>
+  </div>
+</section>
+<script>
+  document.getElementById('subscribeForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const form = e.target;
+    const submitBtn = document.getElementById('submitBtn');
+    const messageDiv = document.getElementById('formMessage');
+    const formData = new FormData(form);
+    
+    // Update button state
+    submitBtn.textContent = 'Sending...';
+    submitBtn.disabled = true;
+    messageDiv.classList.add('hidden');
+    
+    try {
+      const response = await fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        // Success - show thank you message
+        form.reset();
+        messageDiv.textContent = 'Thank you for subscribing.';
+        messageDiv.className = 'form-success';
+        submitBtn.textContent = 'Submit';
+        submitBtn.disabled = false;
+      } else {
+        throw new Error('Form submission failed');
+      }
+    } catch (error) {
+      // Error - show error message
+      messageDiv.textContent = 'Something went wrong. Please try again. If the issue persists, reach us at the email in the footer.';
+      messageDiv.className = 'form-error';
+      submitBtn.textContent = 'Submit';
+      submitBtn.disabled = false;
+    }
+  });
+</script>

@@ -1,47 +1,47 @@
 .subscribe-form {
-    width: 100%;
-    max-width: 480px;
-    mix-blend-mode: multiply;
+    .form-wrapper {
+        position: relative;
+        grid-column: 2/-2;
+        margin: var(--s-l) var(--s-l) var(--s-l) var(--s-l);
+        padding: var(--s-l);
+        border-radius: 4px;
+        background-color: var(--blue-700);
+        color: var(--white-100);
+        text-align: center;
 
-    #mc-embedded-subscribe-form {
-        margin-bottom: var(--s-s);
-
-        input[type="email"] {
-            margin: var(--s-s) 0;
-            padding: 4px 4px 0 var(--s-m);
-            max-width: 420px;
+        @media screen and (max-width: 600px) {
+            grid-column: 1/-1;
         }
-        input[type="submit"] {
-            margin: var(--s-s) 0;
-            padding: 4px 0;
-            max-width: 420px;
-            color: var(--color-black) !important;
 
-            @media only screen and (min-width: 1024px) {
-                display: none;
+        h2 {
+            color: inherit;
+            margin: 1em 0 2em 0;
+        }
+
+        p {
+            font-size: var(--fs-md);
+            max-width: 32em;
+            margin: 1em auto;
+        }
+
+        form {
+            display: flex;
+            gap: var(--s-s);
+            margin: var(--s-xl) auto 0 auto;
+            max-width: 64em;
+
+            @media screen and (max-width: 1024px) {
+                flex-direction: column;
             }
         }
-    }
 
-    #mc_embed_signup div.mce_inline_error {
-        margin: 0;
-        padding: var(--s-s);
-        color: var(--color-red);
-        background-color: transparent;
-        font-weight: 500;
-        font-size: var(--fs-sm);
-    }
+        .form-group {
+            flex: 1 0 auto;
+        }
 
-    #mc_embed_signup div.mce_inline_success {
-        margin: 0;
-        padding: var(--s-s);
-        color: var(--color-black);
-        background-color: transparent;
-        font-weight: 500;
-        font-size: var(--fs-sm);
-    }
-
-    .mc-field-group {
-        margin-bottom: var(--s-s);
+        .hidden {
+            display: none;
+            ;
+        }
     }
 }

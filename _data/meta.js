@@ -96,6 +96,7 @@ async function getMeta() {
                             id
                         }
                         copyrightNotice
+                        subscribeFormText
                     }
                 }`
             })
