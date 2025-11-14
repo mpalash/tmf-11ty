@@ -2,7 +2,7 @@
     <div class="form-wrapper">
         {{ meta.subscribeFormText | md | safe }}
     
-        <form id="subscribeForm" action="https://formspree.io/f/mzzydndd" method="POST">
+        {# <form id="subscribeForm" action="https://formspree.io/f/mzzydndd" method="POST">
             <div class="form-group">
                 <label for="name" class="visually-hidden">Full Name</label>
                 <input type="text" name="name" id="name" placeholder="Full name" required>
@@ -14,12 +14,93 @@
             </div>
 
             <button id="submitBtn" class="button" type="submit">Submit</button>
+        </form> #}
+
+        <form id="subscribeForm" name="subscribe" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+          <p class="hidden">
+            <label>Don't fill this out: <input name="bot-field" /></label>
+          </p>
+          
+          <div class="form-group">
+            <label for="name" class="visually-hidden">Name *</label>
+            <input type="text" id="name" name="name" placeholder="Full name" required />
+          </div>
+
+          <div class="form-group">
+            <label for="email" class="visually-hidden">Email *</label>
+            <input type="email" id="email" name="email" placeholder="Email" required />
+          </div>
+
+          <button id="submitBtn" class="button" type="submit">Submit</button>
         </form>
 
         <p id="formMessage" class="hidden"></p>
   </div>
 </section>
 <script>
+(function() {
+  const form = document.getElementById('subscribeForm');
+  const formStatus = document.getElementById('formMessage');
+  const submitButton = document.getElementById('submitBtn');
+  const originalButtonText = submitButton.textContent;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    // Update UI to show loading state
+    submitButton.disabled = true;
+    submitButton.textContent = 'Sending...';
+    formStatus.textContent = '';
+    formStatus.className = '';
+
+    // Get form data
+    const formData = new FormData(form);
+    
+    // Check honeypot field (spam protection)
+    if (formData.get('bot-field')) {
+      console.warn('Spam detected');
+      resetForm();
+      return;
+    }
+
+    // Convert FormData to URL-encoded format (Netlify requirement)
+    const urlEncodedData = new URLSearchParams(formData).toString();
+
+    try {
+      const response = await fetch('/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: urlEncodedData,
+      });
+
+      if (response.ok) {
+        // Success!
+        formStatus.textContent = 'Thank you for subscribing.';
+        formStatus.className = 'form-success';
+        form.reset();
+      } else {
+        throw new Error('Form submission failed');
+      }
+    } catch (error) {
+      // Error handling
+      console.error('Form submission error:', error);
+      formStatus.textContent = 'Something went wrong. Please try again. If the issue persists, reach us at the email in the footer.';
+      formStatus.className = 'form-error';
+    } finally {
+      // Reset button state
+      resetForm();
+    }
+  });
+
+  function resetForm() {
+    submitButton.disabled = false;
+    submitButton.textContent = originalButtonText;
+  }
+})();
+</script>
+{# <script>
   document.getElementById('subscribeForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
@@ -60,4 +141,4 @@
       submitBtn.disabled = false;
     }
   });
-</script>
+</script> #}
