@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Feed</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #fafafa;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #262626;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .controls {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #262626;
+        }
+
+        input, select {
+            padding: 12px;
+            border: 2px solid #dbdbdb;
+            border-radius: 8px;
+            width: 100%;
+            font-size: 14px;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #0095f6;
+        }
+
+        button {
+            background: #0095f6;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: #1877f2;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .feed {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 20px;
+        }
+
+        .post {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #8e8e8e;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #0095f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .feed {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📸 Instagram Feed</h1>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="username">Instagram Username:</label>
+                <input type="text" id="username" placeholder="e.g., natgeo, nasa" value="">
+            </div>
+
+            <div class="control-group">
+                <label for="postCount">Number of Posts:</label>
+                <select id="postCount">
+                    <option value="3">3 posts</option>
+                    <option value="4">4 posts</option>
+                    <option value="5" selected>5 posts</option>
+                    <option value="6">6 posts</option>
+                    <option value="9">9 posts</option>
+                </select>
+            </div>
+
+            <button onclick="loadFeed()">Load Feed</button>
+        </div>
+
+        <div id="output"></div>
+    </div>
+
+    <script async src="//www.instagram.com/embed.js"></script>
+    <script>
+        async function loadFeed() {
+            const username = document.getElementById('username').value.trim();
+            const count = document.getElementById('postCount').value;
+            const output = document.getElementById('output');
+            const button = document.querySelector('button');
+
+            if (!username) {
+                output.innerHTML = '<div class="message error">Please enter a username</div>';
+                return;
+            }
+
+            button.disabled = true;
+            button.textContent = 'Loading...';
+            output.innerHTML = '<div class="loading"><div class="spinner"></div><p>Fetching posts...</p></div>';
+
+            try {
+                // Call serverless function
+                const response = await fetch(`/api/instagram?username=${username}&count=${count}`);
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.error || 'Failed to fetch posts');
+                }
+
+                // Show cache status
+                let cacheMsg = '';
+                if (data.cached) {
+                    cacheMsg = `<div class="message info">📦 Loaded from cache (${data.cacheAge} minutes old). Cache refreshes every 6 hours.</div>`;
+                } else {
+                    cacheMsg = `<div class="message info">✨ Fresh data fetched! Cached for 6 hours.</div>`;
+                }
+
+                // Fetch embeds
+                const embedPromises = data.posts.map(post =>
+                    fetch(`https://graph.facebook.com/v21.0/instagram_oembed?url=${encodeURIComponent(post.url)}&omitscript=true`)
+                        .then(r => r.ok ? r.json() : null)
+                        .catch(() => null)
+                );
+
+                const embeds = await Promise.all(embedPromises);
+                const validEmbeds = embeds.filter(e => e && e.html);
+
+                if (validEmbeds.length === 0) {
+                    throw new Error('Could not generate embeds');
+                }
+
+                // Display
+                output.innerHTML = `
+                    ${cacheMsg}
+                    <div class="message success">✅ Loaded ${validEmbeds.length} posts from @${username}</div>
+                    <div class="feed">
+                        ${validEmbeds.map(e => `<div class="post">${e.html}</div>`).join('')}
+                    </div>
+                `;
+
+                // Process embeds
+                if (window.instgrm) {
+                    window.instgrm.Embeds.process();
+                }
+
+            } catch (error) {
+                output.innerHTML = `
+                    <div class="message error">
+                        <strong>Error:</strong> ${error.message}<br><br>
+                        Make sure the username exists and the account is public.
+                    </div>
+                `;
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Load Feed';
+            }
+        }
+    </script>
+</body>
+</html>
