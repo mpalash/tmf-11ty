@@ -1,0 +1,55 @@
+.banner {
+    margin: 0 -32px;
+    grid-column: 1/-1;
+    position: sticky;
+    top: 0;
+    z-index: 999;
+    height: var(--s-l);
+    background: var(--grey-950);
+    color: var(--white-100);
+    font-size: var(--fs-sm);
+    line-height: var(--s-l);
+
+    &:before,
+    &:after {
+        content: '';
+        position: absolute;
+        top: 0;
+        z-index: 1;
+        width: var(--s-xl);
+        height: var(--s-l);
+    }
+
+    &:before {
+        left: 0;
+        background: linear-gradient(90deg, var(--grey-950) 0, var(--grey-950) 16px, transparent 100%);
+    }
+
+    &:after {
+        right: 0;
+        background: linear-gradient(90deg, var(--grey-950) 0, var(--grey-950) 16px, transparent 100%);
+        transform: scaleX(-1);
+    }
+}
+
+.marquee {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+
+    &__track {
+        display: inline-flex;
+        will-change: transform;
+    }
+
+    &__text {
+        display: inline-block;
+        margin: 0 10vw;
+        text-align: center;
+    }
+
+    * {
+        white-space: nowrap;
+    }
+}

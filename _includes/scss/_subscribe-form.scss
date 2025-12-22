@@ -5,7 +5,7 @@
         margin: var(--s-l) var(--s-l) var(--s-l) var(--s-l);
         padding: var(--s-l);
         border-radius: 4px;
-        background-color: var(--blue-700);
+        background-color: var(--grey-950);
         color: var(--white-100);
         text-align: center;
 
@@ -16,6 +16,15 @@
         h2 {
             color: inherit;
             margin: 1em 0 2em 0;
+            &:after {
+                content: '';
+                position: absolute;
+                bottom: calc(-1 * var(--s-l));
+                left: 50%;
+                width: 96px;
+                border-bottom: 2px solid var(--white-100);
+                transform: translateX(-50%);
+            }
         }
 
         p {

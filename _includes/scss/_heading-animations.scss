@@ -1,0 +1,144 @@
+/**
+ * Heading Animation Styles
+ * Subtle, artistic transitions for the Tyeb Mehta Foundation
+ */
+
+/* Base styles for animatable headings */
+.heading-animate {
+    /* Headings remain visible - JS handles word opacity */
+    visibility: visible;
+}
+
+/* Word animation styles */
+.heading-animate .word {
+    display: inline-block;
+    opacity: 0;
+    /* No margin - spacing comes from text nodes between spans */
+    will-change: filter, opacity, transform;
+}
+
+/* Completed animation state */
+.heading-animate.animated .word {
+    opacity: 1 !important;
+    filter: none !important;
+    transform: none !important;
+}
+
+/* Optional: Smooth transition for non-JS fallback */
+@media (prefers-reduced-motion: no-preference) {
+    .heading-animate:not(.animated) {
+        transition: opacity 0.6s ease-out;
+    }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+    .heading-animate,
+    .heading-animate .word {
+        animation: none !important;
+        transition: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+        filter: none !important;
+    }
+}
+
+/* Performance optimizations */
+.heading-animate {
+    /* GPU acceleration */
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+}
+
+/* Specific heading type styles */
+
+/* Page titles - bold artistic reveal */
+.page-title.heading-animate {
+    overflow: visible;
+}
+
+/* Subtitles - elegant entrance */
+.subtitle.heading-animate {
+    transform-origin: left center;
+}
+
+/* Hero text headings - dramatic entrance */
+.page-hero-text .heading-animate {
+    letter-spacing: -0.02em;
+}
+
+/* Section headings in columns */
+.col .heading-animate {
+    margin-bottom: 1.5em;
+}
+
+/* Staggered animations for multiple headings */
+.heading-animate + .heading-animate {
+    /* Slight delay is handled by JS but this ensures spacing */
+    margin-top: 0;
+}
+
+/**
+ * Optional enhancement: Underline animation for headings
+ */
+.heading-animate.with-underline {
+    position: relative;
+    padding-bottom: 0.3em;
+}
+
+.heading-animate.with-underline::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: var(--grey-950);
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.heading-animate.with-underline.animated::after {
+    width: 60px;
+}
+
+/**
+ * Optional enhancement: Gradient reveal effect
+ */
+.heading-animate.gradient-reveal {
+    background: linear-gradient(
+        90deg,
+        var(--grey-900) 0%,
+        var(--grey-900) 50%,
+        var(--grey-700) 50%,
+        var(--grey-700) 100%
+    );
+    background-size: 200% 100%;
+    background-position: 100% 0;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    transition: background-position 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.heading-animate.gradient-reveal.animated {
+    background-position: 0 0;
+}
+
+/**
+ * Loading state - ensure headings appear if JS fails
+ */
+.no-js .heading-animate {
+    opacity: 1 !important;
+    transform: none !important;
+}
+
+/**
+ * Print styles - show all headings
+ */
+@media print {
+    .heading-animate {
+        opacity: 1 !important;
+        transform: none !important;
+    }
+}

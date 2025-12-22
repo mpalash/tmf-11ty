@@ -1,13 +1,13 @@
 header {
     position: sticky;
-    top: var(--s-l);
+    top: calc(var(--s-l) + var(--s-l));
     z-index: 100;
     grid-column: 1/-1;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
-    margin: var(--s-l);
+    margin: var(--s-l) 0;
     padding: var(--s-s) var(--s-l);
     min-height: var(--nav-height);
     height: min-content;
@@ -41,13 +41,13 @@ header {
             left: var(--s-s);
             right: var(--s-s);
             height: 0;
-            border-bottom: 1px solid transparent;
+            border-bottom: 2px solid transparent;
             transition: var(--transition-all);
         }
 
         &:hover:after,
         &[aria-current]:after {
-            border-bottom: 1px solid currentColor;
+            border-bottom: 2px solid currentColor;
         }
     }
 

@@ -6,11 +6,12 @@
 	<body>
 		<a href="#skip" class="visually-hidden">Skip to main content</a>
 
+		{% include "components/banner.njk" %}
 		{% include "components/header.njk" %}
 
 		<main id="skip">
 			{{ content | safe }}
-			{# {% include "components/test-markup.njk" %} #}
+			{% include "components/test-markup.njk" %}
 		</main>
 
 		{% include "components/footer.njk" %}
@@ -18,6 +19,12 @@
 		<!-- This page `{{ page.url | htmlBaseUrl }}` was built on {% currentBuildDate %} -->
 		<script type="module" src="{% getBundleFileUrl "js" %}"></script>
 	</body>
+	<!-- GSAP Library -->
+	<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/gsap.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/ScrollTrigger.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/SplitText.min.js"></script>
+	<script src="/js/bgColorTransitionSmooth.js"></script>
+	<script src="/js/headingAnimations.js"></script>
 	<script src="/js/imgFadeIn.js"></script>
 	<script src="/js/animateOnScroll.js"></script>
 	{% if page.url == '/search/' %}

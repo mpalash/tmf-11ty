@@ -31,7 +31,7 @@ layout: layouts/base.njk
     {% endif %}
 
     {%- for s in page.pageSections-%}
-        <section class="{{ s.numColumns }}" data-animate>
+        <section class="{{ s.numColumns }}" {% if s.numColumns == 'cols_2' %}data-bg-color="#f6f4ee"{% endif %}>
             {%- for col in s.columns -%}
                 <div class="col">
                     {%- for c in col.content -%}
@@ -43,14 +43,21 @@ layout: layouts/base.njk
                             </div>
                         {%- endif -%}
 
-                        {%- if c.subtitle -%}
+                        {%- if c.subtitle and s.numColumns == 'cols_2' -%}
                             <h2 class="subtitle">{{ c.subtitle }}</h2>
+                        {%- endif -%}
+                        {%- if c.subtitle and s.numColumns == 'cols_3' -%}
+                            <h3 class="subtitle">{{ c.subtitle }}</h3>
                         {%- endif -%}
 
                         {%- if c.text -%}
                             <div class="text">
                                 {{ c.text | md | safe }}
                             </div>
+                        {%- endif -%}
+
+                        {%- if c.title -%}
+                            <a href="/{{ c.page.title | slugify }}" class="button">{{ c.title }}</a>
                         {%- endif -%}
                     {%- endfor -%}
                 </div>
@@ -60,6 +67,6 @@ layout: layouts/base.njk
 
     {% if page.id == meta.homepage.id %}
         {% include "components/subscribe.njk" %}
-        {% include "components/insta-feed.njk" %}
+        {# {% include "components/insta-feed.njk" %} #}
     {% endif %}
 </article>

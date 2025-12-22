@@ -95,6 +95,7 @@ async function getMeta() {
                         homepage {
                             id
                         }
+                        banner
                         copyrightNotice
                         subscribeFormText
                     }
