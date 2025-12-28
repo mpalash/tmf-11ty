@@ -1,0 +1,44 @@
+---
+pagination:
+  data: timelines
+  size: 1
+  alias: timeline
+permalink: "{{ timeline.title | slugify }}/index.html"
+section: "timeline"
+layout: layouts/base.njk
+---
+<article class="{{ section }} {{ timeline.title | slugify }}">
+    <section data-layout='hero'>
+        <div class="page-hero">
+            <div class="page-hero-content">
+                <div class="page-hero-text">
+                    {{ timeline.hero.text.textmd | md | safe }}
+                </div>
+            </div>
+            <div class="page-hero-image">
+                {% for i in timeline.hero.image.images %}
+                    <img src="{{ i.url }}" alt="{{ i.caption }}" />
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {%- for e in timeline.timelineEvents-%}
+        <section data-bg-color={% if e.bgColor.hex %}{{ e.bgColor.hex }}{% else %}#fff{% endif %}>
+            <div class="year">
+                {{ e.year }}
+            </div>
+            <div class="text-wrapper">
+                <div class="text">
+                    {{ e.text | md | safe }}
+                </div>
+            </div>
+            <div class="image-wrapper" data-layout={{ e.imageLayout }}>
+                <div class="image">
+                    {% for i in e.image.images %}
+                        <img src="{{ i.url }}" alt="{{ i.caption }}" />
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+    {%- endfor -%}
+</article>
