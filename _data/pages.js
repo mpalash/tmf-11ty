@@ -64,7 +64,6 @@ async function getPages() {
                             content(first: 100) {
                                 __typename
                                 ... on Hero {
-                                    id
                                     image {
                                         id
                                         images(first: 50) {
@@ -85,25 +84,20 @@ async function getPages() {
                                         }
                                     }
                                     linkButton {
-                                        id
                                         title
                                         url
                                         page {
-                                            id
                                             title
                                         }
                                     }
                                     text {
-                                        id
                                         textmd
                                     }
                                 }
                                 ... on Text {
-                                    id
                                     textmd
                                 }
                                 ... on Image {
-                                    id
                                     images(first: 50) {
                                         id
                                         sm: url(transformation: {image: {resize: {width: 800}}, document: {output: {format: webp}}})
@@ -123,11 +117,9 @@ async function getPages() {
                                     }
                                 }
                                 ... on LinkButton {
-                                    id
                                     title
                                     url
                                     page {
-                                        id
                                         title
                                     }
                                 }

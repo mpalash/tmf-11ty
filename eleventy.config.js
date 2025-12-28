@@ -81,7 +81,11 @@ export default async function(eleventyConfig) {
 			loop: 0
 		},
 
-		// widths: ["auto"],
+		// widths: [800, 1200, "auto"],
+
+		svgShortCircuit: true,
+		outputDir: "./_site/images/",
+		urlPath: "/images/",
 
 		defaultAttributes: {
 			// e.g. <img loading decoding> assigned on the HTML tag will override these values.

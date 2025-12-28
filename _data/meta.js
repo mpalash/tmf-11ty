@@ -56,14 +56,12 @@ async function getMeta() {
                         emails
                         addresses
                         headerLogo {
-                            id
                             url
                             height
                             width
                             caption
                         }
                         headerNavLinks {
-                            id
                             title
                             url
                             page {
@@ -72,14 +70,12 @@ async function getMeta() {
                             }
                         }
                         footerLogo {
-                            id
                             url
                             height
                             width
                             caption
                         }
                         footerNavLinks {
-                            id
                             title
                             url
                             page {
@@ -88,7 +84,6 @@ async function getMeta() {
                             }
                         }
                         socialMediaLinks {
-                            id
                             title
                             url
                         }
