@@ -33,7 +33,7 @@ async function getPages() {
             },
             body: JSON.stringify({
                 query: `{
-                    pages(first: 1000) {
+                    pages(first: 100) {
                         id
                         title
                         seo {
@@ -56,58 +56,18 @@ async function getPages() {
                                 caption
                             }
                         }
-                        hero {
-                            id
-                            image {
-                                id
-                                makeIntoGallery
-                                image {
-                                    id
-                                    sm: url(transformation: {image: {resize: {width: 800}}, document: {output: {format: webp}}})
-                                    md: url(transformation: {image: {resize: {width: 1200}}, document: {output: {format: webp}}})
-                                    lg: url(transformation: {image: {resize: {width: 1600}}, document: {output: {format: webp}}})
-                                    xlg: url(transformation: {image: {resize: {width: 2000}}, document: {output: {format: webp}}})
-                                    jsm: url(transformation: {image: {resize: {width: 800}}, document: {output: {format: jpg}}})
-                                    jmd: url(transformation: {image: {resize: {width: 1200}}, document: {output: {format: jpg}}})
-                                    jlg: url(transformation: {image: {resize: {width: 1600}}, document: {output: {format: jpg}}})
-                                    jxlg: url(transformation: {image: {resize: {width: 2000}}, document: {output: {format: jpg}}})
-                                    mimeType
-                                    url
-                                    height
-                                    width
-                                    caption
-                                }
-                            }
-                            link {
-                                id
-                                title
-                                url
-                                page {
-                                    id
-                                    title
-                                }
-                            }
-                            text {
-                                id
-                                text
-                            }
-                        }
                         pageSections {
-                            numColumns
-                            columns {
-                                content(first: 100) {
-                                    ... on Subtitle {
+                            layout
+                            bgColor {
+                                hex
+                            }
+                            content(first: 100) {
+                                __typename
+                                ... on Hero {
+                                    id
+                                    image {
                                         id
-                                        subtitle
-                                    }
-                                    ... on Text {
-                                        id
-                                        text
-                                    }
-                                    ... on Image {
-                                        id
-                                        makeIntoGallery
-                                        image(first: 1000) {
+                                        images(first: 50) {
                                             id
                                             sm: url(transformation: {image: {resize: {width: 800}}, document: {output: {format: webp}}})
                                             md: url(transformation: {image: {resize: {width: 1200}}, document: {output: {format: webp}}})
@@ -122,10 +82,9 @@ async function getPages() {
                                             height
                                             width
                                             caption
-                                            mimeType
                                         }
                                     }
-                                    ... on Link {
+                                    linkButton {
                                         id
                                         title
                                         url
@@ -133,6 +92,43 @@ async function getPages() {
                                             id
                                             title
                                         }
+                                    }
+                                    text {
+                                        id
+                                        textmd
+                                    }
+                                }
+                                ... on Text {
+                                    id
+                                    textmd
+                                }
+                                ... on Image {
+                                    id
+                                    images(first: 50) {
+                                        id
+                                        sm: url(transformation: {image: {resize: {width: 800}}, document: {output: {format: webp}}})
+                                        md: url(transformation: {image: {resize: {width: 1200}}, document: {output: {format: webp}}})
+                                        lg: url(transformation: {image: {resize: {width: 1600}}, document: {output: {format: webp}}})
+                                        xlg: url(transformation: {image: {resize: {width: 2000}}, document: {output: {format: webp}}})
+                                        jsm: url(transformation: {image: {resize: {width: 800}}, document: {output: {format: jpg}}})
+                                        jmd: url(transformation: {image: {resize: {width: 1200}}, document: {output: {format: jpg}}})
+                                        jlg: url(transformation: {image: {resize: {width: 1600}}, document: {output: {format: jpg}}})
+                                        jxlg: url(transformation: {image: {resize: {width: 2000}}, document: {output: {format: jpg}}})
+                                        mimeType
+                                        url
+                                        height
+                                        width
+                                        caption
+                                        mimeType
+                                    }
+                                }
+                                ... on LinkButton {
+                                    id
+                                    title
+                                    url
+                                    page {
+                                        id
+                                        title
                                     }
                                 }
                             }

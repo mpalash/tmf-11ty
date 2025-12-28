@@ -14,6 +14,7 @@ header {
     border-radius: 4px;
     background-color: var(--white-80);
     color: var(--grey-600);
+    border: 1px solid var(--white-30);
     backdrop-filter: blur(16px);
     animation: fade-in 0.3s ease-in 1s 1 both;
 

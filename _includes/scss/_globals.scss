@@ -184,6 +184,7 @@
         }
     
         &:hover {
+            // gap: calc(var(--s-s) * 1.25);
             &:after {
                 left: 0;
                 background-color: var(--red-600);
