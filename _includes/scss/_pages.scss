@@ -70,7 +70,7 @@
                 }
             }
     
-            .page-hero-cta {
+            .page-hero-content a {
                 width: 100%;
                 border-radius: 0;
             }
@@ -120,6 +120,9 @@
             grid-column: 2/6;
             margin-bottom: var(--s-l);
         }
+        .text-wrapper {
+            margin-top: var(--s-xl);
+        }
     }
     section[data-layout='textRight'] {
         .image-wrapper {
@@ -129,6 +132,9 @@
         > *:not(.image-wrapper) {
             grid-column: 8/12;
             margin-bottom: var(--s-l);
+        }
+        .text-wrapper {
+            margin-top: var(--s-xl);
         }
     }
     section[data-layout='grid'] {

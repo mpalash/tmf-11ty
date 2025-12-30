@@ -76,8 +76,16 @@ async function getTimelines() {
                             linkButton {
                                 title
                                 url
-                                page {
-                                    title
+                                destination {
+                                    ... on Event {
+                                        eventTitle:title
+                                    }
+                                    ... on Page {
+                                        pageTitle:title
+                                    }
+                                    ... on Timeline {
+                                        timelineTitle:title
+                                    }
                                 }
                             }
                             text {

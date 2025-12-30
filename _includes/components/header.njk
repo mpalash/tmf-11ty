@@ -9,13 +9,8 @@
     <nav>
         <h2 class="visually-hidden">Top level navigation menu</h2>
         <ul class="nav">
-            {% for link in meta.headerNavLinks %}
-                {% if link.url %}
-                    <li class="nav-item"><a href="{{ link.url }}" {% if link.url == page.url %} aria-current="page"{% endif %}>{{ link.title }}</a></li>
-                {% endif %}
-                {%- if link.page -%}
-                    <li class="nav-item"><a href="/{{ link.page.title | slugify }}" {% if link.page.title == page.title %} aria-current="page"{% endif %}>{{ link.title | safe }}</a></li>
-                {%- endif -%}
+            {% for l in meta.headerNavLinks %}
+                {% include "components/headerFooterLinkButton.njk" %}
             {% endfor %}
             {# <li class="nav-item">
                 <a href="/search/" title="Search site">

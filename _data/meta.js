@@ -64,9 +64,17 @@ async function getMeta() {
                         headerNavLinks {
                             title
                             url
-                            page {
-                                id
-                                title
+                            destination {
+                                __typename
+                                ... on Event {
+                                    eventTitle:title
+                                }
+                                ... on Page {
+                                    pageTitle:title
+                                }
+                                ... on Timeline {
+                                    timelineTitle:title
+                                }
                             }
                         }
                         footerLogo {
@@ -78,9 +86,17 @@ async function getMeta() {
                         footerNavLinks {
                             title
                             url
-                            page {
-                                id
-                                title
+                            destination {
+                                __typename
+                                ... on Event {
+                                    eventTitle:title
+                                }
+                                ... on Page {
+                                    pageTitle:title
+                                }
+                                ... on Timeline {
+                                    timelineTitle:title
+                                }
                             }
                         }
                         socialMediaLinks {

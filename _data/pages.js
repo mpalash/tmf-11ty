@@ -86,8 +86,17 @@ async function getPages() {
                                     linkButton {
                                         title
                                         url
-                                        page {
-                                            title
+                                        destination {
+                                            __typename
+                                            ... on Event {
+                                                eventTitle:title
+                                            }
+                                            ... on Page {
+                                                pageTitle:title
+                                            }
+                                            ... on Timeline {
+                                                timelineTitle:title
+                                            }
                                         }
                                     }
                                     text {
@@ -119,8 +128,17 @@ async function getPages() {
                                 ... on LinkButton {
                                     title
                                     url
-                                    page {
-                                        title
+                                    destination {
+                                        __typename
+                                        ... on Event {
+                                            eventTitle:title
+                                        }
+                                        ... on Page {
+                                            pageTitle:title
+                                        }
+                                        ... on Timeline {
+                                            timelineTitle:title
+                                        }
                                     }
                                 }
                             }

@@ -17,10 +17,10 @@ layout: layouts/base.njk
                         <div class="page-hero-text">
                             {{ c.text.textmd | md | safe }}
                         </div>
-                        <a class="button page-hero-cta" href="{{ c.linkButton.page.title | slugify }}">
-                            <img eleventy:ignore class="icon" src="/img/icon-eye.svg" />
-                            {{ c.linkButton.title | safe }}
-                        </a>
+
+                        {% set l = c.linkButton %}
+                        {% set icon = "icon-eye" %}
+                        {% include "components/linkButton.njk" %}
                     </div>
                     <div class="page-hero-image">
                         {% for i in c.image.images %}
@@ -37,10 +37,9 @@ layout: layouts/base.njk
                 </div>
             {% endif %}
             {% if c.__typename == 'LinkButton' %}
-                <a class="button" href="{{ c.page.title | slugify }}">
-                    <img eleventy:ignore class="icon" src="/img/icon-arrow-right.svg" />
-                    {{ c.title | safe }}
-                </a>
+                {% set l = c %}
+                {% set icon = "icon-arrow-right" %}
+                {% include "components/linkButton.njk" %}
             {% endif %}
             {% if c.__typename == 'Image' %}
                 <div class="image-wrapper">
