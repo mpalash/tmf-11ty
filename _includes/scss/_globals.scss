@@ -36,6 +36,28 @@
         font-family: var(--font-mono);
     }
 
+    .page,
+    .timeline,
+    .event {
+        grid-column: 1/-1;
+        display: grid;
+        grid-template-columns: subgrid;
+    }
+
+    main {
+        grid-column: 1/-1;
+        display: grid;
+        grid-template-columns: subgrid;
+
+        section {
+            grid-column: 1/-1;
+            display: grid;
+            grid-template-columns: subgrid;
+            align-items: start;
+            padding: var(--s-xl) 0;
+        }
+    }
+
     picture,
     figure,
     img {
@@ -54,12 +76,6 @@
         padding: var(--s-xxs) var(--s-xs);
         font-size: var(--fs-xs);
         color: var(--grey-500);
-    }
-
-    main {
-        grid-column: 1/-1;
-        display: grid;
-        grid-template-columns: subgrid;
     }
 
     ::selection {

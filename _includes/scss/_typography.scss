@@ -15,6 +15,7 @@
     --font-mono: roboto-mono, monospace;
 }
 
+// 72px
 h1.mega {
     font-size: var(--fs-mega);
     font-weight: 250;
@@ -23,7 +24,7 @@ h1.mega {
 h1 {
     font-size: var(--fs-xxxl);
     font-weight: 350;
-    line-height: 0.95;
+    line-height: 1.15;
 
 }
 // 40px
@@ -63,6 +64,9 @@ footer {
 // 12-14px
 p {
     font-size: inherit;
+}
+p.em {
+    font-size: var(--fs-md);
 }
 
 main p,

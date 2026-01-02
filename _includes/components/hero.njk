@@ -1,0 +1,17 @@
+<div class="page-hero">
+    <div class="page-hero-content">
+        <div class="page-hero-text">
+            {{ hero.text.textmd | md | safe }}
+        </div>
+
+        {% if hero.linkButton.title %}
+            {% set l = hero.linkButton %}
+            {% include "components/linkButton.njk" %}
+        {% endif %}
+    </div>
+    <div class="page-hero-image">
+        {% for i in hero.image.images %}
+            <img src="{{ i.url }}" alt="{{ i.caption }}" />
+        {% endfor %}
+    </div>
+</div>

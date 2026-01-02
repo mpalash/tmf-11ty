@@ -36,37 +36,45 @@ async function getEvents() {
                     events(first: 100) {
                         id
                         title
-                        dateFrom
-                        dateTo
-                        description
-                        venue {
-                            name
-                            address
-                            googleMapsUrl
-                        }
-                        gallery {
-                            title
-                            description
-                            media {
-                                mimeType
+                        hero {
+                            image {
+                                id
+                                images(first: 50) {
+                                   mimeType
+                                    url
+                                    height
+                                    width
+                                    caption
+                                }
+                            }
+                            linkButton {
+                                title
                                 url
-                                height
-                                width
-                                caption
+                                destination {
+                                    __typename
+                                    ... on Event {
+                                        eventTitle:title
+                                    }
+                                    ... on Page {
+                                        pageTitle:title
+                                    }
+                                    ... on Timeline {
+                                        timelineTitle:title
+                                    }
+                                }
+                            }
+                            text {
+                                textmd
                             }
                         }
+                        dateFrom
+                        dateTo
                         seo {
                             title
                             description
                             image {
-                                sm: url(transformation: {image: {resize: {width: 800}}, document: {output: {format: webp}}})
-                                md: url(transformation: {image: {resize: {width: 1200}}, document: {output: {format: webp}}})
-                                lg: url(transformation: {image: {resize: {width: 1600}}, document: {output: {format: webp}}})
-                                xlg: url(transformation: {image: {resize: {width: 2000}}, document: {output: {format: webp}}})
-                                jsm: url(transformation: {image: {resize: {width: 800}}, document: {output: {format: jpg}}})
                                 jmd: url(transformation: {image: {resize: {width: 1200}}, document: {output: {format: jpg}}})
                                 jlg: url(transformation: {image: {resize: {width: 1600}}, document: {output: {format: jpg}}})
-                                jxlg: url(transformation: {image: {resize: {width: 2000}}, document: {output: {format: jpg}}})
                                 mimeType
                                 url
                                 height

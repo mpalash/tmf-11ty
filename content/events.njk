@@ -1,0 +1,24 @@
+---
+pagination:
+  data: events
+  size: 1
+  alias: event
+permalink: "event/{{ event.title | slugify }}/index.html"
+section: "event"
+layout: layouts/base.njk
+---
+<article class="{{ section }} {{ event.title | slugify }}">
+    <section data-layout='hero'>
+        {% set hero = event.hero %}
+        {% include "components/hero.njk" %}
+    </section>
+    {% for g in event.gallery %}
+        <section class="gallery-wrapper">
+            <div class="gallery">
+                {% for m in g.media %}
+                    <img src="{{ m.url }}" alt="{{ m.caption }}" />
+                {% endfor %}
+            </div>
+        </section>
+    {% endfor %}
+</article>

@@ -6,8 +6,10 @@
 @use 'banner';
 @use 'header';
 @use 'footer';
+@use 'hero';
 @use 'pages';
 @use 'timelines';
+@use 'events';
 @use 'heading-animations';
 @use 'insta-feed';
 @use 'modal';
@@ -95,5 +97,27 @@ body:after {
     
     @media screen and (min-width: 1024px) {
         background: repeating-linear-gradient(90deg, transparent 0% calc(8.3333% - 1px), grey calc(8.3333% - 1px) 8.3333%) repeat-x;
+    }
+}
+
+.event {
+    .gallery-wrapper {
+        grid-column: 1/-1;
+
+        @media screen and (min-width: 1024px) {
+            grid-column: 2/-2;
+        }
+    }
+    .gallery {
+        grid-column: 1/-1;
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--s-xs);
+
+        picture, img {
+            height: 20vw;
+            width: auto;
+            max-width: 100%;
+        }
     }
 }

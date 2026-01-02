@@ -12,22 +12,9 @@ layout: layouts/base.njk
         <section data-layout={{ s.layout }} data-bg-color={% if s.bgColor.hex %}{{ s.bgColor.hex }}{% else %}#fff{% endif %}>
         {%- for c in s.content -%}
             {% if c.__typename == 'Hero' %}
-                <div class="page-hero">
-                    <div class="page-hero-content">
-                        <div class="page-hero-text">
-                            {{ c.text.textmd | md | safe }}
-                        </div>
-
-                        {% set l = c.linkButton %}
-                        {% set icon = "icon-eye" %}
-                        {% include "components/linkButton.njk" %}
-                    </div>
-                    <div class="page-hero-image">
-                        {% for i in c.image.images %}
-                            <img src="{{ i.url }}" alt="{{ i.caption }}" />
-                        {% endfor %}
-                    </div>
-                </div>
+                {% set hero = c %}
+                {% set icon = "icon-eye" %}
+                {% include "components/hero.njk" %}
             {% endif %}
             {% if c.__typename == 'Text' %}
                 <div class="text-wrapper">

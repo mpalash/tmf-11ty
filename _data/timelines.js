@@ -40,14 +40,8 @@ async function getTimelines() {
                             title
                             description
                             image {
-                                sm: url(transformation: {image: {resize: {width: 800}}, document: {output: {format: webp}}})
-                                md: url(transformation: {image: {resize: {width: 1200}}, document: {output: {format: webp}}})
-                                lg: url(transformation: {image: {resize: {width: 1600}}, document: {output: {format: webp}}})
-                                xlg: url(transformation: {image: {resize: {width: 2000}}, document: {output: {format: webp}}})
-                                jsm: url(transformation: {image: {resize: {width: 800}}, document: {output: {format: jpg}}})
                                 jmd: url(transformation: {image: {resize: {width: 1200}}, document: {output: {format: jpg}}})
                                 jlg: url(transformation: {image: {resize: {width: 1600}}, document: {output: {format: jpg}}})
-                                jxlg: url(transformation: {image: {resize: {width: 2000}}, document: {output: {format: jpg}}})
                                 mimeType
                                 url
                                 height
@@ -58,14 +52,6 @@ async function getTimelines() {
                         hero {
                             image {
                                 images(first: 50) {
-                                    sm: url(transformation: {image: {resize: {width: 800}}, document: {output: {format: webp}}})
-                                    md: url(transformation: {image: {resize: {width: 1200}}, document: {output: {format: webp}}})
-                                    lg: url(transformation: {image: {resize: {width: 1600}}, document: {output: {format: webp}}})
-                                    xlg: url(transformation: {image: {resize: {width: 2000}}, document: {output: {format: webp}}})
-                                    jsm: url(transformation: {image: {resize: {width: 800}}, document: {output: {format: jpg}}})
-                                    jmd: url(transformation: {image: {resize: {width: 1200}}, document: {output: {format: jpg}}})
-                                    jlg: url(transformation: {image: {resize: {width: 1600}}, document: {output: {format: jpg}}})
-                                    jxlg: url(transformation: {image: {resize: {width: 2000}}, document: {output: {format: jpg}}})
                                     mimeType
                                     url
                                     height
@@ -101,14 +87,6 @@ async function getTimelines() {
                             imageLayout
                             image {
                                 images(first: 50) {
-                                    sm: url(transformation: {image: {resize: {width: 800}}, document: {output: {format: webp}}})
-                                    md: url(transformation: {image: {resize: {width: 1200}}, document: {output: {format: webp}}})
-                                    lg: url(transformation: {image: {resize: {width: 1600}}, document: {output: {format: webp}}})
-                                    xlg: url(transformation: {image: {resize: {width: 2000}}, document: {output: {format: webp}}})
-                                    jsm: url(transformation: {image: {resize: {width: 800}}, document: {output: {format: jpg}}})
-                                    jmd: url(transformation: {image: {resize: {width: 1200}}, document: {output: {format: jpg}}})
-                                    jlg: url(transformation: {image: {resize: {width: 1600}}, document: {output: {format: jpg}}})
-                                    jxlg: url(transformation: {image: {resize: {width: 2000}}, document: {output: {format: jpg}}})
                                     mimeType
                                     url
                                     height
