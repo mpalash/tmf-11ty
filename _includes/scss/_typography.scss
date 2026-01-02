@@ -64,23 +64,19 @@ footer {
 // 12-14px
 p {
     font-size: inherit;
+    font-weight: 400;
 }
 p.em {
     font-size: var(--fs-md);
 }
-
-main p,
-.text {
-  font-size: var(--fs-b);
-  font-weight: 400;
-
-    sub,
-    sup {
-        font-size: var(--fs-xs);
-    }
+sub,
+sup {
+    font-size: 0.75em;
 }
 
 main {
+    font-size: var(--fs-b);
+
     p,
     blockquote {
         margin: 2em 0;
@@ -90,6 +86,9 @@ main {
         &:last-child {
             margin-bottom: 0;
         }
+    }
+    blockquote {
+        font-size: var(--fs-lg);
     }
     ul,
     ol {
