@@ -46,9 +46,9 @@ layout: layouts/base.njk
     {% endif %}
     {% if page.id == 'cmjx7kcjy4lcc07o2jsu4c827' %}
         <section>
-            <ul>
+            <ul class="all-events-list">
             {% for e in events %}
-                <li><a href="/events/{{ e.title | slugify }}/">{{ e.title }}</a></li>
+                <li><a href="/events/{{ e.title | slugify }}/"><h3>{{ e.dateFrom | eventDate }} — {{ e.title }}</h3></a></li>
             {% endfor %}
             </ul>
         </section>

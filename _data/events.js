@@ -38,14 +38,11 @@ async function getEvents() {
                         title
                         hero {
                             image {
-                                id
-                                images(first: 50) {
-                                   mimeType
-                                    url
-                                    height
-                                    width
-                                    caption
-                                }
+                                mimeType
+                                url
+                                height
+                                width
+                                caption
                             }
                             linkButton {
                                 title

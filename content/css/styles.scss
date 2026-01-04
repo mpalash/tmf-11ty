@@ -121,3 +121,9 @@ body:after {
         }
     }
 }
+.all-events-list {
+    grid-column: 2/-2;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}

@@ -9,18 +9,8 @@ layout: layouts/base.njk
 ---
 <article class="{{ section }} {{ timeline.title | slugify }}">
     <section data-layout='hero'>
-        <div class="page-hero">
-            <div class="page-hero-content">
-                <div class="page-hero-text">
-                    {{ timeline.hero.text.textmd | md | safe }}
-                </div>
-            </div>
-            <div class="page-hero-image">
-                {% for i in timeline.hero.image.images %}
-                    <img src="{{ i.url }}" alt="{{ i.caption }}" />
-                {% endfor %}
-            </div>
-        </div>
+        {% set hero = timeline.hero %}
+        {% include "components/hero.njk" %}
     </section>
     {%- for e in timeline.timelineEvents-%}
         <section data-bg-color={% if e.bgColor.hex %}{{ e.bgColor.hex }}{% else %}#fff{% endif %}>

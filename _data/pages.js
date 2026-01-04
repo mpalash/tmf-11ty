@@ -58,14 +58,11 @@ async function getPages() {
                                 __typename
                                 ... on Hero {
                                     image {
-                                        id
-                                        images(first: 50) {
-                                            mimeType
-                                            url
-                                            height
-                                            width
-                                            caption
-                                        }
+                                        mimeType
+                                        url
+                                        height
+                                        width
+                                        caption
                                     }
                                     linkButton {
                                         title

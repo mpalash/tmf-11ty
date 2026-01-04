@@ -30,22 +30,15 @@
         grid-template-columns: 1fr;
         
         @media screen and (min-width: 600px) {
-            background: linear-gradient(180deg, rgba(246, 244, 238, 0) 0, rgba(246, 244, 238, 0) 240px, #fff0de 241px, rgba(246, 244, 238, 0) 85%);
             grid-template-columns: repeat(3, minmax(20px, 1fr));
         }
 
         .text-wrapper {
-            grid-template-rows: 360px 48px max-content;
-            gap: var(--s-xl);
             padding: var(--s-l) 5vw;
-
-            @media screen and (max-width: 600px) {
-                background: linear-gradient(180deg, rgba(246, 244, 238, 0) 0, rgba(246, 244, 238, 0) 240px, #fff0de 241px, rgba(246, 244, 238, 0) 85%);
-            }
+            background: linear-gradient(180deg, rgba(246, 244, 238, 0) 0, rgba(246, 244, 238, 0) 300px, #fff0de 301px, rgba(246, 244, 238, 0) 85%);
 
             img {
-                height: 360px;
-                width: auto;
+                width: 100%;
             }
         }
     }

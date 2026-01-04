@@ -11,7 +11,7 @@
         position: relative;
         grid-column: 2/6;
         margin: var(--s-xxl) 0 10vw 0;
-        animation: fade-in-up 0.5s ease-in 0.75s 1 both;
+        // animation: fade-in-up 0.5s ease-in 0.75s 1 both;
         z-index: 1;
 
         @media screen and (max-width: 1024px) {
@@ -38,7 +38,7 @@
     .page-hero-image {
         position: relative;
         grid-column: 6/-2;
-        animation: fade-in-down 0.5s ease-in 1s 1 both;
+        // animation: fade-in-down 0.5s ease-in 1s 1 both;
 
         @media screen and (max-width: 1024px) {
             grid-column: 5/-1;
@@ -49,10 +49,21 @@
             grid-row: 1;
         }
 
+        video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: fill;
+            z-index: 5;
+            mix-blend-mode: screen;
+        }
         img {
             height: 100%;
             object-fit: cover;
             object-position: center;
+            aspect-ratio: 1;
         }
 
         @media screen and (min-width: 600px) {

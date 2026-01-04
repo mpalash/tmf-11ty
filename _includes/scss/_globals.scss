@@ -110,6 +110,11 @@
             text-underline-offset: 6px;
         }
     }
+    main hr {
+        margin: 0 0 var(--s-xl) 0;
+        border: 0;
+        border-top: 2px solid var(--grey-200);
+    }
 
     img {
         max-width: 100%;
@@ -121,6 +126,9 @@
         &[data-src] {
             opacity: 0;
         }
+    }
+    .image-caption {
+        user-select: none;
     }
 
     .icon {

@@ -51,13 +51,11 @@ async function getTimelines() {
                         }
                         hero {
                             image {
-                                images(first: 50) {
-                                    mimeType
-                                    url
-                                    height
-                                    width
-                                    caption
-                                }
+                                mimeType
+                                url
+                                height
+                                width
+                                caption
                             }
                             linkButton {
                                 title

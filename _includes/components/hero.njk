@@ -10,8 +10,7 @@
         {% endif %}
     </div>
     <div class="page-hero-image">
-        {% for i in hero.image.images %}
-            <img src="{{ i.url }}" alt="{{ i.caption }}" />
-        {% endfor %}
+        <video id="hero-mask" muted><source src="/vidMask.mp4"></video>
+        <img src="{{ hero.image.url }}" alt="{{ hero.image.caption }}" onload="video = document.getElementById('hero-mask');video.currentTime=0;video.play()"/>
     </div>
 </div>
