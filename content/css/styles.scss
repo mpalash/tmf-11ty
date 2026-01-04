@@ -1,8 +1,8 @@
 @use "reset";
 @use 'typography';
 @use 'variables';
-@use 'grid';
 @use 'globals';
+@use "debug";
 @use 'banner';
 @use 'header';
 @use 'footer';
@@ -16,8 +16,34 @@
 @use 'subscribe-form';
 // @use 'search';
 
-@view-transition {
-    navigation: auto;
+/* Animation wiping in the new content */
+@keyframes wipe-in {
+    from {
+        clip-path: inset(100% 0 0 0);
+    }
+
+    to {
+        clip-path: inset(0 0 0 0);
+    }
+}
+
+@keyframes fadeToBlack {
+    from {
+        filter: brightness(1);
+    }
+    to {
+        filter: brightness(0);
+    }
+}
+@keyframes fadeFromBlack {
+    from {
+        filter: brightness(0);
+        transform: translateY(24px) scale(0.95);
+    }
+    to {
+        filter: brightness(1);
+        transform: translateY(0) scale(1);
+    }
 }
 
 /* Create a custom page transition animation */
@@ -25,7 +51,6 @@
     from {
         opacity: 0;
     }
-
     to {
         opacity: 1;
     }
@@ -34,7 +59,6 @@
     from {
         opacity: 1;
     }
-
     to {
         opacity: 0;
     }
@@ -42,9 +66,8 @@
 @keyframes fade-in-up {
     from {
         opacity: 0;
-        transform: translateY(48px);
+        transform: translateY(32px);
     }
-
     to {
         opacity: 1;
         transform: translateY(0);
@@ -55,50 +78,39 @@
         opacity: 0;
         transform: translateY(-48px);
     }
-
     to {
         opacity: 1;
         transform: translateY(0);
     }
 }
-/* Apply the custom animation to the old and new page states */
-::view-transition-old(root) {
-    animation: 0.3s ease-in both fade-out;
-}
-::view-transition-new(root) {
-    animation: 0.3s ease-in both fade-in;
+@keyframes scale-in {
+    from {
+        transform: scale(0);
+    }
+    to {
+        transform: scale(1);
+    }
 }
 
-* {
-    // outline: 1px solid red;
+@view-transition {
+    navigation: auto;
 }
-.test-markup {
-    grid-column: span 4;
-    display: flex;
-    flex-direction: column;
-    gap: var(--s-l);
+/* Apply custom animations to the old and new page states */
+// ::view-transition-old(root) {
+//     animation: 0.3s ease-in both fade-out;
+// }
+// ::view-transition-new(root) {
+//     animation: 0.3s ease-in both fade-in;
+// }
+::view-transition-old(root) {
+    animation: fadeToBlack 0.25s ease-out forwards;
 }
-body:after {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 32px;
-    right: 32px;
-    bottom: 0;
-    pointer-events: none;
-    opacity: 0.2;
-    z-index: 9999;
-    border-left: 1px solid grey;
-    background: repeating-linear-gradient(90deg, transparent 0% calc(25% - 1px), grey calc(25% - 1px) 25%) repeat-x;
-        
-    @media screen and (min-width: 600px) {
-        background: repeating-linear-gradient(90deg, transparent 0% calc(12.5% - 1px), grey calc(12.5% - 1px) 12.5%) repeat-x;
-    }
-    
-    @media screen and (min-width: 1024px) {
-        background: repeating-linear-gradient(90deg, transparent 0% calc(8.3333% - 1px), grey calc(8.3333% - 1px) 8.3333%) repeat-x;
-    }
+::view-transition-new(root) {
+    animation: fadeFromBlack 0.75s ease-out forwards;
 }
+
+
+
 
 .event {
     .gallery-wrapper {

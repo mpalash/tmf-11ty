@@ -4,13 +4,15 @@
  */
 
 /* Base styles for animatable headings */
-.heading-animate {
+.heading-animate,
+section[data-layout="heroHomepage"] .page-hero-text p.heading-animate {
     /* Headings remain visible - JS handles word opacity */
     visibility: visible;
 }
 
 /* Word animation styles */
-.heading-animate .word {
+.heading-animate .word,
+section[data-layout="heroHomepage"] .page-hero-text p .word {
     display: inline-block;
     opacity: 0;
     /* No margin - spacing comes from text nodes between spans */
@@ -18,7 +20,8 @@
 }
 
 /* Completed animation state */
-.heading-animate.animated .word {
+.heading-animate.animated .word,
+section[data-layout="heroHomepage"] .page-hero-text p.animated .word {
     opacity: 1 !important;
     filter: none !important;
     transform: none !important;

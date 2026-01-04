@@ -38,7 +38,7 @@
     
     // Render caption from alt attribute
     renderCaption(img);
-    
+
     // Check if image is already loaded (from cache)
     if (img.complete && img.naturalHeight !== 0) {
       img.classList.add('loaded');

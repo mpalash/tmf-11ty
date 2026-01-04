@@ -2,11 +2,23 @@
     <li class="nav-item"><a href="{{ l.url }}" rel="noopener noreferrer" target="_blank">{{ l.title }}</a></li>
 {% endif %}
 {% if l.destination.__typename == 'Page' %}
-    <li class="nav-item"><a href="/{{ l.destination.pageTitle | slugify }}" {% if l.destination.pageTitle == page.title %} aria-current="page"{% endif %}>{{ l.title | safe }}</a></li>
+    <li class="nav-item">
+        <a href="/{{ l.destination.pageTitle | slugify }}" {% if l.destination.pageTitle == page.title %} aria-current="page"{% endif %}>
+            {{ l.title | safe }}
+        </a>
+    </li>
 {% endif %}
 {% if l.destination.__typename == 'Timeline' %}
-    <li class="nav-item"><a href="/{{ l.destination.timelineTitle | slugify }}" {% if l.destination.timelineTitle == timeline.title %} aria-current="page"{% endif %}>{{ l.title | safe }}</a></li>
+    <li class="nav-item">
+        <a href="/{{ l.destination.timelineTitle | slugify }}" {% if l.destination.timelineTitle == timeline.title %} aria-current="page"{% endif %}>
+            {{ l.title | safe }}
+        </a>
+    </li>
 {% endif %}
 {% if l.destination.__typename == 'Event' %}
-    <li class="nav-item"><a href="/{{ l.destination.eventTitle | slugify }}" {% if l.destination.eventTitle == event.title %} aria-current="page"{% endif %}>{{ l.title | safe }}</a></li>
+    <li class="nav-item">
+        <a href="/{{ l.destination.eventTitle | slugify }}" {% if l.destination.eventTitle == event.title %} aria-current="page"{% endif %}>
+            {{ l.title | safe }}
+        </a>
+    </li>
 {% endif %}
