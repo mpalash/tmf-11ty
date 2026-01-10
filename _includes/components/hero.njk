@@ -9,8 +9,10 @@
             {% include "components/linkButton.njk" %}
         {% endif %}
     </div>
-    <div class="page-hero-image">
-        <video id="hero-mask" muted><source src="/vidMask.mp4"></video>
-        <img src="{{ hero.image.url }}" alt="{{ hero.image.caption }}" onload="video = document.getElementById('hero-mask');video.currentTime=0;video.play()"/>
-    </div>
+    {% if hero.image.url %}
+        <div class="page-hero-image">
+            <video id="hero-mask" muted><source src="/vidMask.mp4"></video>
+            <img src="{{ hero.image.url }}" alt="{{ hero.image.caption }}" onload="video = document.getElementById('hero-mask');video.currentTime=0;video.play()"/>
+        </div>
+    {% endif %}
 </div>

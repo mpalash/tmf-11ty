@@ -127,8 +127,8 @@ async function getMeta() {
         }
 
         debug('Meta data retrieved successfully');
-        debug('Site Name:', meta.title);
-        debug('Description:', meta.description);
+        debug('Site Name:', meta.seo.title);
+        debug('Description:', meta.seo.description);
         debug('Site URL:', meta.siteUrl);
 
         if (rootURL) {

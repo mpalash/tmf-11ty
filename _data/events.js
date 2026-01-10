@@ -36,6 +36,11 @@ async function getEvents() {
                     events(first: 100) {
                         id
                         title
+                        dates {
+                            dateFrom
+                            dateTo
+                            dateTimeDisplay
+                        }
                         hero {
                             image {
                                 mimeType
@@ -43,6 +48,9 @@ async function getEvents() {
                                 height
                                 width
                                 caption
+                            }
+                            text {
+                                textmd
                             }
                             linkButton {
                                 title
@@ -60,12 +68,7 @@ async function getEvents() {
                                     }
                                 }
                             }
-                            text {
-                                textmd
-                            }
                         }
-                        dateFrom
-                        dateTo
                         seo {
                             title
                             description
@@ -77,6 +80,30 @@ async function getEvents() {
                                 height
                                 width
                                 caption
+                            }
+                        }
+                        details {
+                            dates {
+                                dateFrom
+                                dateTo
+                                dateTimeDisplay
+                            }
+                            eventName
+                            eventType
+                            eventDescription
+                            vanueName
+                            venueAddress
+                            googleMapsUrl
+                            gallery {
+                                videos
+                                images {
+                                    mimeType
+                                    url
+                                    height
+                                    width
+                                    caption
+                                }
+                                notes
                             }
                         }
                     }
@@ -99,12 +126,47 @@ async function getEvents() {
 
         // console.log(JSON.stringify(events, null, 4))
 
-        return events;
+        const sortedEvents = sortEventsByDateOnly(events)
+
+        return sortedEvents;
 
     } catch (error) {
         debug('Error occurred:', error.message);
         return error.message;
     }
+}
+
+function sortEventsByDateOnly(events) {
+    if (!Array.isArray(events) || events.length === 0) {
+        debug('Warning: No events to sort');
+        return events;
+    }
+    
+    return events.sort((a, b) => {
+        // Get dates - check both possible locations
+        const aDates = a.dates || (a.details && a.details[0] && a.details[0].dates);
+        const bDates = b.dates || (b.details && b.details[0] && b.details[0].dates);
+        
+        const aDateFrom = aDates?.dateFrom;
+        const bDateFrom = bDates?.dateFrom;
+        
+        // Handle events without dates
+        if (!aDateFrom && !bDateFrom) return 0;
+        if (!aDateFrom) return 1;  // Events without dates go to end
+        if (!bDateFrom) return -1;
+        
+        // Convert to Date objects for comparison
+        const aDate = new Date(aDateFrom);
+        const bDate = new Date(bDateFrom);
+        
+        // Check for invalid dates
+        if (isNaN(aDate.getTime()) && isNaN(bDate.getTime())) return 0;
+        if (isNaN(aDate.getTime())) return 1;
+        if (isNaN(bDate.getTime())) return -1;
+        
+        // Latest to earliest (descending)
+        return bDate - aDate;
+    });
 }
 
 // Development mode: Add timestamp for cache busting

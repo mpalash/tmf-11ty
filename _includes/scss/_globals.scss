@@ -135,6 +135,28 @@
         width: var(--s-m);
     }
     
+    .badge-list {
+        display: inline-flex;
+        gap: var(--s-xs);
+        margin: var(--s-b) 0;
+    }
+    .badge {
+        display: inline-block;
+        padding: var(--s-xxs) var(--s-s);
+        border-radius: var(--s-m);
+        background-color: var(--yellow-100);
+        text-transform: capitalize;
+        width: min-content;
+        &-upcoming {
+            background-color: var(--grey-950);
+            color: var(--white-100);
+        }
+        &-past {
+            background-color: var(--grey-50);
+            color: var(--grey-600);
+        }
+    }
+
     input {
         box-sizing: border-box;
         width: 100%;
@@ -184,7 +206,8 @@
         gap: var(--s-s);
         text-decoration: none !important;
         height: var(--s-xl);
-        padding: 0 var(--s-m);
+        width: max-content;
+        padding: 0 var(--s-xl);
         border: 0;
         border-radius: var(--s-xxs);
         background-color: var(--grey-950);

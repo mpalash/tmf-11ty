@@ -41,16 +41,16 @@
         grid-template-columns: 1fr;
         grid-template-rows: max-content min-content;
         // animation: fade-in-down 0.5s ease-in 1s 1 both;
-
+        
         @media screen and (max-width: 1024px) {
             grid-column: 5/-1;
         }
-
+        
         @media screen and (max-width: 600px) {
             grid-column: 1/-1;
             grid-row: 1;
         }
-
+        
         video {
             grid-column: 1/-1;
             grid-row: 1;
@@ -69,7 +69,8 @@
             width: 100%;
             object-fit: cover;
             object-position: center;
-            aspect-ratio: 1;
+            // box-shadow: 0 0 0 1px var(--grey-50);
+            // aspect-ratio: 1;
         }
         .image-caption {
             grid-row: 2;
@@ -84,6 +85,7 @@
                 width: 300px;
                 height: 100%;
                 background: url('/img/shade.svg') no-repeat top right / auto 100%;
+                mix-blend-mode: multiply;
                 pointer-events: none;
                 user-select: none;
                 transform-origin: top right;
