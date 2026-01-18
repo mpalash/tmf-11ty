@@ -80,6 +80,7 @@ async function getTimelines() {
                             bgColor {
                                 hex
                             }
+                            sectionMarker
                             year
                             text
                             imageLayout

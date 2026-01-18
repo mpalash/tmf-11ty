@@ -16,7 +16,9 @@ layout: layouts/base.njk
         <section class="gallery-wrapper">
             <div class="gallery">
                 {% for m in g.media %}
-                    <img src="{{ m.url }}" alt="{{ m.caption }}" />
+                    <img
+                        src="{{ m.url }}"
+                        alt="{{ m.caption }}" />
                 {% endfor %}
             </div>
         </section>

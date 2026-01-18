@@ -73,9 +73,11 @@
     }
     .image-caption {
         display: block;
-        padding: var(--s-xxs) var(--s-xs);
-        font-size: var(--fs-xs);
+        padding: var(--s-xs);
+        margin-bottom: var(--s-l);
+        font-size: var(--fs-sm);
         color: var(--grey-500);
+        mix-blend-mode: multiply;
     }
 
     ::selection {

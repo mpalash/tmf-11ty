@@ -13,7 +13,7 @@ layout: layouts/base.njk
         {% include "components/hero.njk" %}
     </section>
     {%- for e in timeline.timelineEvents-%}
-        <section data-bg-color={% if e.bgColor.hex %}{{ e.bgColor.hex }}{% else %}#fff{% endif %}>
+        <section data-layout='event{% if e.imageLayout != 'inline' %}-{{ e.imageLayout }}{% endif %}{% if e.sectionMarker %}-section{% endif %}' data-bg-color={% if e.bgColor.hex %}{{ e.bgColor.hex }}{% else %}#fff{% endif %}>
             <div class="year">
                 {{ e.year }}
             </div>
@@ -22,13 +22,20 @@ layout: layouts/base.njk
                     {{ e.text | md | safe }}
                 </div>
             </div>
-            <div class="image-wrapper" data-layout={{ e.imageLayout }}>
-                <div class="image">
-                    {% for i in e.image.images %}
-                        <img src="{{ i.url }}" alt="{{ i.caption }}" />
-                    {% endfor %}
+            {% if e.image.images %}
+                <div class="image-wrapper" data-layout={{ e.imageLayout }}>
+                    <div class="image">
+                        {% for i in e.image.images %}
+                            <img
+                                src="{{ i.url }}"
+                                alt="{{ i.caption }}" />
+                            {% if i.caption %}
+                                <span class="image-caption">{{ i.caption | md | safe }}</span>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
                 </div>
-            </div>
-        </section>
+            {% endif %}
+        </section>  
     {%- endfor -%}
 </article>

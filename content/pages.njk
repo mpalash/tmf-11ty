@@ -32,7 +32,12 @@ layout: layouts/base.njk
                 <div class="image-wrapper">
                     <div class="image">
                         {% for i in c.images %}
-                            <img src="{{ i.url }}" alt="{{ i.caption }}" />
+                            <img
+                                src="{{ i.url }}"
+                                alt="{{ i.caption }}" />
+                            {% if i.caption %}
+                                <span class="image-caption">{{ i.caption | md | safe }}</span>
+                            {% endif %}
                         {% endfor %}
                     </div>
                 </div>

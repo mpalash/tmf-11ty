@@ -11,8 +11,17 @@
     </div>
     {% if hero.image.url %}
         <div class="page-hero-image">
-            <video id="hero-mask" muted><source src="/vidMask.mp4"></video>
-            <img src="{{ hero.image.url }}" alt="{{ hero.image.caption }}" onload="video = document.getElementById('hero-mask');video.currentTime=0;video.play()"/>
+            <video id="hero-mask" preload="auto" muted><source src="/vidMask.mp4"></video>
+            <img 
+                src="{{ hero.image.url }}"
+                alt="{{ hero.image.caption }}"
+                loading="eager"
+                decoding="sync"
+                fetchpriority="high"
+                onload="video = document.getElementById('hero-mask');video.currentTime=0;video.play()"/>
+            {% if hero.image.caption %}
+                <span class="image-caption">{{ hero.image.caption | md | safe }}</span>
+            {% endif %}
         </div>
     {% endif %}
 </div>

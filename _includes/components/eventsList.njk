@@ -18,7 +18,10 @@
                 <span class="event-status-badge"></span>
             </a>
             {% if e.hero.image.url %}
-                <img class="event-thumbnail" src="{{ e.hero.image.url }}" alt="{{ e.hero.image.caption }}" />
+                <img
+                    class="event-thumbnail"
+                    src="{{ e.hero.image.url }}"
+                    alt="{{ e.hero.image.caption }}" />
             {% endif %}
         </li>
     {% endfor %}

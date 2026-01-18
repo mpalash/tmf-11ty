@@ -81,16 +81,24 @@ export default async function(eleventyConfig) {
 			loop: 0
 		},
 
-		// widths: [800, 1200, "auto"],
+		widths: [480, 960, 1280, "auto"],
 
 		svgShortCircuit: true,
 		outputDir: "./_site/images/",
 		urlPath: "/images/",
 
+		filenameFormat: function (id, src, width, format, options) {
+			const extension = path.extname(src);
+			const name = path.basename(src, extension);
+
+			return `${name}-${width}w.${format}`;
+		},
+
 		defaultAttributes: {
 			// e.g. <img loading decoding> assigned on the HTML tag will override these values.
 			loading: "lazy",
 			decoding: "async",
+			sizes: "(min-width: 1024px) 64vw, (min-width: 600px) 84vw, 100vw",
 		}
 	});
 

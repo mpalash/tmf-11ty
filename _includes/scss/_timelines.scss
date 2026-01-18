@@ -1,9 +1,18 @@
 .timeline {
+    section:not([data-layout='hero']):not(:last-child) {
+        border-bottom: 1px solid var(--grey-200);
+    }
+
     .year {
         grid-column: 1 / span 1;
-        font-weight: 500;
-        letter-spacing: 0.025em;
-        color: var(--red-600);
+        position: sticky;
+        top: calc(2 * var(--s-xxxl));
+        font-size: var(--fs-lg);
+        font-weight: 450;
+        line-height: 1.1;
+        text-wrap-style: balance;
+        color: var(--grey-500);
+        mix-blend-mode: multiply;
     }
 
     .text-wrapper {
@@ -11,8 +20,29 @@
     }
 
     .image-wrapper {
-        grid-column: 1/-1;
+        grid-column: 2/-1;
         padding-top: var(--s-xl);
+
+        &[data-layout='fullWidth'] {
+            grid-column: 1/-1;
+            padding-top: calc(2 * var(--s-xl));
+            padding-left: 0;
+        }
+    }
+
+    blockquote {
+        color: var(--red-600);
+        p {
+            font-weight: 500;
+        }
+        em:last-child {
+            display: block;
+            margin-top: var(--s-b);
+            font-size: var(--fs-sm);
+            font-weight: initial;
+            font-style: initial;
+            color: var(--grey-500);
+        }
     }
 
     @media screen and (min-width: 600px) {
@@ -20,39 +50,62 @@
             grid-column: 1 / span 1;
         }
 
-        .text-wrapper {
+        [data-layout='event'] .text-wrapper {
             grid-column: 2 / span 3;
+            position: sticky;
+            top: calc(2 * var(--s-xxxl));
         }
 
         .image-wrapper {
-            grid-column: 6/-1;
+            grid-column: 5/-1;
             padding-top: 0;
+            padding-left: var(--s-l);
 
             &[data-layout='fullWidth'] {
-                grid-column: 1/-1;
+                grid-column: 2/-1;
                 padding-top: calc(2 * var(--s-xl));
+                padding-left: 0;
             }
+        }
+
+        blockquote {
+            width: 150%;
+        }
+
+        [data-layout='event-section'] .text-wrapper {
+            grid-column: 2 / span 6;
+            column-count: 2;
+            column-gap: var(--s-xl);
         }
 
     }
 
     @media screen and (min-width: 1024px) {
         .year {
-            grid-column: 2 / span 1;
+            grid-column: 1 / span 1;
         }
 
         .text-wrapper {
-            grid-column: 3 / span 4;
+            grid-column: 2 / span 4;
         }
 
         .image-wrapper {
-            grid-column: 8/-2;
+            grid-column: 7/-2;
             padding-top: 0;
+            padding-left: 0;
 
             &[data-layout='fullWidth'] {
-                grid-column: 1/-1;
+                grid-column: 2/-2;
                 padding-top: calc(2 * var(--s-xl));
             }
+        }
+
+        blockquote {
+            width: 175%;
+        }
+
+        [data-layout='event-section'] .text-wrapper {
+            grid-column: 2 / span 10;
         }
 
     }
