@@ -19,6 +19,7 @@
 
         display: grid;
         grid-template-columns: repeat(4, minmax(20px, 1fr));
+        column-gap: var(--s-m);
         
         @media screen and (min-width: 600px){
             grid-template-columns: repeat(8, minmax(20px, 1fr));
@@ -64,20 +65,34 @@
         pointer-events: none;
         user-select: none;
     }
-    img.fade-in {
-        opacity: 0;
-        transition: var(--transition-all);
-    }
-    img.fade-in.loaded {
+    img {
+        max-width: 100%;
+        height: auto;
+        user-select: none;
         opacity: 1;
+        transition: opacity 0.2s ease-in;
+        &.fade-in {
+            opacity: 0;
+            transition: var(--transition-all);
+        }
+        &.fade-in.loaded {
+            opacity: 1;
+        }
+        &[data-src] {
+            opacity: 0;
+        }
     }
     .image-caption {
         display: block;
         padding: var(--s-xs);
-        margin-bottom: var(--s-l);
+        // margin-bottom: var(--s-l);
+        user-select: none;
         font-size: var(--fs-sm);
         color: var(--grey-500);
         mix-blend-mode: multiply;
+        &+picture {
+            margin-top: var(--s-l);
+        }
     }
 
     ::selection {
@@ -117,22 +132,6 @@
         border: 0;
         border-top: 2px solid var(--grey-200);
     }
-
-    img {
-        max-width: 100%;
-        height: auto;
-        user-select: none;
-        opacity: 1;
-        transition: opacity 0.2s ease-in;
-        
-        &[data-src] {
-            opacity: 0;
-        }
-    }
-    .image-caption {
-        user-select: none;
-    }
-
     .icon {
         width: var(--s-m);
     }

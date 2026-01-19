@@ -81,7 +81,7 @@ export default async function(eleventyConfig) {
 			loop: 0
 		},
 
-		widths: [480, 960, 1280, "auto"],
+		widths: [800, 1200, 1600, "auto"],
 
 		svgShortCircuit: true,
 		outputDir: "./_site/images/",

@@ -1,6 +1,12 @@
 .timeline {
-    section:not([data-layout='hero']):not(:last-child) {
-        border-bottom: 1px solid var(--grey-200);
+    // section:not([data-layout='hero']):not(:last-child) {
+    //     border-bottom: 1px solid var(--grey-200);
+    // }
+    
+    hr {
+        margin: 0 !important;
+        grid-column: 2 / span 4;
+        mix-blend-mode: multiply;
     }
 
     .year {
@@ -9,6 +15,7 @@
         top: calc(2 * var(--s-xxxl));
         font-size: var(--fs-lg);
         font-weight: 450;
+        letter-spacing: -0.01em;
         line-height: 1.1;
         text-wrap-style: balance;
         color: var(--grey-500);
@@ -17,6 +24,15 @@
 
     .text-wrapper {
         grid-column: 2 / span 3;
+        // &:before {
+        //     content: '';
+        //     position: absolute;
+        //     top: 0;
+        //     left: calc(-1 * var(--s-b));
+        //     bottom: 0;
+        //     width: 0;
+        //     border-left: 1px solid var(--grey-200);
+        // }
     }
 
     .image-wrapper {
@@ -27,7 +43,12 @@
             grid-column: 1/-1;
             padding-top: calc(2 * var(--s-xl));
             padding-left: 0;
+            img[data-aspect='portrait'] {
+                max-height: 85vh;
+                width: auto;
+            }
         }
+
     }
 
     blockquote {
@@ -46,14 +67,27 @@
     }
 
     @media screen and (min-width: 600px) {
+        hr {
+            grid-column: 2 / span 3;
+        }
+
         .year {
             grid-column: 1 / span 1;
         }
 
-        [data-layout='event'] .text-wrapper {
+        .text-wrapper {
             grid-column: 2 / span 3;
             position: sticky;
             top: calc(2 * var(--s-xxxl));
+        }
+        [data-layout='event-fullWidth'] .text-wrapper {
+            position: relative;
+            top: 0;
+        }
+        [data-layout='event-section'] .text-wrapper {
+            grid-column: 2 / span 6;
+            column-count: 2;
+            column-gap: 10vw; //var(--s-m);
         }
 
         .image-wrapper {
@@ -72,21 +106,22 @@
             width: 150%;
         }
 
-        [data-layout='event-section'] .text-wrapper {
-            grid-column: 2 / span 6;
-            column-count: 2;
-            column-gap: var(--s-xl);
-        }
-
     }
 
     @media screen and (min-width: 1024px) {
+        hr {
+            grid-column: 2 / span 4;
+        }
+
         .year {
             grid-column: 1 / span 1;
         }
 
         .text-wrapper {
             grid-column: 2 / span 4;
+        }
+        [data-layout='event-section'] .text-wrapper {
+            grid-column: 2 / span 9;
         }
 
         .image-wrapper {
@@ -102,10 +137,6 @@
 
         blockquote {
             width: 175%;
-        }
-
-        [data-layout='event-section'] .text-wrapper {
-            grid-column: 2 / span 10;
         }
 
     }
