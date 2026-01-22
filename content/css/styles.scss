@@ -183,3 +183,21 @@
     //     display: none !important;
     // }
 }
+
+// IMAGE REVEAL
+.image-reveal-wrapper {
+    img {
+        will-change: transform, opacity, clip-path;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .image-reveal-wrapper {
+        clip-path: none !important;
+    }
+
+    .image-reveal-wrapper img {
+        opacity: 1 !important;
+        transform: none !important;
+    }
+}

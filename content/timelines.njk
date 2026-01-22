@@ -18,27 +18,29 @@ layout: layouts/base.njk
                 {{ e.year }}
             </div>
             <div class="text-wrapper">
+                {% if e.year %}<hr/>{% endif %}
                 <div class="text">
                     {{ e.text | md | safe }}
                 </div>
             </div>
             {% if e.image.images %}
                 <div class="image-wrapper" data-layout={{ e.imageLayout }}>
-                    <div class="image">
+                    <div class="images">
                         {% for i in e.image.images %}
                             {% set aspect = i.width / i.height %}
-                            <img
-                                data-aspect="{% if aspect > 1.2 %}landscape{% else %}portrait{% endif %}"
-                                src="{{ i.url }}"
-                                alt="{{ i.caption }}" />
-                            {% if i.caption %}
-                                <span class="image-caption">{{ i.caption | md | safe }}</span>
-                            {% endif %}
+                            <div class="image">                            
+                                <img
+                                    data-aspect="{% if aspect > 1.2 %}landscape{% else %}portrait{% endif %}"
+                                    src="{{ i.url }}"
+                                    alt="{{ i.caption }}" />
+                                {% if i.caption %}
+                                    <span class="image-caption">{{ i.caption | md | safe }}</span>
+                                {% endif %}
+                            </div>
                         {% endfor %}
                     </div>
                 </div>
             {% endif %}
-        </section>  
-        <hr/>
+        </section>        
     {%- endfor -%}
 </article>

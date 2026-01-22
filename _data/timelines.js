@@ -76,7 +76,7 @@ async function getTimelines() {
                                 textmd
                             }
                         }
-                        timelineEvents {
+                        timelineEvents(first: 100) {
                             bgColor {
                                 hex
                             }
