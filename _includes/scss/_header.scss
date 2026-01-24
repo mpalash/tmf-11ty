@@ -30,6 +30,15 @@ header {
         list-style: none;
         margin: 0;
         padding: 0;
+
+        li:last-child {
+            img {
+                display: block;
+            }
+            span {
+                display: none;
+            }
+        }
     }
 
     nav a {
@@ -49,6 +58,10 @@ header {
         &:hover:after,
         &[aria-current]:after {
             border-bottom: 2px solid currentColor;
+        }
+
+        &[aria-current] {
+            pointer-events: none;
         }
     }
 
@@ -114,9 +127,8 @@ header {
                 img {
                     display: none;
                 }
-
                 span {
-                    display: block;
+                    display: inline-block;
                 }
             }
 

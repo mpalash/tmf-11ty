@@ -19,6 +19,7 @@
 
         display: grid;
         grid-template-columns: repeat(4, minmax(20px, 1fr));
+        grid-template-rows: min-content min-content minmax(min-content, 1fr) min-content;
         column-gap: var(--s-m);
         
         @media screen and (min-width: 600px){
@@ -39,7 +40,8 @@
 
     .page,
     .timeline,
-    .event {
+    .event,
+    .search-container {
         grid-column: 1/-1;
         display: grid;
         grid-template-columns: subgrid;
@@ -71,6 +73,7 @@
         user-select: none;
         opacity: 1;
         transition: opacity 0.2s ease-in;
+        will-change: transform, opacity, clip-path;
         &.fade-in {
             opacity: 0;
             transition: var(--transition-all);
@@ -188,16 +191,16 @@
 
     }
     input::-webkit-input-placeholder {
-        color: var(--grey-950);
+        color: var(--grey-600);
     }
     input::-moz-placeholder {
-            color: var(--grey-950);
-        }
+        color: var(--grey-600);
+    }
     input:-ms-input-placeholder {
-            color: var(--grey-950);
-        }
+        color: var(--grey-600);
+    }
     input:-moz-placeholder {
-        color: var(--grey-950);
+        color: var(--grey-600);
     }
     
     .button:not([hidden]) {

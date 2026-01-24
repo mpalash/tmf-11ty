@@ -44,7 +44,7 @@
             grid-column: 1/-1;
             padding-top: calc(2 * var(--s-xl));
             padding-left: 0;
-            img[data-aspect='portrait'] {
+            img {
                 max-height: 85vh;
                 width: auto;
             }

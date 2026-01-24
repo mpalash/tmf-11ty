@@ -14,7 +14,7 @@
 @use 'insta-feed';
 @use 'modal';
 @use 'subscribe-form';
-// @use 'search';
+@use 'search';
 
 /* Animation wiping in the new content */
 @keyframes wipe-in {
@@ -185,12 +185,6 @@
 }
 
 // IMAGE REVEAL
-.image-reveal-wrapper {
-    img {
-        will-change: transform, opacity, clip-path;
-    }
-}
-
 @media (prefers-reduced-motion: reduce) {
     .image-reveal-wrapper {
         clip-path: none !important;

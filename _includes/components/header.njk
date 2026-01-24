@@ -12,12 +12,12 @@
             {% for l in meta.headerNavLinks %}
                 {% include "components/headerFooterLinkButton.njk" %}
             {% endfor %}
-            {# <li class="nav-item">
-                <a href="/search/" title="Search site">
+            <li class="nav-item">
+                <a href="/search/" title="Search site" {% if permalink == '/search/' %}aria-current="page"{% endif %}>
                     <img eleventy:ignore class="icon search" src="/img/icon-search.svg" />
                     <span>Search</span>
                 </a>
-            </li> #}
+            </li>
         </ul>
     </nav>
 </header>

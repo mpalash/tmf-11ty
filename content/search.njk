@@ -7,7 +7,8 @@ excludeFromSearch: true
 
 <div class="search-container">
     <div class="search-input-wrapper">
-        <input type="text" id="search-input" placeholder="Search">
+        <h2>Search</h2>
+        <input type="text" id="search-input" placeholder="What are you looking for?">
         <a id="clear-search" href="#">
             <img eleventy:ignore class="icon close" src="/img/icon-close.svg" />
         </a>
@@ -126,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function displayResults(results, query) {
     if (results.length === 0) {
-      searchResults.innerHTML = `<p class="no-search-result">No results found for "${escapeHTML(query)}"</p>`;
+      searchResults.innerHTML = `<p class="no-search-result">No results found for “${escapeHTML(query)}”</p>`;
       return;
     }
 
@@ -136,12 +137,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const item = result.item;
         return `
           <a href="${item.url}" class="search-result">
-            <div class="meta">
-                <h3>${escapeHTML(item.title)}</h3>
-                <span class="date">${item.date}</span>
-                <span class="read-more">Read more</span>
-            </div>
+            <h3>${escapeHTML(item.title)}</h3>
             <p>${escapeHTML(item.excerpt)}</p>
+            <span class="read-more badge">Read more</span>
           </a>
         `;
       }).join('')}
