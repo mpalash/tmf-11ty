@@ -66,6 +66,8 @@ a.search-result {
   .read-more {
     width: max-content !important;
     justify-self: end;
+    background-color: var(--grey-950);
+    color: var(--white-100);
   }
 }
 
