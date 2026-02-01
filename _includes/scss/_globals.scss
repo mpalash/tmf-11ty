@@ -1,7 +1,7 @@
 :root {
     body {
-        margin: 0 var(--s-l);
-        padding: 0;
+        margin: 0;
+        padding: 0 var(--s-l);
         min-height: 100vh;
         max-width: 100vw;
         background-color: var(--white-100);
@@ -10,7 +10,9 @@
         line-height: 1.65;
         font-display: swap;
 
+        scroll-behavior: smooth;
         scroll-padding-top: calc(var(--nav-height) + var(--s-xxl));
+        overflow-x: hidden;
         overscroll-behavior: none;
 
         -webkit-font-smoothing: antialiased;
@@ -22,6 +24,9 @@
         grid-template-rows: min-content min-content minmax(min-content, 1fr) min-content;
         column-gap: var(--s-m);
         
+        @media screen and (max-width: 480px) {
+            padding: 0 var(--s-b);
+        }
         @media screen and (min-width: 600px){
             grid-template-columns: repeat(8, minmax(20px, 1fr));
         }
@@ -210,6 +215,7 @@
         gap: var(--s-s);
         text-decoration: none !important;
         height: var(--s-xl);
+        min-height: var(--s-xl);
         width: max-content;
         padding: 0 var(--s-xl);
         border: 0;

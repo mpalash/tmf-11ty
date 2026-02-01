@@ -2,7 +2,7 @@
 @use 'typography';
 @use 'variables';
 @use 'globals';
-// @use "debug";
+@use "debug";
 @use 'banner';
 @use 'header';
 @use 'footer';
@@ -96,17 +96,26 @@
     navigation: auto;
 }
 /* Apply custom animations to the old and new page states */
-// ::view-transition-old(root) {
-//     animation: 0.3s ease-in both fade-out;
-// }
-// ::view-transition-new(root) {
-//     animation: 0.3s ease-in both fade-in;
-// }
 ::view-transition-old(root) {
-    animation: fadeToBlack 0.25s ease-out forwards;
+    animation: fade-out 0.25s ease-in forwards;
 }
 ::view-transition-new(root) {
-    animation: fadeFromBlack 0.75s ease-out forwards;
+    animation: fade-in 0.25s ease-in forwards;
+}
+@media screen and (min-width: 720px) {
+    ::view-transition-old(root) {
+        animation: fadeToBlack 0.25s ease-out forwards;
+    }
+    ::view-transition-new(root) {
+        animation: fadeFromBlack 0.75s ease-out forwards;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+        animation: none !important;
+    }
 }
 
 .event {

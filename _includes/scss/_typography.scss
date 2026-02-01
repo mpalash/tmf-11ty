@@ -25,15 +25,16 @@ h1 {
     font-size: var(--fs-xxxl);
     font-weight: 350;
     line-height: 1.15;
+    left: 0.2em;
     &:before {
         content: '';
-        width: 200px;
+        width: 160px;
         position: absolute;
         top: 0;
         left: 0;
         border-bottom: 2px solid var(--grey-950);
         transform-origin: top left;
-        transform: translate(8px, -56px) rotate(119deg);
+        transform: translate(8px, -36px) rotate(119deg);
         animation: fade-in 0.3s ease-in 1s 1 both;
     }
 }

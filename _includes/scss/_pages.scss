@@ -1,35 +1,73 @@
 .page {
     section {
+        row-gap: var(--s-xxl);
+        scroll-snap-type: y proximity;
+        scroll-snap-align: center;
+
+        @media screen and (min-width: 600px) {
+            row-gap: 0;
+        }
         .text-wrapper {
             margin-top: var(--s-l);
         }
         h2, h3 {
             margin-top: var(--s-l);
         }
-
         .image-wrapper:only-child {
             grid-column: 2/-2;
         }
     }
     section[data-layout='textLeft'] {
-        .image-wrapper {
-            grid-column: 7/12;
-            grid-row: 1 / span 25;
-        }
+        .image-wrapper,
         > *:not(.image-wrapper) {
-            grid-column: 2/6;
-            margin-bottom: var(--s-l);
+            grid-column: 1/-1;
         }
-        
+        @media screen and (min-width: 600px) {
+            .image-wrapper {
+                grid-column: 5/-1;
+                grid-row: 1 / span 25;
+            }
+            > *:not(.image-wrapper) {
+                grid-column: 1/5;
+                margin-bottom: var(--s-l);
+            }
+        }
+        @media screen and (min-width: 1024px) {
+            .image-wrapper {
+                grid-column: 7/12;
+                grid-row: 1 / span 25;
+            }
+            > *:not(.image-wrapper) {
+                grid-column: 2/6;
+                margin-bottom: var(--s-l);
+            }
+        }
     }
     section[data-layout='textRight'] {
-        .image-wrapper {
-            grid-column: 2/7;
-            grid-row: 1 / span 25;
-        }
+        .image-wrapper,
         > *:not(.image-wrapper) {
-            grid-column: 8/12;
-            margin-bottom: var(--s-l);
+            grid-column: 1/-1;
+            row-gap: var(--s-l);
+        }
+        @media screen and (min-width: 600px) {
+            .image-wrapper {
+                grid-column: 1/5;
+                grid-row: 1 / span 25;
+            }
+            > *:not(.image-wrapper) {
+                grid-column: 5/-1;
+                margin-bottom: var(--s-l);
+            }
+        }
+        @media screen and (min-width: 1024px) {
+            .image-wrapper {
+                grid-column: 2/7;
+                grid-row: 1 / span 25;
+            }
+            > *:not(.image-wrapper) {
+                grid-column: 8/12;
+                margin-bottom: var(--s-l);
+            }
         }
     }
     section[data-layout='grid'] {
