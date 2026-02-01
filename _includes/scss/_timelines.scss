@@ -25,15 +25,6 @@
 
     .text-wrapper {
         grid-column: 2 / span 3;
-        // &:before {
-        //     content: '';
-        //     position: absolute;
-        //     top: 0;
-        //     left: calc(-1 * var(--s-b));
-        //     bottom: 0;
-        //     width: 0;
-        //     border-left: 1px solid var(--grey-200);
-        // }
     }
 
     .image-wrapper {
@@ -44,9 +35,13 @@
             grid-column: 1/-1;
             padding-top: calc(2 * var(--s-xl));
             padding-left: 0;
-            img {
-                max-height: 85vh;
+
+            .image[data-orientation='square'] img,
+            .image[data-orientation='portrait'] img {
+                height: 75vh;
                 width: auto;
+                max-width: 100%;
+                object-fit: contain;
             }
         }
         

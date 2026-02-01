@@ -1,9 +1,13 @@
 /**
- * GSAP Image Reveal Animation
+ * GSAP Image Reveal Animation with Orientation Detection
  * Uses clip-path for true masked reveal without scaling
  * DOM Structure: .image-wrapper > .images > [.image, .image, .image, ...]
  * Each .image contains one <picture> element
  * Plays only once when images enter viewport
+ * Adds data-orientation attribute based on aspect ratio
+ * 
+ * 75vh rule: Applied ONLY to fullWidth + (portrait OR square) images
+ * Landscape images always use natural aspect ratio
  */
 
 (function() {
@@ -13,7 +17,7 @@
   function init() {
     // Check if GSAP is loaded
     if (typeof gsap === 'undefined') {
-      console.error('GSAP not loaded. Please include GSAP library.');
+      // console.error('GSAP not loaded. Please include GSAP library.');
       return;
     }
 
@@ -56,15 +60,114 @@
       picture.parentNode.insertBefore(wrapper, picture);
       wrapper.appendChild(picture);
 
+      // Get image dimensions from attributes
+      const imgWidth = parseFloat(img.getAttribute('width'));
+      const imgHeight = parseFloat(img.getAttribute('height'));
+      
+      // Check if parent has fullWidth layout
+      const imageWrapper = imageContainer.closest('.image-wrapper');
+      const isFullWidth = imageWrapper && imageWrapper.getAttribute('data-layout') === 'fullWidth';
+      
+      if (imgWidth && imgHeight) {
+        // Calculate aspect ratio
+        const aspectRatio = imgWidth / imgHeight;
+        
+        // Determine orientation and add data attribute
+        let orientation;
+        if (aspectRatio > 1.2) {
+          orientation = 'landscape';
+        } else if (aspectRatio < 0.8) {
+          orientation = 'portrait';
+        } else {
+          orientation = 'square';
+        }
+        
+        // Add orientation data attribute to the image container
+        imageContainer.setAttribute('data-orientation', orientation);
+        
+        // Also add to the wrapper for styling flexibility
+        wrapper.setAttribute('data-orientation', orientation);
+        
+        // console.log(`Image orientation: ${orientation} (aspect ratio: ${aspectRatio.toFixed(3)})`, img.alt || img.src);
+        
+        // Apply 75vh rule ONLY to fullWidth + (portrait OR square) images
+        const shouldUse75vh = isFullWidth && (orientation === 'portrait' || orientation === 'square');
+        
+        if (shouldUse75vh) {
+          // For fullWidth portrait/square: height is 75vh, width is auto (maintains aspect ratio)
+          wrapper.style.display = 'flex';
+          wrapper.style.alignItems = 'start';
+          wrapper.style.justifyContent = 'start';
+          wrapper.style.height = '75vh';
+          wrapper.style.minHeight = '75vh';
+          
+          // Picture should be sized to maintain aspect ratio
+          picture.style.height = '100%';
+          picture.style.width = 'auto';
+          picture.style.maxWidth = '100%';
+          
+          // console.log(`75vh layout applied (fullWidth ${orientation}):`, img.alt || img.src);
+        } else {
+          // Standard layout: use aspect ratio padding technique
+          // This applies to:
+          // - All non-fullWidth images (regardless of orientation)
+          // - FullWidth landscape images (they use natural aspect ratio)
+          const paddingRatio = imgHeight / imgWidth;
+          
+          wrapper.style.paddingBottom = (paddingRatio * 100) + '%';
+          wrapper.style.position = 'relative';
+          wrapper.style.height = '0';
+          
+          // Position picture absolutely inside wrapper
+          picture.style.position = 'absolute';
+          picture.style.top = '0';
+          picture.style.left = '0';
+          picture.style.width = '100%';
+          picture.style.height = '100%';
+          
+          // Apply different object-fit based on orientation
+          if (orientation === 'portrait') {
+            img.style.objectFit = 'cover';
+            img.style.objectPosition = 'center';
+          } else if (orientation === 'landscape') {
+            img.style.objectFit = 'contain';
+            img.style.objectPosition = 'center';
+          } else {
+            // Square
+            img.style.objectFit = 'cover';
+            img.style.objectPosition = 'center';
+          }
+          
+          if (isFullWidth && orientation === 'landscape') {
+            // console.log(`Natural aspect ratio layout (fullWidth landscape):`, img.alt || img.src);
+          }
+        }
+      } else {
+        console.warn('Image missing width/height attributes:', img.src);
+        // Default to unknown orientation
+        imageContainer.setAttribute('data-orientation', 'unknown');
+        wrapper.setAttribute('data-orientation', 'unknown');
+      }
+
       // Set initial state: wrapper clipped to 0% width (left to right reveal)
       gsap.set(wrapper, {
         clipPath: 'inset(0 100% 0 0)' // top right bottom left
       });
 
       // Set initial state: image slightly scaled and transparent
+      // Use different scale values based on orientation
+      const orientation = imageContainer.getAttribute('data-orientation');
+      let initialScale = 1.05; // default
+      
+      if (orientation === 'landscape') {
+        initialScale = 1.08; // More dramatic for landscape
+      } else if (orientation === 'portrait') {
+        initialScale = 1.03; // Subtle for portrait
+      }
+      
       gsap.set(img, {
         opacity: 0,
-        scale: 1.05
+        scale: initialScale
       });
     });
 
@@ -104,18 +207,33 @@
           // IMPORTANT: Change lazy loading to eager when image enters viewport
           // This ensures the image will load even though it's clipped
           if (img.loading === 'lazy') {
-            console.log('Changing lazy to eager for:', img.alt || img.src);
+            // console.log('Changing lazy to eager for:', img.alt || img.src);
             img.loading = 'eager';
           }
 
           // Mark as revealed to prevent re-animation
           imageContainer.dataset.revealed = 'true';
 
-          console.log('Image in viewport, waiting for load:', img.alt || img.src);
+          // console.log('Image in viewport, waiting for load:', img.alt || img.src);
 
           // Function to trigger the animation
           function triggerAnimation() {
-            console.log('Image loaded, revealing:', img.alt || img.src);
+            // console.log('Image loaded, revealing:', img.alt || img.src);
+
+            // Get orientation for animation customization
+            const orientation = imageContainer.getAttribute('data-orientation');
+
+            // Customize animation timing based on orientation
+            let revealDuration = 1.2;
+            let scaleDuration = 1.2;
+            
+            if (orientation === 'portrait') {
+              revealDuration = 1.0; // Faster reveal for portrait
+              scaleDuration = 1.0;
+            } else if (orientation === 'landscape') {
+              revealDuration = 1.4; // Slower, more dramatic for landscape
+              scaleDuration = 1.4;
+            }
 
             // Create timeline for sequenced animation
             const tl = gsap.timeline({
@@ -135,12 +253,12 @@
             }, 0)
             .to(wrapper, {
               clipPath: 'inset(0 0% 0 0)', // Reveal fully
-              duration: 1.2,
+              duration: revealDuration,
               ease: 'power3.inOut'
             }, 0.2)
             .to(img, {
               scale: 1,
-              duration: 1.2,
+              duration: scaleDuration,
               ease: 'power2.out'
             }, 0.2);
           }
@@ -155,7 +273,7 @@
             
             // Also handle error case - still reveal but log the error
             img.addEventListener('error', function() {
-              console.warn('Image failed to load, revealing anyway:', img.src);
+              // console.warn('Image failed to load, revealing anyway:', img.src);
               triggerAnimation();
             }, { once: true });
           }
@@ -191,14 +309,14 @@
         
         // Change lazy loading to eager for skipped images
         if (img.loading === 'lazy') {
-          console.log('Changing lazy to eager (previous image):', img.alt || img.src);
+          // console.log('Changing lazy to eager (previous image):', img.alt || img.src);
           img.loading = 'eager';
         }
         
         // Mark as revealed
         container.dataset.revealed = 'true';
         
-        console.log('Instantly revealing previous image:', img.alt || img.src);
+        // console.log('Instantly revealing previous image:', img.alt || img.src);
         
         // Instantly reveal (no animation)
         gsap.set(img, {
