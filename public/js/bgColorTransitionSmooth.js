@@ -96,7 +96,19 @@
       });
     });
 
-    // Add final default color at the very bottom
+    // Find the last section within <main> element
+    const mainElement = document.querySelector('main');
+    let lastMainSection = null;
+    
+    if (mainElement) {
+      const sectionsInMain = Array.from(sections).filter(section => 
+        mainElement.contains(section)
+      );
+      lastMainSection = sectionsInMain[sectionsInMain.length - 1];
+    }
+    
+    // If last section in main has a color, maintain it to the end
+    // Otherwise, revert to default color
     const lastSection = sections[sections.length - 1];
     if (lastSection) {
       const rect = lastSection.getBoundingClientRect();
@@ -104,10 +116,14 @@
       const sectionBottom = rect.top + scrollTop + rect.height;
       const finalScrollPos = sectionBottom + window.innerHeight;
       
+      // Check if the last section in main has a background color
+      const lastMainColor = lastMainSection ? lastMainSection.getAttribute(config.dataAttribute) : null;
+      
       colorStops.push({
         scrollPos: finalScrollPos,
-        color: hexToRgb(config.defaultColor),
-        element: null
+        color: lastMainColor ? hexToRgb(lastMainColor) : hexToRgb(config.defaultColor),
+        element: null,
+        isEnd: true
       });
     }
 
@@ -202,6 +218,17 @@
           });
         });
 
+        // Find the last section within <main> element
+        const mainElement = document.querySelector('main');
+        let lastMainSection = null;
+        
+        if (mainElement) {
+          const sectionsInMain = Array.from(sections).filter(section => 
+            mainElement.contains(section)
+          );
+          lastMainSection = sectionsInMain[sectionsInMain.length - 1];
+        }
+
         const lastSection = sections[sections.length - 1];
         if (lastSection) {
           const rect = lastSection.getBoundingClientRect();
@@ -209,10 +236,14 @@
           const sectionBottom = rect.top + scrollTop + rect.height;
           const finalScrollPos = sectionBottom + window.innerHeight;
           
+          // Check if the last section in main has a background color
+          const lastMainColor = lastMainSection ? lastMainSection.getAttribute(config.dataAttribute) : null;
+          
           colorStops.push({
             scrollPos: finalScrollPos,
-            color: hexToRgb(config.defaultColor),
-            element: null
+            color: lastMainColor ? hexToRgb(lastMainColor) : hexToRgb(config.defaultColor),
+            element: null,
+            isEnd: true
           });
         }
 

@@ -74,5 +74,5 @@
     });
   });
 
-  console.log('✓ Lenis smooth scrolling initialized');
+  console.log('Smooth scrolling initialized');
 })();

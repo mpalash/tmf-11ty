@@ -10,11 +10,15 @@
         .text-wrapper {
             margin-top: var(--s-l);
         }
+        .image-wrapper {
+            position: sticky;
+            top: calc(2 * var(--s-xxxl));
+            &:only-child {
+                grid-column: 2/-2;
+            }
+        }
         h2, h3 {
             margin-top: var(--s-l);
-        }
-        .image-wrapper:only-child {
-            grid-column: 2/-2;
         }
     }
     section[data-layout='textLeft'] {

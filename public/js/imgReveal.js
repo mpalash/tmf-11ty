@@ -22,14 +22,14 @@
     }
 
     // Find all .image containers with picture elements
-    const imageContainers = document.querySelectorAll('main .images .image');
+    const imageContainers = document.querySelectorAll('main .image-wrapper .image');
     
     if (imageContainers.length === 0) {
-      console.log('No .image containers found to animate');
+      console.log('No image containers found to animate');
       return;
     }
 
-    console.log(`Found ${imageContainers.length} .image containers to animate`);
+    console.log(`Found ${imageContainers.length} image containers to animate`);
 
     // Apply initial styles and setup for each .image container
     imageContainers.forEach(function(imageContainer) {
@@ -37,7 +37,7 @@
       const picture = imageContainer.querySelector('picture');
       
       if (!picture) {
-        console.warn('.image container has no picture element, skipping:', imageContainer);
+        console.warn('Image container has no picture element, skipping:', imageContainer);
         return;
       }
 

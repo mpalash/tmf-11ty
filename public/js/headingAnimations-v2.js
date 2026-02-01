@@ -120,12 +120,12 @@
   function animate(element) {
     const animation = getAnimation(element);
     
-    console.log('[BLUR ANIMATE] Starting:', element.textContent.substring(0, 40));
-    console.log('[BLUR ANIMATE] Element type:', element.tagName, element.className);
+    // console.log('[BLUR ANIMATE] Starting:', element.textContent.substring(0, 40));
+    // console.log('[BLUR ANIMATE] Element type:', element.tagName, element.className);
     
     // Split into words
     const words = splitIntoWords(element);
-    console.log('[BLUR ANIMATE] Words:', words.length);
+    // console.log('[BLUR ANIMATE] Words:', words.length);
     
     // Make element visible (container should always be visible)
     element.style.visibility = 'visible';
@@ -146,7 +146,7 @@
     
     if (CONFIG.randomizeOrder) {
       // Random order with shuffle
-      console.log('[BLUR ANIMATE] Using randomized order');
+      // console.log('[BLUR ANIMATE] Using randomized order');
       staggerConfig = {
         amount: animation.stagger * words.length,
         from: 'random', // GSAP's built-in random
@@ -154,11 +154,11 @@
       };
     } else {
       // Sequential left-to-right
-      console.log('[BLUR ANIMATE] Using sequential order');
+      // console.log('[BLUR ANIMATE] Using sequential order');
       staggerConfig = animation.stagger;
     }
     
-    console.log('[BLUR ANIMATE] Initial state set, starting tween');
+    // console.log('[BLUR ANIMATE] Initial state set, starting tween');
     
     // Animate words
     const tl = gsap.to(words, {
@@ -171,11 +171,11 @@
       ease: animation.ease,
       stagger: staggerConfig,
       force3D: true,
-      onStart: () => {
-        console.log('[BLUR ANIMATE] Timeline started');
-      },
+      // onStart: () => {
+      //   console.log('[BLUR ANIMATE] Timeline started');
+      // },
       onComplete: () => {
-        console.log('[BLUR ANIMATE] Complete');
+        // console.log('[BLUR ANIMATE] Complete');
         element.classList.add('animated');
         // Clean up inline styles
         gsap.set(words, { clearProps: 'all' });
@@ -191,7 +191,7 @@
   function onIntersect(entries, observer) {
     entries.forEach(entry => {
       if (entry.isIntersecting && !entry.target.classList.contains('animated')) {
-        console.log('[BLUR ANIMATE] Element intersecting:', entry.target.textContent.substring(0, 30));
+        // console.log('[BLUR ANIMATE] Element intersecting:', entry.target.textContent.substring(0, 30));
         animate(entry.target);
         observer.unobserve(entry.target);
       }
@@ -204,11 +204,11 @@
   function init() {
     // Check GSAP
     if (typeof gsap === 'undefined') {
-      console.error('[BLUR ANIMATE] GSAP not loaded!');
+      // console.error('[BLUR ANIMATE] GSAP not loaded!');
       return;
     }
     
-    console.log('[BLUR ANIMATE] Initializing with GSAP', gsap.version);
+    // console.log('[BLUR ANIMATE] Initializing with GSAP', gsap.version);
     
     // Find headings and hero paragraphs
     const headings = document.querySelectorAll('h1, h2, h3, h4, .subtitle, .page-title');
@@ -218,11 +218,11 @@
     const allElements = [...headings, ...heroParagraphs];
     
     if (allElements.length === 0) {
-      console.warn('[BLUR ANIMATE] No elements found');
+      // console.warn('[BLUR ANIMATE] No elements found');
       return;
     }
     
-    console.log('[BLUR ANIMATE] Found', headings.length, 'headings and', heroParagraphs.length, 'hero paragraphs');
+    console.log('Found', headings.length, 'headings and', heroParagraphs.length, 'hero paragraphs');
     
     // Create observer
     const observer = new IntersectionObserver(onIntersect, CONFIG.observerOptions);
@@ -231,7 +231,7 @@
     let count = 0;
     allElements.forEach(element => {
       if (element.dataset.noAnimate !== undefined) {
-        console.log('[BLUR ANIMATE] Skipping (data-no-animate):', element.textContent.substring(0, 30));
+        // console.log('[BLUR ANIMATE] Skipping (data-no-animate):', element.textContent.substring(0, 30));
         return;
       }
       
@@ -240,7 +240,7 @@
       count++;
     });
     
-    console.log('[BLUR ANIMATE] Observing', count, 'elements total');
+    // console.log('[BLUR ANIMATE] Observing', count, 'elements total');
   }
 
   /**
@@ -250,7 +250,7 @@
     if (typeof gsap !== 'undefined') {
       init();
     } else {
-      console.log('[BLUR ANIMATE] Waiting for GSAP...');
+      // console.log('[BLUR ANIMATE] Waiting for GSAP...');
       setTimeout(checkAndInit, 50);
     }
   }
@@ -269,7 +269,7 @@
     config: CONFIG, // Expose config for runtime changes
     setRandomize: (value) => {
       CONFIG.randomizeOrder = value;
-      console.log('[BLUR ANIMATE] Randomize set to:', value);
+      // console.log('[BLUR ANIMATE] Randomize set to:', value);
     }
   };
 
