@@ -33,7 +33,7 @@ async function getMeta() {
             },
             body: JSON.stringify({
                 query: `{
-                    metas(first: 1000, where: {id: "cmhuevoj4aigk07pbnc7bx1ls"}) {
+                    metas(first: 5, where: {id: "cmhuevoj4aigk07pbnc7bx1ls"}) {
                         title
                         seo {
                             title
@@ -57,7 +57,7 @@ async function getMeta() {
                             width
                             caption
                         }
-                        headerNavLinks {
+                        headerNavLinks(first: 25) {
                             title
                             url
                             destination {
@@ -79,7 +79,7 @@ async function getMeta() {
                             width
                             caption
                         }
-                        footerNavLinks {
+                        footerNavLinks(first: 25) {
                             title
                             url
                             destination {
@@ -95,7 +95,7 @@ async function getMeta() {
                                 }
                             }
                         }
-                        socialMediaLinks {
+                        socialMediaLinks(first: 25) {
                             title
                             url
                         }

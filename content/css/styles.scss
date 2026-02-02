@@ -2,7 +2,7 @@
 @use 'typography';
 @use 'variables';
 @use 'globals';
-@use "debug";
+// @use "debug";
 @use 'banner';
 @use 'header';
 @use 'footer';
@@ -192,16 +192,4 @@
     // (hover: none) {
     //     display: none !important;
     // }
-}
-
-// IMAGE REVEAL
-@media (prefers-reduced-motion: reduce) {
-    .image-reveal-wrapper {
-        clip-path: none !important;
-    }
-
-    .image-reveal-wrapper img {
-        opacity: 1 !important;
-        transform: none !important;
-    }
 }
