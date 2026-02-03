@@ -78,10 +78,39 @@
     --s-xxs: 4px;
 
     // TRANSITION
-    --transition-all: all 0.3s ease-in;
-    --transition-timing: 0.3s ease-in;
+    --transition-all: all 0.2s ease-in;
+    --transition-timing: 0.2s ease-in;
 
     --nav-height: 4.5rem;
+
+    // SHADOWS
+    --white-border: 0 0 0 8px var(--white-100);
+    --shadow-color: rgba(0,0,0,0.05);
+    --shadow-elevation-low:
+        0px 0.7px 1px var(--shadow-color),
+        0px 1.2px 1.8px var(--shadow-color),
+        0px 2.5px 3.8px var(--shadow-color);
+    --shadow-elevation-medium:
+        0px 0.7px 1px hsl(var(--shadow-color) / 0),
+        0px 3.1px 4.7px hsl(var(--shadow-color) / 0.16),
+        0.1px 6.1px 9.2px hsl(var(--shadow-color) / 0.32),
+        0.2px 12.5px 18.8px hsl(var(--shadow-color) / 0.49);
+    --shadow-elevation-high:
+        0px 0.7px 1px var(--shadow-color),
+        0.1px 6.2px 9.3px var(--shadow-color),
+        0.1px 11px 16.5px var(--shadow-color),
+        0.2px 16px 24px var(--shadow-color),
+        0.3px 22.3px 33.5px var(--shadow-color),
+        0.4px 30.9px 46.4px var(--shadow-color),
+        0.6px 42.8px 64.2px var(--shadow-color),
+        0.8px 59px 88.5px var(--shadow-color);
+    --shadow-elevation-higher:
+        0px 1px 3px rgba(3, 7, 18, 0.01),
+        0px 3px 11px rgba(3, 7, 18, 0.03),
+        0px 6px 24px rgba(3, 7, 18, 0.04),
+        0px 11px 43px rgba(3, 7, 18, 0.05),
+        0px 17px 67px rgba(3, 7, 18, 0.07),
+        0px 24px 96px rgba(3, 7, 18, 0.08);
 
     @media only screen and (max-width: 1024px) {
         --s-xxxl: 72px;
@@ -95,11 +124,4 @@
         --s-xs: 8px;
         --s-xxs: 4px;
     }
-}
-
-/* InclusiveColors-2025-06-24-21-46-25.tokens.json */
-:root {
-    /* Default */
-    /* color */
-    
 }

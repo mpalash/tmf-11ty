@@ -33,22 +33,15 @@ async function getPages() {
             },
             body: JSON.stringify({
                 query: `{
-                    pages(first: 1000) {
+                    pages(first: 100) {
                         id
                         title
                         seo {
                             title
                             description
                             image {
-                                id
-                                sm: url(transformation: {image: {resize: {width: 800}}, document: {output: {format: webp}}})
-                                md: url(transformation: {image: {resize: {width: 1200}}, document: {output: {format: webp}}})
-                                lg: url(transformation: {image: {resize: {width: 1600}}, document: {output: {format: webp}}})
-                                xlg: url(transformation: {image: {resize: {width: 2000}}, document: {output: {format: webp}}})
-                                jsm: url(transformation: {image: {resize: {width: 800}}, document: {output: {format: jpg}}})
                                 jmd: url(transformation: {image: {resize: {width: 1200}}, document: {output: {format: jpg}}})
                                 jlg: url(transformation: {image: {resize: {width: 1600}}, document: {output: {format: jpg}}})
-                                jxlg: url(transformation: {image: {resize: {width: 2000}}, document: {output: {format: jpg}}})
                                 mimeType
                                 url
                                 height
@@ -56,82 +49,67 @@ async function getPages() {
                                 caption
                             }
                         }
-                        hero {
-                            id
-                            image {
-                                id
-                                makeIntoGallery
-                                image {
-                                    id
-                                    sm: url(transformation: {image: {resize: {width: 800}}, document: {output: {format: webp}}})
-                                    md: url(transformation: {image: {resize: {width: 1200}}, document: {output: {format: webp}}})
-                                    lg: url(transformation: {image: {resize: {width: 1600}}, document: {output: {format: webp}}})
-                                    xlg: url(transformation: {image: {resize: {width: 2000}}, document: {output: {format: webp}}})
-                                    jsm: url(transformation: {image: {resize: {width: 800}}, document: {output: {format: jpg}}})
-                                    jmd: url(transformation: {image: {resize: {width: 1200}}, document: {output: {format: jpg}}})
-                                    jlg: url(transformation: {image: {resize: {width: 1600}}, document: {output: {format: jpg}}})
-                                    jxlg: url(transformation: {image: {resize: {width: 2000}}, document: {output: {format: jpg}}})
-                                    mimeType
-                                    url
-                                    height
-                                    width
-                                    caption
-                                }
-                            }
-                            link {
-                                id
-                                title
-                                url
-                                page {
-                                    id
-                                    title
-                                }
-                            }
-                            text {
-                                id
-                                text
-                            }
-                        }
                         pageSections {
-                            numColumns
-                            columns {
-                                content(first: 100) {
-                                    ... on Subtitle {
-                                        id
-                                        subtitle
+                            layout
+                            bgColor {
+                                hex
+                            }
+                            content(first: 100) {
+                                __typename
+                                ... on Hero {
+                                    image {
+                                        mimeType
+                                        url
+                                        height
+                                        width
+                                        caption
                                     }
-                                    ... on Text {
-                                        id
-                                        text
-                                    }
-                                    ... on Image {
-                                        id
-                                        makeIntoGallery
-                                        image(first: 1000) {
-                                            id
-                                            sm: url(transformation: {image: {resize: {width: 800}}, document: {output: {format: webp}}})
-                                            md: url(transformation: {image: {resize: {width: 1200}}, document: {output: {format: webp}}})
-                                            lg: url(transformation: {image: {resize: {width: 1600}}, document: {output: {format: webp}}})
-                                            xlg: url(transformation: {image: {resize: {width: 2000}}, document: {output: {format: webp}}})
-                                            jsm: url(transformation: {image: {resize: {width: 800}}, document: {output: {format: jpg}}})
-                                            jmd: url(transformation: {image: {resize: {width: 1200}}, document: {output: {format: jpg}}})
-                                            jlg: url(transformation: {image: {resize: {width: 1600}}, document: {output: {format: jpg}}})
-                                            jxlg: url(transformation: {image: {resize: {width: 2000}}, document: {output: {format: jpg}}})
-                                            mimeType
-                                            url
-                                            height
-                                            width
-                                            caption
-                                            mimeType
-                                        }
-                                    }
-                                    ... on Link {
-                                        id
+                                    linkButton {
                                         title
                                         url
-                                        page {
-                                            id
-                                            title
+                                        destination {
+                                            __typename
+                                            ... on Event {
+                                                eventTitle:title
+                                            }
+                                            ... on Page {
+                                                pageTitle:title
+                                            }
+                                            ... on Timeline {
+                                                timelineTitle:title
+                                            }
+                                        }
+                                    }
+                                    text {
+                                        textmd
+                                    }
+                                }
+                                ... on Text {
+                                    textmd
+                                }
+                                ... on Image {
+                                    images(first: 50) {
+                                        mimeType
+                                        url
+                                        height
+                                        width
+                                        caption
+                                        mimeType
+                                    }
+                                }
+                                ... on LinkButton {
+                                    title
+                                    url
+                                    destination {
+                                        __typename
+                                        ... on Event {
+                                            eventTitle:title
+                                        }
+                                        ... on Page {
+                                            pageTitle:title
+                                        }
+                                        ... on Timeline {
+                                            timelineTitle:title
                                         }
                                     }
                                 }

@@ -33,68 +33,76 @@ async function getMeta() {
             },
             body: JSON.stringify({
                 query: `{
-                    metas(first: 1000, where: {id: "cmhuevoj4aigk07pbnc7bx1ls"}) {
+                    metas(first: 5, where: {id: "cmhuevoj4aigk07pbnc7bx1ls"}) {
                         title
-                        description
-                        siteUrl
-                        siteOgImage {
-                            id
-                            sm: url(transformation: {image: {resize: {width: 800}}, document: {output: {format: webp}}})
-                            md: url(transformation: {image: {resize: {width: 1200}}, document: {output: {format: webp}}})
-                            lg: url(transformation: {image: {resize: {width: 1600}}, document: {output: {format: webp}}})
-                            xlg: url(transformation: {image: {resize: {width: 2000}}, document: {output: {format: webp}}})
-                            jsm: url(transformation: {image: {resize: {width: 800}}, document: {output: {format: jpg}}})
-                            jmd: url(transformation: {image: {resize: {width: 1200}}, document: {output: {format: jpg}}})
-                            jlg: url(transformation: {image: {resize: {width: 1600}}, document: {output: {format: jpg}}})
-                            jxlg: url(transformation: {image: {resize: {width: 2000}}, document: {output: {format: jpg}}})
-                            mimeType
-                            url
-                            height
-                            width
-                            caption
+                        seo {
+                            title
+                            description
+                            image {
+                                jmd: url(transformation: {image: {resize: {width: 1200}}, document: {output: {format: jpg}}})
+                                jlg: url(transformation: {image: {resize: {width: 1600}}, document: {output: {format: jpg}}})
+                                mimeType
+                                url
+                                height
+                                width
+                                caption
+                            }
                         }
+                        siteUrl
                         emails
                         addresses
                         headerLogo {
-                            id
                             url
                             height
                             width
                             caption
                         }
-                        headerNavLinks {
-                            id
+                        headerNavLinks(first: 25) {
                             title
                             url
-                            page {
-                                id
-                                title
+                            destination {
+                                __typename
+                                ... on Event {
+                                    eventTitle:title
+                                }
+                                ... on Page {
+                                    pageTitle:title
+                                }
+                                ... on Timeline {
+                                    timelineTitle:title
+                                }
                             }
                         }
                         footerLogo {
-                            id
                             url
                             height
                             width
                             caption
                         }
-                        footerNavLinks {
-                            id
+                        footerNavLinks(first: 25) {
                             title
                             url
-                            page {
-                                id
-                                title
+                            destination {
+                                __typename
+                                ... on Event {
+                                    eventTitle:title
+                                }
+                                ... on Page {
+                                    pageTitle:title
+                                }
+                                ... on Timeline {
+                                    timelineTitle:title
+                                }
                             }
                         }
-                        socialMediaLinks {
-                            id
+                        socialMediaLinks(first: 25) {
                             title
                             url
                         }
                         homepage {
                             id
                         }
+                        banner
                         copyrightNotice
                         subscribeFormText
                     }
@@ -119,8 +127,8 @@ async function getMeta() {
         }
 
         debug('Meta data retrieved successfully');
-        debug('Site Name:', meta.title);
-        debug('Description:', meta.description);
+        debug('Site Name:', meta.seo.title);
+        debug('Description:', meta.seo.description);
         debug('Site URL:', meta.siteUrl);
 
         if (rootURL) {

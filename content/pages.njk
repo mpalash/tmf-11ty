@@ -8,58 +8,48 @@ section: "page"
 layout: layouts/base.njk
 ---
 <article class="{% if page.id == meta.homepage.id %}home{% endif %} {{ section }} {{ page.title | slugify }}">
-    
-    {% if page.hero %}
-        <div class="page-hero">
-            <div class="page-hero-content">
-                <div class="page-hero-text">
-                    {{ page.hero.text.text | md | safe }}
-                </div>
-                <a class="button page-hero-cta" href="{{ page.hero.link.page.title | slugify }}">
-                    <img eleventy:ignore class="icon" src="/img/icon-eye.svg" />
-                    {{ page.hero.link.title | safe }}
-                </a>
-            </div>
-            <div class="page-hero-image">
-                {% for i in page.hero.image.image %}
-                    <img src="{{ i.url }}" alt="{{ i.caption }}" />
-                {% endfor %}
-            </div>
-        </div>
-    {% else%}
-        <h1 class="page-title">{{ page.title }}</h1>
-    {% endif %}
-
     {%- for s in page.pageSections-%}
-        <section class="{{ s.numColumns }}" data-animate>
-            {%- for col in s.columns -%}
-                <div class="col">
-                    {%- for c in col.content -%}
-                        {%- if c.image -%}
-                            <div class="image">
-                                {% for i in c.image %}
-                                    <img src="{{ i.url }}" alt="{{ i.caption }}" />
-                                {% endfor %}
-                            </div>
-                        {%- endif -%}
-
-                        {%- if c.subtitle -%}
-                            <h2 class="subtitle">{{ c.subtitle }}</h2>
-                        {%- endif -%}
-
-                        {%- if c.text -%}
-                            <div class="text">
-                                {{ c.text | md | safe }}
-                            </div>
-                        {%- endif -%}
-                    {%- endfor -%}
+        <section data-layout={{ s.layout }} data-bg-color={% if s.bgColor.hex %}{{ s.bgColor.hex }}{% else %}#fff{% endif %}>
+        {%- for c in s.content -%}
+            {% if c.__typename == 'Hero' %}
+                {% set hero = c %}
+                {% set icon = "icon-eye" %}
+                {% include "components/hero.njk" %}
+            {% endif %}
+            {% if c.__typename == 'Text' %}
+                <div class="text-wrapper">
+                    <div class="text">
+                    {{ c.textmd | md | safe }}
+                    </div>
                 </div>
-            {%- endfor -%}
+            {% endif %}
+            {% if c.__typename == 'LinkButton' %}
+                {% set l = c %}
+                {% set icon = "icon-arrow-right" %}
+                {% include "components/linkButton.njk" %}
+            {% endif %}
+            {% if c.__typename == 'Image' %}
+                <div class="image-wrapper">
+                    <div class="image">
+                        {% for i in c.images %}
+                            <img
+                                src="{{ i.url }}"
+                                alt="{{ i.caption }}" />
+                            {% if i.caption %}
+                                <span class="image-caption">{{ i.caption | md | safe }}</span>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        {%- endfor -%}
         </section>
     {%- endfor -%}
-
     {% if page.id == meta.homepage.id %}
         {% include "components/subscribe.njk" %}
         {# {% include "components/insta-feed.njk" %} #}
+    {% endif %}
+    {% if page.id == 'cmjx7kcjy4lcc07o2jsu4c827' %}
+        {% include "components/eventsList.njk" %}
     {% endif %}
 </article>

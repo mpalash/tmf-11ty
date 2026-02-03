@@ -1,46 +1,54 @@
+{% set headTitle = page.seo.title or page.title or event.seo.title or event.title or timeline.seo.title or timeline.title %}
+{% set headDescription = page.seo.description or event.seo.description or timeline.seo.description or meta.seo.description %}
+{% set headImage = page.seo.image.jmd or event.seo.image.jmd or timeline.seo.image.jmd or meta.seo.image.jmd %}
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>{{ page.seo.title or page.title }} • {{ meta.title }}</title>
+<meta name="language"    content="EN">
+<title>{{ headTitle}} • {{ meta.title }}</title>
 
 <link rel="stylesheet" href="/css/styles.css">
 
-<meta name="description" content="{{ meta.description }}">
-<meta name="copyright"   content="{{ meta.title }}">
-<meta name="language"    content="EN">
+<meta name="description" content="{{ headDescription }}">
+<meta name="copyright"   content="{{ meta.seo.title }}">
 
 <meta property="og:type"             content="website" />
-<meta property="og:site_name"        content="{{ meta.title }}"/>
+<meta property="og:site_name"        content="{{ meta.seo.title }}"/>
 <meta property="og:url"              content="{{ meta.siteUrl }}"/>
-<meta property="og:title"            content="{{ page.seo.title or page.title }} • {{ meta.title }}" />
-<meta property="og:description"      content="{{ page.seo.description or meta.description }}" />
+<meta property="og:title"            content="{{ headTitle }} • {{ meta.seo.title }}" />
+<meta property="og:description"      content="{{ headDescription }}" />
 {% if hero %}
-    <meta property="og:image"          content="{{ page.seo.image.jmd or meta.siteOgImage.jmd }}" />
+    <meta property="og:image"          content="{{ headImage }}" />
     <meta property="og:image:type"     content="image/jpeg" />
     <meta property="og:image:width"    content="1600" />
 {% else %}
-    <meta property="og:image"          content="{{ page.seo.image.jmd or meta.siteOgImage.jmd }}" />
+    <meta property="og:image"          content="{{ headImage }}" />
     <meta property="og:image:type"     content="image/jpeg" />
     <meta property="og:image:width"    content="1600" />
 {% endif %}
 
 <meta name="twitter:card"            content="summary_large_image" />
 <meta name="twitter:site"            content="{{ meta.siteUrl }}" />
-<meta name="twitter:title"           content="{{ page.seo.title or page.title }} • {{ meta.title }}" />
-<meta name="twitter:description"     content="{{ page.seo.description or meta.description }}" />
+<meta name="twitter:title"           content="{{ headTitle }} • {{ meta.seo.title }}" />
+<meta name="twitter:description"     content="{{ headDescription }}" />
 {% if hero %}
-    <meta name="twitter:image:alt"     content="{{ article.seo.seoTitle or article.title or page.seo.seoTitle or page.title }} • {{ meta.title }}" />
+    <meta name="twitter:image:alt"     content="{{ headTitle }} • {{ meta.seo.title }}" />
     <meta name="twitter:image"         content="{{ meta.siteUrl }}{{ hero | og }}" />
 {% else %}
-    <meta name="twitter:image:alt"     content="{{ page.seo.title or page.title }} • {{ meta.title }}" />
-    <meta name="twitter:image"         content="{{ page.seo.image.jmd or meta.siteOgImage.jmd }}" />
+    <meta name="twitter:image:alt"     content="{{ headTitle }} • {{ meta.seo.title }}" />
+    <meta name="twitter:image"         content="{{ headImage }}" />
 {% endif %}
 
 <meta name="generator" content="{{ eleventy.generator }}">
 
 <link rel="icon" href="/favicon.svg">
-<link rel="stylesheet" href="https://use.typekit.net/roq4hhp.css">
+<link rel="preload" 
+      as="video" 
+      href="/vid/vidMask_lo.mp4" 
+      type="video/mp4"
+      fetchpriority="high">
+{# <script src="/js/pageLoader.js"></script> #}
 
-<!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-7RRZHZW6MG"></script>
 <script>
   window.dataLayer = window.dataLayer || [];

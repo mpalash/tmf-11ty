@@ -1,0 +1,55 @@
+<div id="banner">
+    <div class="marquee" aria-hidden="true">
+        <div class="marquee__track">
+            <span class="marquee__text">{{ meta.banner | md | safe }}</span>
+            <span class="marquee__text">{{ meta.banner | md | safe }}</span>
+            <span class="marquee__text">{{ meta.banner | md | safe }}</span>
+            <span class="marquee__text">{{ meta.banner | md | safe }}</span>
+        </div>
+    </div>
+</div>
+<script>
+    (function() {
+        'use strict';
+
+        function initMarquee() {
+            const marqueeTrack = document.querySelector('.marquee__track');
+            
+            if (!marqueeTrack) return;
+
+            // Get all text elements
+            const texts = marqueeTrack.querySelectorAll('.marquee__text');
+            if (!texts.length) return;
+
+            // Calculate the width of half the track (2 text items)
+            const textWidth = texts[0].offsetWidth + texts[1].offsetWidth;
+
+            // Create seamless infinite scroll using GSAP
+            // Animate to -textWidth (the width of 2 items), then reset
+            gsap.fromTo(marqueeTrack, 
+            { x: 0 },
+            {
+                x: -textWidth,
+                duration: 30,
+                ease: 'none',
+                repeat: -1
+            }
+            );
+        }
+
+        // Initialize when DOM is ready and GSAP is loaded
+        function init() {
+            if (typeof gsap !== 'undefined') {
+            initMarquee();
+            } else {
+            console.warn('GSAP not loaded - marquee animation disabled');
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    })();
+</script>

@@ -4,29 +4,101 @@ eleventyExcludeFromCollections: true
 ---
 {
   "searchIndex": [
-    {%- for p in pages -%}
+    {# {%- for p in pages -%}
         {
             "id": "{{ p.id }}",
-            "url": "{%- if p.id !== meta.homepage.id -%}{{ p.title | slugify }}/{%- endif -%}",
+            "url": "/{%- if p.id !== meta.homepage.id -%}{{ p.title | slugify }}/{%- endif -%}",
             "title": "{{ p.title }}",
+            "excerpt": "{{ p.seo.description | md | striptags | safe }}",
+            "content": "{%- for s in page.pageSections-%}
+                {%- for c in s.content -%}
+                    {% if c.__typename == 'Text' %}
+                            {{ c.textmd | md | striptags | safe }}
+                    {% endif %}
+                    {% if c.__typename == 'Image' %}
+                        {% for i in c.images %}
+                            {% if i.caption %}
+                                {{ i.caption | md | striptags | safe }}
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                {%- endfor -%}
+            {%- endfor -%}
+        },
+    {%- endfor -%} #}
+    {# {{%- for t in timelines -%}
+        {
+            "id": "{{ t.id }}",
+            "url": "{%- if t.id !== meta.homepage.id -%}{{ t.title | slugify }}/{%- endif -%}",
+            "title": "{{ t.title }}",
             "date": "",
             "tags": "",
-            "excerpt": "{{ p.seo.description | md | striptags | safe }}",
-            "content": "{%- for s in p.section-%}{%- for c in s.content -%}
-                {%- if c.subHeading -%}
-                    {{ c.subHeading }}
+            "excerpt": "{{ t.seo.description | md | striptags | safe }}",
+            "content": "{%- for e in t.timelineEvents-%}
+                {% if e.year %}
+                    {{ e.year }} 
+                {% endif %}
+                {%- if e.text -%}
+                    {{ e.text | md | striptags(false) | safe }}
                 {%- endif -%}
-                {%- if c.text -%}
-                    {{ c.text | md | striptags | safe }}
-                {%- endif -%}
-                {%- if c.largeText -%}
-                    {{ c.largeText | md | striptags | safe }}
-                {%- endif -%}
-                {%- if c.pullquote -%}
-                    {{ c.pullquote | md | striptags | safe }}
-                {%- endif -%}
-            {%- endfor -%}{%- endfor -%}"
+                {% for i in e.image.images %}
+                    {% if i.caption %}
+                        {{ i.caption | md | striptags(false) | safe }}
+                    {% endif %}
+                {% endfor %}
+            {%- endfor -%}"
+        }
+    {%- endfor -%} #}
+
+    {%- for p in pages -%}
+        {%- set contentParts = [] -%}
+        {%- for s in page.pageSections-%}
+            {%- for c in s.content -%}
+                {% if c.__typename == 'Text' %}
+                        {%- set contentParts = (contentParts.push(c.textmd | md | striptags), contentParts) -%}
+                {% endif %}
+                {% if c.__typename == 'Image' %}
+                    {% for i in c.images %}
+                        {% if i.caption %}
+                            {%- set contentParts = (contentParts.push(i.caption | md | striptags), contentParts) -%}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            {%- endfor -%}
+        {%- endfor -%}
+
+        {
+            "id": "{{ p.id }}",
+            "url": "/{%- if p.id !== meta.homepage.id -%}{{ p.title | slugify }}/{%- endif -%}",
+            "title": "{{ p.title }}",
+            "excerpt": "{{ p.seo.description | md | striptags }}",
+            "content": "{{ contentParts | join(' ') }}"
         },
+    {%- endfor -%}
+
+    {%- for t in timelines -%}
+        {%- set contentParts = [] -%}
+        {%- for e in t.timelineEvents-%}
+            {% if e.year %}
+                {%- set contentParts = (contentParts.push(e.year), contentParts) -%}
+            {% endif %}
+            {%- if e.text -%}
+                {%- set contentParts = (contentParts.push(e.text | md | striptags), contentParts) -%}
+            {%- endif -%}
+            {% for i in e.image.images %}
+                {% if i.caption %}
+                    {%- set contentParts = (contentParts.push(i.caption | md | striptags), contentParts) -%}
+                {% endif %}
+            {% endfor %}
+        {%- endfor -%}
+
+        {
+            "id": "{{ t.id }}",
+            "url": "/{%- if t.id !== meta.homepage.id -%}{{ t.title | slugify }}/{%- endif -%}",
+            "title": "{{ t.title }}",
+            "excerpt": "{{ t.seo.description | md | striptags }}",
+            "content": "{{ contentParts | join(' ') }}"
+        }{%- if not loop.last -%},{%- endif -%}
     {%- endfor -%}
   ]
 }

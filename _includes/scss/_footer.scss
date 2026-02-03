@@ -3,11 +3,11 @@ footer {
     grid-column: 1/-1;
     display: grid;
     grid-template-columns: subgrid;
-    margin: var(--s-xxl) var(--s-l) var(--s-l) var(--s-l);
+    margin: var(--s-xxl) 0 var(--s-l) 0;
     padding: 0 var(--s-l);
     height: -webkit-fill-available;
     border-radius: 4px;
-    background-color: var(--blue-700);
+    background-color: var(--grey-950);
     color: var(--white-100);
 
     >* {
@@ -83,7 +83,6 @@ footer {
     .copyright {
         grid-column: 1/-1;
         color: var(--white-100);
-        text-align: center;
         padding: var(--s-s) 0 var(--s-m) 0;
 
         p {

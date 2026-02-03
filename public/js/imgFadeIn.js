@@ -38,7 +38,7 @@
     
     // Render caption from alt attribute
     renderCaption(img);
-    
+
     // Check if image is already loaded (from cache)
     if (img.complete && img.naturalHeight !== 0) {
       img.classList.add('loaded');
@@ -58,7 +58,9 @@
   // Initialize on DOM ready
   function init() {
     // Get all images you want to fade in
-    const images = document.querySelectorAll('picture img');
+    const images = document.querySelectorAll('.gallery-images picture img');
+
+    console.log(`Found ${images.length} images to fade in`);
     
     images.forEach(function(img) {
       fadeInImage(img);

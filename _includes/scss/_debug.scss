@@ -1,0 +1,32 @@
+* {
+    // outline: 1px solid red;
+}
+
+.test-markup {
+    grid-column: span 4;
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-l);
+}
+
+body:after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 32px;
+    right: 32px;
+    bottom: 0;
+    pointer-events: none;
+    opacity: 0.2;
+    z-index: 9999;
+    border-left: 1px solid grey;
+    background: repeating-linear-gradient(90deg, transparent 0% calc(25% - 1px), grey calc(25% - 1px) 25%) repeat-x;
+
+    @media screen and (min-width: 600px) {
+        background: repeating-linear-gradient(90deg, transparent 0% calc(12.5% - 1px), grey calc(12.5% - 1px) 12.5%) repeat-x;
+    }
+
+    @media screen and (min-width: 1024px) {
+        background: repeating-linear-gradient(90deg, transparent 0% calc(8.3333% - 1px), grey calc(8.3333% - 1px) 8.3333%) repeat-x;
+    }
+}

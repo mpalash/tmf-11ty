@@ -1,0 +1,35 @@
+<section>
+    <ul class="all-events-list">
+    {% for e in events %}
+        <li data-date-from="{{ e.dates.dateFrom }}"
+            {% if e.dates.dateTo %}data-date-to="{{ e.dates.dateTo }}"{% endif %} >
+            <a href="/events/{{ e.title | slugify }}/">
+                <div>
+                    <span class="event-date">{{ e.dates.dateFrom | eventDate }}</span>
+                </div>
+                <div>
+                    <h3>{{ e.title }}</h3>
+                    <div class="badge-list">
+                        {% for d in e.details %}
+                            {% for et in d.eventType %}
+                                <span class="badge">{{ et }}</span>
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                </div>
+                <div>
+                    <span class="event-status-badge"></span>
+                </div>
+            </a>
+            {% if e.hero.image.url %}
+                <img
+                    class="event-thumbnail"
+                    src="{{ e.hero.image.url }}"
+                    alt="{{ e.hero.image.caption }}" />
+            {% endif %}
+        </li>
+    {% endfor %}
+    </ul>
+</section>
+<script src="/js/eventStatus.js"></script>
+<script src="/js/eventPosterHover.js"></script>

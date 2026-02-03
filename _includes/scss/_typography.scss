@@ -1,4 +1,4 @@
-// @import url("https://use.typekit.net/roq4hhp.css");
+@import url("https://use.typekit.net/roq4hhp.css");
 
 :root {
     --fs-xs:    clamp(0.625rem, 0.6028rem + 0.0847vw, 0.6875rem); // 10-11
@@ -9,71 +9,97 @@
     --fs-xl:    clamp(1.5rem, 1.322rem + 0.678vw, 2rem); // 24-32
     --fs-xxl:   clamp(2rem, 1.822rem + 0.678vw, 2.5rem); // 32-40
     --fs-xxxl:  clamp(2.25rem, 1.9831rem + 1.0169vw, 3rem); // 36-48
-    --fs-mega:  clamp(3rem, 2.6441rem + 1.3559vw, 4rem); // 48-64
+    --fs-mega:  clamp(3.5rem, 3.1441rem + 1.3559vw, 4.5rem); // 56-72
+
+    --font-body: peridot-pe-variable, sans-serif;
+    --font-mono: roboto-mono, monospace;
 }
 
+// 72px
+h1.mega {
+    font-size: var(--fs-mega);
+    font-weight: 250;
+}
 // 48px
 h1 {
     font-size: var(--fs-xxxl);
-    line-height: 0.95;
+    font-weight: 350;
+    line-height: 1.15;
+    left: 0.2em;
+    &:before {
+        content: '';
+        width: 160px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        border-bottom: 2px solid var(--grey-950);
+        transform-origin: top left;
+        transform: translate(8px, -36px) rotate(119deg);
+        animation: fade-in 0.3s ease-in 1s 1 both;
+    }
 }
 // 40px
-// h2 {
-//     font-size: var(--fs-xxl);
-//     line-height: 0.95;    
-// }
+h2 {
+    font-size: var(--fs-xl);
+    font-weight: 450;
+    line-height: 1.1;    
+}
 // 24px
-h2, h3 {
+h3 {
     font-size: var(--fs-lg);
-    line-height: 0.95;
-    color: var(--grey-700);
+    font-weight: 450;
+    line-height: 1.1;
 }
 // 24px
 h4 {
     font-size: var(--fs-lg);
+    font-weight: 500;
     line-height: 0.95;
 }
 // 18px
 h5 {
     font-size: var(--fs-md);
+    font-weight: 500;
 }
 
-h1, h2 {
-    font-weight: 400;
-}
-h3, h4 {
-    font-weight: 600;
-}
 strong, b {
     font-weight: 700;
 }
-header,
-footer {
+header {
     font-size: var(--fs-b);
+}
+footer {
+    font-size: var(--fs-sm);
 }
 
 // 12-14px
-main,
-p,
-.text {
-  font-size: var(--fs-b);
-
-    sub,
-    sup {
-        font-size: var(--fs-xs);
-    }
+p {
+    font-size: inherit;
+    font-weight: 400;
+}
+p.em {
+    font-size: var(--fs-md);
+}
+sub,
+sup {
+    font-size: 0.75em;
 }
 
 main {
+    font-size: var(--fs-b);
+
     p,
     blockquote {
-        margin: 1em 0;
+        margin: 2em 0;
         &:first-child {
             margin-top: 0;
         }
         &:last-child {
             margin-bottom: 0;
         }
+    }
+    blockquote {
+        font-size: var(--fs-md);
     }
     ul,
     ol {

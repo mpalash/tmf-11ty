@@ -1,0 +1,46 @@
+---
+pagination:
+  data: timelines
+  size: 1
+  alias: timeline
+permalink: "{{ timeline.title | slugify }}/index.html"
+section: "timeline"
+layout: layouts/base.njk
+---
+<article class="{{ section }} {{ timeline.title | slugify }}">
+    <section data-layout='hero'>
+        {% set hero = timeline.hero %}
+        {% include "components/hero.njk" %}
+    </section>
+    {%- for e in timeline.timelineEvents-%}
+        <section data-layout='event{% if e.imageLayout != 'inline' %}-{{ e.imageLayout }}{% endif %}{% if e.sectionMarker %}-section{% endif %}' data-bg-color={% if e.bgColor.hex %}{{ e.bgColor.hex }}{% else %}#fff{% endif %}>
+            <div class="year">
+                {{ e.year }}
+            </div>
+            <div class="text-wrapper">
+                {% if e.year %}<hr/>{% endif %}
+                <div class="text">
+                    {{ e.text | md | safe }}
+                </div>
+            </div>
+            {% if e.image.images %}
+                <div class="image-wrapper" data-layout={{ e.imageLayout }}>
+                    <div class="images">
+                        {% for i in e.image.images %}
+                            {% set aspect = i.width / i.height %}
+                            <div class="image">                            
+                                <img
+                                    data-aspect="{% if aspect > 1.2 %}landscape{% else %}portrait{% endif %}"
+                                    src="{{ i.url }}"
+                                    alt="{{ i.caption }}" />
+                                {% if i.caption %}
+                                    <span class="image-caption">{{ i.caption | md | safe }}</span>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </section>        
+    {%- endfor -%}
+</article>
