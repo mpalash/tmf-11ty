@@ -12,15 +12,93 @@ layout: layouts/base.njk
         {% set hero = event.hero %}
         {% include "components/hero.njk" %}
     </section>
-    {% for g in event.gallery %}
-        <section class="gallery-wrapper">
-            <div class="gallery">
-                {% for m in g.media %}
-                    <img
-                        src="{{ m.url }}"
-                        alt="{{ m.caption }}" />
-                {% endfor %}
-            </div>
-        </section>
-    {% endfor %}
+    
+    {% if event.details.length == 1 %}
+        <ul class="all-event-details">
+        {% for d in event.details %}
+            <li class="solo" data-date-from="{{ d.dates.dateFrom }}"
+                {% if d.dates.dateTo %}data-date-to="{{ d.dates.dateTo }}"{% endif %} >
+                <a>
+                    <div>
+                        <h3>{{ d.eventName }}</h3>
+                        <div class="badge-list">
+                            {% for et in d.eventType %}
+                                <span class="badge">{{ et }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    {{ d.dates.dateFrom | formatEventDateTime(d.dates.dateTo) | safe }}
+                    
+                    <div>
+                        <span class="event-venue">{{ d.venueName }}</span>
+                        <span class="event-address">{{ d.venueAddress }}</span>
+                    </div>
+                </a>
+            </li>
+        {% endfor %}
+        <ul>
+    {% endif %}
+
+    {% if event.details.length > 1 %}
+        <ul class="all-event-details accordion">
+        {% for d in event.details %}
+            <li class="accordion-item" data-date-from="{{ d.dates.dateFrom }}"
+                {% if d.dates.dateTo %}data-date-to="{{ d.dates.dateTo }}"{% endif %} >
+                <a class="accordion-header">
+                    <div>
+                        <h3 class="accordion-title">{{ d.eventName }}</h3>
+                        <div class="badge-list">
+                            {% for et in d.eventType %}
+                                <span class="badge">{{ et }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    {{ d.dates.dateFrom | formatEventDateTime(d.dates.dateTo) | safe }}
+                    
+                    <div>
+                        <span class="event-venue">{{ d.venueName }}</span>
+                        <span class="event-address">{{ d.venueAddress }}</span>
+                    </div>
+                    <div class="accordion-button" aria-hidden="true">
+                        <img src="/img/expand.svg" class="expand" eleventy:ignore />
+                        <img src="/img/collapse.svg" class="collapse" eleventy:ignore />
+                    </div>
+                </a>
+                <div class="accordion-content">
+                    <div class="accordion-content-inner">
+                        <section>
+                            <div class="text-wrapper">
+                                {{ d.eventDescription | md | safe }}
+                            </div>
+                        </section>
+                        {% if d.gallery %}
+                            <section class="gallery-wrapper">
+                                <div class="gallery">
+                                    <div class="gallery-videos">
+                                        {% for video in d.gallery.videos %}
+                                            <div class="youtube-embed" data-video-id="{{ video }}"></div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="gallery-images">
+                                        {% for i in d.gallery.images %}
+                                            <img
+                                                src="{{ i.url }}"
+                                                alt="{{ i.caption }}" />
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </section>
+                        {% endif %}
+                    </div>
+                </div>
+            </li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+    
 </article>
+<script src="/js/accordion.js"></script>
+<script src="/js/youtube-embed.js"></script>
+<script src="/js/imgFadeIn.js"></script>

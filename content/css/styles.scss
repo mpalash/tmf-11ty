@@ -13,6 +13,8 @@
 @use 'img-reveal';
 @use 'heading-animations';
 @use 'insta-feed';
+@use 'youtube-embed';
+@use 'accordion';
 @use 'modal';
 @use 'subscribe-form';
 @use 'search';
@@ -119,77 +121,3 @@
     }
 }
 
-.event {
-    .gallery-wrapper {
-        grid-column: 1/-1;
-
-        @media screen and (min-width: 1024px) {
-            grid-column: 2/-2;
-        }
-    }
-    .gallery {
-        grid-column: 1/-1;
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--s-xs);
-
-        picture, img {
-            height: 20vw;
-            width: auto;
-            max-width: 100%;
-        }
-    }
-}
-.all-events-list {
-    grid-column: 2/-2;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    li {
-        border-bottom: 1px solid var(--grey-200);
-        padding: var(--s-m) 0;
-        a {
-            text-decoration: none;
-            display: grid;
-            grid-template-columns: 20% 1fr 20%;
-            align-items: baseline;
-            justify-content: start;
-        }
-        .event-date,
-        h3 {
-            @extend h3;
-            margin: 0 !important;
-        }
-        .badge {
-            justify-self: end;
-        }
-    }
-    .event-thumbnail {
-        display: none;
-    }
-}
-.poster-thumbnail {
-    position: fixed;
-    pointer-events: none;
-    z-index: 1000;
-    opacity: 0;
-    transform: scale(0.8);
-    will-change: transform, opacity, left, top;
-    box-shadow: var(--white-border), var(--shadow-elevation-high);
-    /* Initialize position off-screen */
-    left: -1000px;
-    top: -1000px;
-
-    picture,
-    img {
-        height: 360px;
-        width: auto;
-        object-fit: cover;
-        display: block;
-    }
-
-    // @media (max-width: 768px),
-    // (hover: none) {
-    //     display: none !important;
-    // }
-}

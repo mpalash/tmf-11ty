@@ -82,7 +82,7 @@ async function getEvents() {
                                 caption
                             }
                         }
-                        details {
+                        details(first: 20) {
                             dates {
                                 dateFrom
                                 dateTo
@@ -91,12 +91,12 @@ async function getEvents() {
                             eventName
                             eventType
                             eventDescription
-                            vanueName
+                            venueName
                             venueAddress
                             googleMapsUrl
                             gallery {
                                 videos
-                                images {
+                                images(first: 100) {
                                     mimeType
                                     url
                                     height

@@ -4,7 +4,9 @@
         <li data-date-from="{{ e.dates.dateFrom }}"
             {% if e.dates.dateTo %}data-date-to="{{ e.dates.dateTo }}"{% endif %} >
             <a href="/events/{{ e.title | slugify }}/">
-                <span class="event-date">{{ e.dates.dateFrom | eventDate }}</span>
+                <div>
+                    <span class="event-date">{{ e.dates.dateFrom | eventDate }}</span>
+                </div>
                 <div>
                     <h3>{{ e.title }}</h3>
                     <div class="badge-list">
@@ -15,7 +17,9 @@
                         {% endfor %}
                     </div>
                 </div>
-                <span class="event-status-badge"></span>
+                <div>
+                    <span class="event-status-badge"></span>
+                </div>
             </a>
             {% if e.hero.image.url %}
                 <img

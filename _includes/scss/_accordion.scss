@@ -1,0 +1,37 @@
+.accordion-button {
+    display: grid !important;
+    justify-self: center;
+    align-self: center;
+
+    img {
+        grid-column: 1;
+        grid-row: 1;
+        width: var(--s-xxl);
+        transform: opacity var(--transition-timing);
+    }
+
+    .expand {
+        opacity: 1;
+    }
+
+    .collapse {
+        opacity: 0;
+    }
+
+    &.open {
+        .expand {
+            opacity: 0;
+        }
+
+        .collapse {
+            opacity: 1;
+        }
+    }
+}
+
+.accordion-content {
+    overflow: hidden;
+    height: 0;
+}
+
+.accordion-content-inner {}

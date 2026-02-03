@@ -146,6 +146,7 @@
     
     .badge-list {
         display: inline-flex;
+        flex-wrap: wrap;
         gap: var(--s-xs);
         margin: var(--s-b) 0;
     }
@@ -155,7 +156,7 @@
         border-radius: var(--s-m);
         background-color: var(--yellow-100);
         text-transform: capitalize;
-        width: min-content;
+        width: fit-content;
         &-upcoming {
             background-color: var(--grey-950);
             color: var(--white-100);
