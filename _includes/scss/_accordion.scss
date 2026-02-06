@@ -1,7 +1,12 @@
 .accordion-button {
     display: grid !important;
     justify-self: center;
-    align-self: center;
+    align-self: start;
+    transition: var(--transition-all);
+
+    @media screen and (min-width: 1024px) {
+        align-self: center;
+    }
 
     img {
         grid-column: 1;
@@ -19,6 +24,8 @@
     }
 
     &.open {
+        align-self: start;
+
         .expand {
             opacity: 0;
         }

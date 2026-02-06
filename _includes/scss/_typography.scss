@@ -17,8 +17,11 @@
 
 // 72px
 h1.mega {
-    font-size: var(--fs-mega);
+    font-size: var(--fs-xxxl);
     font-weight: 250;
+    @media screen and (min-width: 1028px) {
+        font-size: var(--fs-mega);
+    }
 }
 // 48px
 h1 {

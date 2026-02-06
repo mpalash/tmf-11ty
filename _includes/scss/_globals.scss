@@ -77,11 +77,11 @@
         height: auto;
         user-select: none;
         opacity: 1;
-        transition: opacity 0.2s ease-in;
+        transition: opacity var(--transition-timing);
         will-change: transform, opacity, clip-path;
         &.fade-in {
             opacity: 0;
-            transition: var(--transition-all);
+            transition: opacity var(--transition-timing);
         }
         &.fade-in.loaded {
             opacity: 1;

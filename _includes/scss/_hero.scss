@@ -31,8 +31,12 @@
     
     .page-hero-text {
         h1 {
-            font-size: var(--fs-mega);
+            font-size: var(--fs-xxxl);
             font-weight: 250;
+        
+            @media screen and (min-width: 1280px) {
+                font-size: var(--fs-mega);
+            }
         }
         p {
             font-size: var(--fs-md);
@@ -81,6 +85,8 @@
             width: 100%;
             object-fit: cover;
             object-position: center;
+            opacity: 0;
+            transition: opacity 1s ease-in;
             // box-shadow: 0 0 0 1px var(--grey-50);
             // aspect-ratio: 1;
         }

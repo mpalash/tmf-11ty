@@ -33,6 +33,10 @@
 
   // Function to handle image fade-in
   function fadeInImage(img) {
+    if (img.hasAttribute('data-no-auto-fade')) {
+        return;
+    }
+    
     // Add the fade-in class
     img.classList.add('fade-in');
     
@@ -58,7 +62,7 @@
   // Initialize on DOM ready
   function init() {
     // Get all images you want to fade in
-    const images = document.querySelectorAll('.gallery-images picture img');
+    const images = document.querySelectorAll('main picture img');
 
     console.log(`Found ${images.length} images to fade in`);
     
