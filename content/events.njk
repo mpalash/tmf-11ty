@@ -43,6 +43,7 @@ layout: layouts/base.njk
     {% if event.details.length > 1 %}
         <ul class="all-event-details accordion">
         {% for d in event.details %}
+            {% set detailIdx = loop.index %}
             <li class="accordion-item" data-date-from="{{ d.dates.dateFrom }}"
                 {% if d.dates.dateTo %}data-date-to="{{ d.dates.dateTo }}"{% endif %} >
                 <a class="accordion-header">
@@ -54,9 +55,9 @@ layout: layouts/base.njk
                             {% endfor %}
                         </div>
                     </div>
-                    
+
                     {{ d.dates.dateFrom | formatEventDateTime(d.dates.dateTo) | safe }}
-                    
+
                     <div>
                         <span class="event-venue">{{ d.venueName }}</span>
                         <span class="event-address">{{ d.venueAddress }}</span>
@@ -83,9 +84,14 @@ layout: layouts/base.njk
                                     </div>
                                     <div class="gallery-images">
                                         {% for i in d.gallery.images %}
-                                            <img
-                                                src="{{ i.url }}"
-                                                alt="{{ i.caption }}" />
+                                            <a href="{{ i.url }}"
+                                               class="lightbox"
+                                               data-group="gallery-{{ detailIdx }}"
+                                               data-caption="{{ i.caption }}">
+                                                <img
+                                                    src="{{ i.url }}"
+                                                    alt="{{ i.caption }}" />
+                                            </a>
                                         {% endfor %}
                                     </div>
                                 </div>
@@ -102,3 +108,12 @@ layout: layouts/base.njk
 <script src="/js/accordion.js"></script>
 <script src="/js/youtube-embed.js"></script>
 <script src="/js/imgFadeIn.js"></script>
+<link rel="stylesheet" href="/css/parvus.min.css">
+<script src="/js/parvus.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (document.querySelector('.lightbox')) {
+            new Parvus();
+        }
+    });
+</script>
