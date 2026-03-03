@@ -49,6 +49,7 @@ Hygraph CMS (GraphQL API) → `_data/*.js` fetch at build time → Nunjucks temp
 ## Active JavaScript Files
 | File | Loaded In | Purpose |
 |------|-----------|---------|
+| `heroReveal.js` | base.njk (global) | Hero video mask reveal + reduced-motion |
 | `smoothScroll.js` | base.njk (global) | Lenis smooth scrolling init |
 | `bgColorTransitionSmooth.js` | base.njk (global) | GSAP-based section bg color transitions |
 | `headingAnimations-v2.js` | base.njk (global) | Blur-focus heading reveal animations |
@@ -94,7 +95,11 @@ ROOT_URL=      # Site URL override (optional)
 ```
 
 ## Worktree / Fresh Clone Setup
-`.env` is gitignored — copy it from the main repo manually.
+`.env` is gitignored. For worktrees, **symlink** it from the main repo:
+```bash
+ln -s /path/to/main-repo/.env /path/to/worktree/.env
+```
+This keeps a single source of truth for environment variables. Do not copy — symlink ensures changes propagate automatically.
 
 Sharp requires **version-matched** platform binaries:
 ```bash
@@ -102,6 +107,12 @@ npm install
 npm install @img/sharp-libvips-darwin-arm64@1.0.4
 ```
 The `@img/sharp-libvips-darwin-arm64` version **must match** what `@img/sharp-darwin-arm64` expects (check its `optionalDependencies` in `package.json`). Using `npm install --os=darwin --cpu=arm64 sharp` alone may install a mismatched libvips version.
+
+**Always test the build** in the worktree before finalizing changes:
+```bash
+npx @11ty/eleventy                        # dev build
+NODE_ENV=production npx @11ty/eleventy    # production build (with JS minification)
+```
 
 ## Session-End Update Instructions
 At the end of each Claude Code session, update this file with:
@@ -129,3 +140,15 @@ This ensures mistakes are not repeated and learning is iterative across sessions
 - **2026-03-03**: Fixed GSAP loading error on Talks & Exhibitions and event detail pages:
   - Reverted `defer` on per-page scripts in `eventsList.njk` and `events.njk` — these load inside `{{ content | safe }}` before GSAP CDN scripts, so `defer` caused them to execute before GSAP was available
   - Added "Script Loading Rules" section documenting the `defer` vs non-`defer` pattern for global vs per-page scripts
+- **2026-03-03**: Hero refinement, console log cleanup, JS minification:
+  - Replaced inline `onload` handler on hero `<img>` with external `heroReveal.js` — eliminates global scope pollution (`img`, `video` vars)
+  - Added `prefers-reduced-motion` support: CSS hides video and removes opacity transition; JS skips video playback and shows static image
+  - Added error handling for hero: `video.play().catch()` for autoplay-blocked browsers, `img error` listener as fallback
+  - Fixed `object-fit: fill` → `object-fit: cover` on hero video to prevent distortion
+  - Removed empty `section[data-layout=hero]` ruleset and commented-out animation from `_hero.scss`
+  - Removed all verbose `console.log` statements from client-side JS (smoothScroll, bgColorTransitionSmooth, headingAnimations-v2, imgReveal, accordion, eventStatus, imgFadeIn, eventPosterHover, columnScrollAnimation)
+  - Cleaned up all commented-out `// console.*` dead code from JS files and `_data/*.js` files
+  - Kept legitimate `console.error`/`console.warn` for real error conditions (missing dependencies, broken images)
+  - Added `terser` as devDependency for production JS minification
+  - Added `eleventy.after` event in `eleventy.config.js` — minifies all JS files in `_site/js/` during production builds with `drop_console: true` (strips any remaining console calls)
+  - New file: `public/js/heroReveal.js` — hero video mask reveal logic

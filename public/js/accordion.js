@@ -18,8 +18,6 @@ class Accordion {
         this.headers = Array.from(this.accordion.querySelectorAll('.accordion-header'));
         this.contents = Array.from(this.accordion.querySelectorAll('.accordion-content'));
         
-        console.log(`Found ${this.items.length} accordion items`);
-        
         this.init();
     }
 

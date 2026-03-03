@@ -47,10 +47,7 @@
     // Target three-column sections
     const threeColumnSections = document.querySelectorAll('section[data-layout="grid"]');
 
-    if (threeColumnSections.length === 0) {
-      // console.log('No three-column sections found');
-      return;
-    }
+    if (threeColumnSections.length === 0) return;
 
     threeColumnSections.forEach((section, sectionIndex) => {
       const columns = section.querySelectorAll('.text-wrapper');
@@ -122,9 +119,6 @@
       }, 250);
     });
 
-    // console.log(`✓ Scroll-linked animations initialized for ${threeColumnSections.length} section(s)`);
-    // console.log(`  Mode: ${CONFIG.scrubMode} (scrub: ${scrubValue})`);
-    // console.log(`  Direction: All columns slide UP from bottom`);
   }
 
   /**
@@ -162,8 +156,6 @@
   function setScrubMode(mode) {
     if (CONFIG.scrubValues[mode]) {
       updateConfig({ scrubMode: mode });
-    } else {
-      // console.warn(`Invalid scrub mode: ${mode}. Valid modes: instant, smooth, very-smooth`);
     }
   }
 

@@ -1,6 +1,8 @@
 import { IdAttributePlugin, InputPathToUrlTransformPlugin, HtmlBasePlugin } from "@11ty/eleventy";
 import * as path from "path";
+import * as fs from "fs";
 import * as sass from "sass";
+import { minify } from "terser";
 import { eleventyImageTransformPlugin } from "@11ty/eleventy-img";
 
 import pluginFilters from "./_config/filters.js";
@@ -129,6 +131,28 @@ export default async function(eleventyConfig) {
 
 	eleventyConfig.addShortcode("currentBuildDate", () => {
 		return (new Date()).toISOString();
+	});
+
+	// Minify JS in production builds
+	eleventyConfig.on('eleventy.after', async () => {
+		if (process.env.NODE_ENV !== 'production') return;
+
+		const jsDir = path.join('_site', 'js');
+		if (!fs.existsSync(jsDir)) return;
+
+		const files = fs.readdirSync(jsDir).filter(f => f.endsWith('.js') && !f.endsWith('.min.js'));
+
+		for (const file of files) {
+			const filePath = path.join(jsDir, file);
+			const code = fs.readFileSync(filePath, 'utf-8');
+			const result = await minify(code, {
+				compress: { drop_console: true },
+				mangle: true
+			});
+			if (result.code) {
+				fs.writeFileSync(filePath, result.code);
+			}
+		}
 	});
 
 	// Features to make your build faster (when you need them)

@@ -85,13 +85,8 @@
         // Find all event elements with date data attributes
         const eventElements = document.querySelectorAll('[data-date-from]');
         
-        if (eventElements.length === 0) {
-            console.log('No events found with data-date-from attribute');
-            return;
-        }
-        
-        console.log(`Processing ${eventElements.length} events...`);
-        
+        if (eventElements.length === 0) return;
+
         eventElements.forEach(function(element) {
             const dateFrom = element.getAttribute('data-date-from');
             const dateTo = element.getAttribute('data-date-to');
@@ -118,7 +113,6 @@
             }
         });
         
-        console.log('Event status processing complete');
     }
 
     /**
@@ -131,8 +125,6 @@
         if (subEventElements.length === 0) {
             return;
         }
-        
-        console.log(`Processing ${subEventElements.length} sub-events...`);
         
         subEventElements.forEach(function(element) {
             const dateFrom = element.getAttribute('data-sub-event-date-from');

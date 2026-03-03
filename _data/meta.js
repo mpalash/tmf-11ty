@@ -19,8 +19,6 @@ function debug(...args) {
 
 async function getMeta() {
     debug('Fetching meta data from CMS...');
-    // debug('Using endpoint:', path);
-    // debug('Using token:', token);
     try {
         const startTime = Date.now();
 

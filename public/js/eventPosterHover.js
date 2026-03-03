@@ -72,8 +72,6 @@
 
         // Attach event listeners to all event list items
         attachEventListeners();
-
-        console.log('Poster hover module initialized');
     }
 
     /**
@@ -187,42 +185,26 @@
      * Handles both plain img tags and picture elements with source tags
      */
     function getPosterData(item) {
-        // Look for the event-thumbnail img element
         const thumbnailImg = item.querySelector('.event-thumbnail');
-        
-        console.log('Looking for thumbnail in:', item);
-        console.log('Found thumbnail:', thumbnailImg);
-        
-        if (!thumbnailImg) {
-            console.warn('No .event-thumbnail found in this item');
-            return null;
-        }
 
-        // Get the src (required) from the img element
+        if (!thumbnailImg) return null;
+
         const src = thumbnailImg.src || thumbnailImg.getAttribute('src');
-        
-        console.log('Thumbnail src:', src);
-        
-        if (!src) {
-            console.warn('Thumbnail has no src attribute');
-            return null;
-        }
+
+        if (!src) return null;
 
         // Check if img is inside a picture element (11ty-img does this)
         const pictureElement = thumbnailImg.closest('picture');
-        
+
         let srcset = null;
         let sizes = null;
-        
+
         if (pictureElement) {
-            console.log('Found picture element, looking for source tags');
-            
-            // Get the first webp or avif source for best quality
             const sources = pictureElement.querySelectorAll('source');
-            
+
             // Prefer AVIF, then WebP, then fallback to img srcset
             let selectedSource = null;
-            
+
             sources.forEach(function(source) {
                 const type = source.getAttribute('type');
                 if (type === 'image/avif' && !selectedSource) {
@@ -231,21 +213,18 @@
                     selectedSource = source;
                 }
             });
-            
+
             if (selectedSource) {
                 srcset = selectedSource.getAttribute('srcset');
                 sizes = selectedSource.getAttribute('sizes');
-                console.log('Using source element:', selectedSource.getAttribute('type'));
             }
         }
-        
+
         // Fallback to img attributes if no picture/source found
         if (!srcset) {
             srcset = thumbnailImg.srcset || thumbnailImg.getAttribute('srcset');
             sizes = thumbnailImg.sizes || thumbnailImg.getAttribute('sizes');
         }
-
-        console.log('Poster data:', { src, srcset, sizes });
 
         return {
             src: src,
@@ -258,61 +237,27 @@
      * Attach event listeners to all event list items
      */
     function attachEventListeners() {
-        // Find all list items with thumbnails
         const eventItems = document.querySelectorAll('.all-events-list > li');
 
-        console.log('Found event items:', eventItems.length);
+        if (eventItems.length === 0) return;
 
-        if (eventItems.length === 0) {
-            console.warn('No event items found with selector: .all-events-list > li');
-            
-            // Try alternative selector
-            const altItems = document.querySelectorAll('.all-events-list li');
-            console.log('Alternative selector found:', altItems.length, 'items');
-            
-            if (altItems.length > 0) {
-                console.warn('Consider using .all-events-list li instead of .all-events-list > li');
-            }
-            
-            return;
-        }
-
-        let attachedCount = 0;
-
-        eventItems.forEach(function(item, index) {
-            console.log('Processing item', index);
-            
+        eventItems.forEach(function(item) {
             const posterData = getPosterData(item);
 
-            // Skip if no poster image found
-            if (!posterData) {
-                console.warn('Skipping item', index, '- no poster data');
-                return;
-            }
+            if (!posterData) return;
 
-            console.log('Attaching events to item', index);
-
-            // Mouse enter - prepare to show poster with delay
             item.addEventListener('mouseenter', function(e) {
-                console.log('MOUSEENTER on item', index);
                 showPoster(e, posterData.src, posterData.srcset, posterData.sizes);
             });
 
-            // Mouse move - follow cursor
             item.addEventListener('mousemove', function(e) {
                 updatePosition(e);
             });
 
-            // Mouse leave - hide poster immediately
             item.addEventListener('mouseleave', function() {
-                console.log('MOUSELEAVE on item', index);
                 hidePoster();
             });
-
-            attachedCount++;
         });
-
-        console.log('Successfully attached poster hover to ' + attachedCount + ' event items');
     }
 
     // Initialize when DOM is ready
