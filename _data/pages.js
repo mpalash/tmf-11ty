@@ -133,8 +133,6 @@ async function getPages() {
 
         const pages = response.data.pages
 
-        // console.log(JSON.stringify(pages, null, 4))
-
         return pages;
 
     } catch (error) {

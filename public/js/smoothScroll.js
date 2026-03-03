@@ -74,5 +74,4 @@
     });
   });
 
-  console.log('Smooth scrolling initialized');
 })();

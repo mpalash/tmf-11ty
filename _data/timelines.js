@@ -113,8 +113,6 @@ async function getTimelines() {
 
         const timelines = response.data.timelines
 
-        // console.log(JSON.stringify(timelines, null, 4))
-
         return timelines;
 
     } catch (error) {

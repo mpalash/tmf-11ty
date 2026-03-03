@@ -124,8 +124,6 @@ async function getEvents() {
 
         const events = response.data.events
 
-        // console.log(JSON.stringify(events, null, 4))
-
         const sortedEvents = sortEventsByDateOnly(events)
 
         return sortedEvents;

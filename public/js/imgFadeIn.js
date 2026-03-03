@@ -64,8 +64,6 @@
     // Get all images you want to fade in
     const images = document.querySelectorAll('main picture img');
 
-    console.log(`Found ${images.length} images to fade in`);
-    
     images.forEach(function(img) {
       fadeInImage(img);
     });

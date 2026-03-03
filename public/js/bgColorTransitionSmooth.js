@@ -254,7 +254,6 @@
     // Initial update
     updateBackgroundColor();
 
-    console.log(`Initialized continuous background color transitions with ${colorStops.length} color stops`);
   }
 
   // Run when DOM is ready
