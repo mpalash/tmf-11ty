@@ -7,6 +7,8 @@
 <meta name="language"    content="EN">
 <title>{{ headTitle}} • {{ meta.title }}</title>
 
+<link rel="preconnect" href="https://use.typekit.net" crossorigin>
+<link rel="stylesheet" href="https://use.typekit.net/roq4hhp.css">
 <link rel="stylesheet" href="/css/styles.css">
 
 <meta name="description" content="{{ headDescription }}">
@@ -17,15 +19,9 @@
 <meta property="og:url"              content="{{ meta.siteUrl }}"/>
 <meta property="og:title"            content="{{ headTitle }} • {{ meta.seo.title }}" />
 <meta property="og:description"      content="{{ headDescription }}" />
-{% if hero %}
-    <meta property="og:image"          content="{{ headImage }}" />
-    <meta property="og:image:type"     content="image/jpeg" />
-    <meta property="og:image:width"    content="1600" />
-{% else %}
-    <meta property="og:image"          content="{{ headImage }}" />
-    <meta property="og:image:type"     content="image/jpeg" />
-    <meta property="og:image:width"    content="1600" />
-{% endif %}
+<meta property="og:image"            content="{{ headImage }}" />
+<meta property="og:image:type"       content="image/jpeg" />
+<meta property="og:image:width"      content="1600" />
 
 <meta name="twitter:card"            content="summary_large_image" />
 <meta name="twitter:site"            content="{{ meta.siteUrl }}" />
@@ -42,12 +38,9 @@
 <meta name="generator" content="{{ eleventy.generator }}">
 
 <link rel="icon" href="/favicon.svg">
-{# <link rel="preload" 
-      as="video" 
-      href="/vid/vidMask_lo.mp4" 
-      type="video/mp4"
-      fetchpriority="high"> #}
-{# <script src="/js/pageLoader.js"></script> #}
+{% if hero and hero.image.url %}
+<link rel="preload" as="video" href="/vid/vidMask_lo.mp4" type="video/mp4">
+{% endif %}
 
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-7RRZHZW6MG"></script>
 <script>
