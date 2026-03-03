@@ -21,21 +21,25 @@ export default async function(eleventyConfig) {
 				return;
 			}
 
+			const isDev = process.env.NODE_ENV !== 'production';
+
 			let result = sass.compileString(inputContent, {
 				loadPaths: [
 					".",
 					this.config.dir.sass,
 					path.dirname(inputPath)
 				],
-				sourceMap: true
+				sourceMap: isDev
 			});
 
 			return (data) => {
-				const sm = JSON.stringify(result.sourceMap)
-				const smBase64 = (Buffer.from(sm, 'utf8') || '').toString('base64')
-				const smComment = '/*# sourceMappingURL=data:application/json;charset=utf-8;base64,' + smBase64 + ' */'
-
-				return result.css.toString() + '\n'.repeat(2) + smComment;
+				if (isDev && result.sourceMap) {
+					const sm = JSON.stringify(result.sourceMap)
+					const smBase64 = (Buffer.from(sm, 'utf8') || '').toString('base64')
+					const smComment = '/*# sourceMappingURL=data:application/json;charset=utf-8;base64,' + smBase64 + ' */'
+					return result.css.toString() + '\n'.repeat(2) + smComment;
+				}
+				return result.css.toString();
 			};
 		}
 	});

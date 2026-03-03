@@ -180,7 +180,7 @@
         outline: none;
         transition: var(--transition-all);
 
-        &:active
+        &:active,
         &:focus,
         &:focus-visible {
             outline: none;
@@ -196,16 +196,7 @@
         }
 
     }
-    input::-webkit-input-placeholder {
-        color: var(--grey-600);
-    }
-    input::-moz-placeholder {
-        color: var(--grey-600);
-    }
-    input:-ms-input-placeholder {
-        color: var(--grey-600);
-    }
-    input:-moz-placeholder {
+    input::placeholder {
         color: var(--grey-600);
     }
     
