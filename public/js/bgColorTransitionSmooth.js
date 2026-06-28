@@ -49,22 +49,11 @@
     return `rgb(${result.r}, ${result.g}, ${result.b})`;
   }
 
-  // Initialize continuous background color transitions
-  function init() {
-    const body = document.body;
-    
-    // Find all sections with the data attribute
-    const sections = document.querySelectorAll(`[${config.dataAttribute}]`);
+  // Build (or rebuild) the colorStops array from current DOM positions.
+  // Mutates the array in-place so the scroll ticker always reads the live reference.
+  function buildColorStops(sections, colorStops) {
+    colorStops.length = 0;
 
-    if (sections.length === 0) {
-      console.warn(`No sections found with ${config.dataAttribute} attribute`);
-      return;
-    }
-
-    // Build color map with scroll positions
-    const colorStops = [];
-    
-    // Add initial default color at the very top
     colorStops.push({
       scrollPos: 0,
       color: hexToRgb(config.defaultColor),
@@ -73,7 +62,7 @@
 
     sections.forEach((section) => {
       const bgColor = section.getAttribute(config.dataAttribute);
-      
+
       if (!bgColor) {
         console.warn('Section has data attribute but no color value:', section);
         return;
@@ -81,14 +70,10 @@
 
       const rect = section.getBoundingClientRect();
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-      
-      // Calculate the scroll position when section center hits viewport center
       const sectionTop = rect.top + scrollTop;
-      const sectionHeight = rect.height;
-      const sectionCenter = sectionTop + (sectionHeight / 2);
-      const viewportCenter = window.innerHeight / 2;
-      const scrollPosition = sectionCenter - viewportCenter;
-      
+      const sectionCenter = sectionTop + (rect.height / 2);
+      const scrollPosition = sectionCenter - (window.innerHeight / 2);
+
       colorStops.push({
         scrollPos: Math.max(0, scrollPosition),
         color: hexToRgb(bgColor),
@@ -96,29 +81,21 @@
       });
     });
 
-    // Find the last section within <main> element
     const mainElement = document.querySelector('main');
     let lastMainSection = null;
-    
+
     if (mainElement) {
-      const sectionsInMain = Array.from(sections).filter(section => 
-        mainElement.contains(section)
-      );
+      const sectionsInMain = Array.from(sections).filter(s => mainElement.contains(s));
       lastMainSection = sectionsInMain[sectionsInMain.length - 1];
     }
-    
-    // If last section in main has a color, maintain it to the end
-    // Otherwise, revert to default color
+
     const lastSection = sections[sections.length - 1];
     if (lastSection) {
       const rect = lastSection.getBoundingClientRect();
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-      const sectionBottom = rect.top + scrollTop + rect.height;
-      const finalScrollPos = sectionBottom + window.innerHeight;
-      
-      // Check if the last section in main has a background color
+      const finalScrollPos = rect.top + scrollTop + rect.height + window.innerHeight;
       const lastMainColor = lastMainSection ? lastMainSection.getAttribute(config.dataAttribute) : null;
-      
+
       colorStops.push({
         scrollPos: finalScrollPos,
         color: lastMainColor ? hexToRgb(lastMainColor) : hexToRgb(config.defaultColor),
@@ -127,8 +104,23 @@
       });
     }
 
-    // Sort color stops by scroll position
     colorStops.sort((a, b) => a.scrollPos - b.scrollPos);
+  }
+
+  // Initialize continuous background color transitions
+  function init() {
+    const body = document.body;
+
+    // Find all sections with the data attribute
+    const sections = document.querySelectorAll(`[${config.dataAttribute}]`);
+
+    if (sections.length === 0) {
+      console.warn(`No sections found with ${config.dataAttribute} attribute`);
+      return;
+    }
+
+    const colorStops = [];
+    buildColorStops(sections, colorStops);
 
     // Current and target color for smooth interpolation
     let currentColor = { ...colorStops[0].color };
@@ -189,66 +181,7 @@
     let resizeTimeout;
     window.addEventListener('resize', () => {
       clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(() => {
-        // Rebuild color stops with new positions
-        colorStops.length = 0;
-        
-        colorStops.push({
-          scrollPos: 0,
-          color: hexToRgb(config.defaultColor),
-          element: null
-        });
-
-        sections.forEach((section) => {
-          const bgColor = section.getAttribute(config.dataAttribute);
-          if (!bgColor) return;
-
-          const rect = section.getBoundingClientRect();
-          const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-          const sectionTop = rect.top + scrollTop;
-          const sectionHeight = rect.height;
-          const sectionCenter = sectionTop + (sectionHeight / 2);
-          const viewportCenter = window.innerHeight / 2;
-          const scrollPosition = sectionCenter - viewportCenter;
-          
-          colorStops.push({
-            scrollPos: Math.max(0, scrollPosition),
-            color: hexToRgb(bgColor),
-            element: section
-          });
-        });
-
-        // Find the last section within <main> element
-        const mainElement = document.querySelector('main');
-        let lastMainSection = null;
-        
-        if (mainElement) {
-          const sectionsInMain = Array.from(sections).filter(section => 
-            mainElement.contains(section)
-          );
-          lastMainSection = sectionsInMain[sectionsInMain.length - 1];
-        }
-
-        const lastSection = sections[sections.length - 1];
-        if (lastSection) {
-          const rect = lastSection.getBoundingClientRect();
-          const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-          const sectionBottom = rect.top + scrollTop + rect.height;
-          const finalScrollPos = sectionBottom + window.innerHeight;
-          
-          // Check if the last section in main has a background color
-          const lastMainColor = lastMainSection ? lastMainSection.getAttribute(config.dataAttribute) : null;
-          
-          colorStops.push({
-            scrollPos: finalScrollPos,
-            color: lastMainColor ? hexToRgb(lastMainColor) : hexToRgb(config.defaultColor),
-            element: null,
-            isEnd: true
-          });
-        }
-
-        colorStops.sort((a, b) => a.scrollPos - b.scrollPos);
-      }, 250);
+      resizeTimeout = setTimeout(() => buildColorStops(sections, colorStops), 250);
     });
 
     // Initial update

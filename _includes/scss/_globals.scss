@@ -181,10 +181,15 @@
         transition: var(--transition-all);
 
         &:active,
-        &:focus,
+        &:focus {
+            outline: none;
+            background-color: var(--white-100);
+        }
+
         &:focus-visible {
             outline: none;
             background-color: var(--white-100);
+            box-shadow: 0 0 0 2px var(--sky-300);
         }
 
         &[type=search] {

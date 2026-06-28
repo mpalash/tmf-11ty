@@ -211,22 +211,11 @@
     });
   }
 
-  /**
-   * Wait for GSAP and init
-   */
-  function checkAndInit() {
-    if (typeof gsap !== 'undefined') {
-      init();
-    } else {
-      setTimeout(checkAndInit, 50);
-    }
-  }
-
   // Start
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', checkAndInit);
+    document.addEventListener('DOMContentLoaded', init);
   } else {
-    checkAndInit();
+    init();
   }
 
   // Public API
