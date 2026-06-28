@@ -1,12 +1,12 @@
 <header>
     <a href="/" class="home-link" title="{{ meta.siteName }}">
-        <img eleventy:ignore src="{{ meta.headerLogo.url }}" alt="{{ meta.headerLogo.caption }}" />
+        <img eleventy:ignore src="{{ meta.headerLogo.url }}" alt="{{ meta.headerLogo.caption }}" width="{{ meta.headerLogo.width }}" height="{{ meta.headerLogo.height }}" />
     </a>
-    <a class="toggle-nav" href="#">
-        <img eleventy:ignore class="icon menu" src="/img/icon-menu.svg" />
-        <img eleventy:ignore class="icon close" src="/img/icon-close.svg" />
-    </a>
-    <nav>
+    <button type="button" class="toggle-nav" aria-expanded="false" aria-controls="primary-nav" aria-label="Toggle navigation">
+        <img eleventy:ignore class="icon menu" src="/img/icon-menu.svg" alt="Open menu" width="24" height="24" />
+        <img eleventy:ignore class="icon close" src="/img/icon-close.svg" alt="Close" width="24" height="24" />
+    </button>
+    <nav id="primary-nav">
         <h2 class="visually-hidden">Top level navigation menu</h2>
         <ul class="nav">
             {% for l in meta.headerNavLinks %}
@@ -14,7 +14,7 @@
             {% endfor %}
             <li class="nav-item">
                 <a href="/search/" title="Search site" {% if permalink == '/search/' %}aria-current="page"{% endif %}>
-                    <img eleventy:ignore class="icon search" src="/img/icon-search.svg" />
+                    <img eleventy:ignore class="icon search" src="/img/icon-search.svg" alt="" width="24" height="24" />
                     <span>Search</span>
                 </a>
             </li>
@@ -23,13 +23,13 @@
 </header>
 <script>
     const body = document.querySelector('body');
-    const toggleNav = document.querySelector('a.toggle-nav');
+    const toggleNav = document.querySelector('.toggle-nav');
     const nav = document.querySelector('nav');
 
-    toggleNav.addEventListener('click', (e) => {
-        e.preventDefault();
+    toggleNav.addEventListener('click', () => {
         nav.classList.toggle('active');
         toggleNav.classList.toggle('active');
+        toggleNav.setAttribute('aria-expanded', nav.classList.contains('active') ? 'true' : 'false');
         // body.classList.toggle('disable-scroll');
     });
 

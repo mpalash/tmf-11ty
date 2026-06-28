@@ -50,8 +50,7 @@ class Accordion {
 
         // Add click handlers
         this.headers.forEach((header, index) => {
-            header.addEventListener('click', (e) => {
-                e.preventDefault();        
+            header.addEventListener('click', () => {
                 this.toggle(index);
             });
         });

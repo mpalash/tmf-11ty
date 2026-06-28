@@ -124,6 +124,30 @@ At the end of each Claude Code session, update this file with:
 
 This ensures mistakes are not repeated and learning is iterative across sessions.
 
+## Phase B — Accessibility (COMPLETE)
+
+### SCSS edits — DONE
+- `_accordion.scss` — added `.accordion-header` button reset (border/bg/padding/font/cursor/width)
+- `_header.scss` — added button resets to `.toggle-nav` block
+- `_events.scss` — `li a` selector expanded to `li a, .accordion-header`; `.all-event-details li a` changed to `.all-event-details li .accordion-header`
+- `_typography.scss` — `h1::before { animation }` wrapped in `@media (prefers-reduced-motion: no-preference)`
+
+### Template/JS edits — DONE
+
+- **B1** `content/events.njk`: accordion `<a class="accordion-header">` → `<button type="button" ... aria-expanded="false" aria-controls="accordion-panel-{{ detailIdx }}">` ; `<div class="accordion-content">` → `<div class="accordion-content" id="accordion-panel-{{ detailIdx }}">`
+- **B2** `_includes/components/header.njk`: hamburger `<a class="toggle-nav">` → `<button type="button" ... aria-expanded="false" aria-controls="primary-nav" aria-label="Toggle navigation">` ; `<nav>` → `<nav id="primary-nav">` ; inline script updated: querySelector uses `.toggle-nav`, removed `e.preventDefault()`, added `aria-expanded` toggle after class toggle
+- **B3** Icon alt text: `header.njk` icons (`Open menu`, `Close`, `""`) ; `events.njk` expand/collapse (`Expand`, `Collapse`) ; `search.njk` clear icon (`Clear search`)
+- **B4** `content/search.njk`: `<label for="search-input" class="visually-hidden">Search the site</label>` added before input
+- **B5** Already done (typography SCSS)
+- **B6** width/height on all icon/logo `<img>` tags: logos use CMS dimensions (`meta.headerLogo.width/height`, `meta.footerLogo.width/height`); icons use `width="24" height="24"`; expand/collapse use `width="64" height="64"`
+- **B7** `content/events.njk` lightbox: `aria-label="View image: {{ i.caption }}"` added to each `<a class="lightbox">`
+- **B8** Contrast fix: `.image-caption` changed from `var(--grey-500)` (#838178, 3.91:1 FAIL) to `var(--grey-600)` (#5f5e57, ~5.9:1 PASS AA) in `_globals.scss`. Other `--grey-500` usages (`_parvus.scss`, `_timelines.scss`) are on dark backgrounds and were not changed.
+
+### Key architectural note
+The `.accordion-header` SCSS reset is in `_accordion.scss`. The grid layout styling the header row comes from `_events.scss`. Both must be present for the button to look correct. `accordion.js` `e.preventDefault()` removed (was needed for `<a>`, no-op on `<button>`).
+
+---
+
 ## Change Log
 - **2026-03-02**: Initial CLAUDE.md created. Codebase audit completed:
   - Fixed CSS syntax error (`_globals.scss:183` missing comma in selector list)
@@ -152,3 +176,21 @@ This ensures mistakes are not repeated and learning is iterative across sessions
   - Added `terser` as devDependency for production JS minification
   - Added `eleventy.after` event in `eleventy.config.js` — minifies all JS files in `_site/js/` during production builds with `drop_console: true` (strips any remaining console calls)
   - New file: `public/js/heroReveal.js` — hero video mask reveal logic
+- **2026-06-28**: Phase A refactors (Steps 1–10) and Phase B SCSS (partial):
+  - Step 1: Hoisted `markdownIt` instance to module scope in `_config/filters.js` — gotcha: the `quotes` string `'""'''` uses Unicode curly quotes as content (U+201C/D/18/19) with ASCII `'` (U+0027) as JS string delimiters; Edit tool replaced delimiters with curly variants causing SyntaxError; fixed via Python byte-level replacement
+  - Step 2: Removed `import fetch from 'node-fetch'` from all four `_data/*.js` files; Node ≥18 global `fetch` takes over; `package.json` untouched
+  - Step 3: Removed `checkAndInit` polling loop from `headingAnimations-v2.js`; DOMContentLoaded now calls `init()` directly; `typeof gsap === 'undefined'` guard retained
+  - Step 4: Extracted `buildColorStops(sections, colorStops)` in `bgColorTransitionSmooth.js` — mutates array in-place so GSAP ticker keeps live reference; resize handler reduced to single call
+  - Step 5: Removed `maximum-scale=1.0` from viewport meta in `head-seo.njk` (WCAG 1.4.4)
+  - Step 6: `.DS_Store` already in `.gitignore` — no-op
+  - Step 7: `@media (max-width: 1024px)` in `_variables.scss` trimmed from 10 tokens to 2 (only `--s-xxxl` and `--s-xxl` actually differ)
+  - Step 8: New file `_includes/scss/_breakpoints.scss` — `@mixin bp($name)` with sm/tablet/mid/desktop/wide breakpoints; `@use 'breakpoints' as *` added to `styles.scss`; no CSS output change (mixin unused)
+  - Step 9: `.visually-hidden:focus, .visually-hidden:focus-visible` added to `_reset.scss` — skip link at `base.njk:9` and `<main id="skip">` at line 14 already exist
+  - Step 10: Input `:focus-visible` split from `:active, :focus` in `_globals.scss`; `box-shadow: 0 0 0 2px var(--sky-300)` added to `:focus-visible` only
+  - Phase B SCSS: accordion-header button reset (`_accordion.scss`), toggle-nav button reset (`_header.scss`), `a`→`.accordion-header` selectors in `_events.scss`, `prefers-reduced-motion` guard on `h1::before` animation (`_typography.scss`) — all built and verified
+- **2026-06-28 (continued)**: Phase B template/JS edits (B1–B7) completed, build verified:
+  - `events.njk`: accordion `<a>` → `<button>` with `aria-expanded`/`aria-controls`; panel `id` added; lightbox `aria-label` added; expand/collapse icons got `alt` + dimensions
+  - `header.njk`: hamburger `<a>` → `<button>` with `aria-expanded`/`aria-controls`/`aria-label`; `<nav id="primary-nav">`; script updated (selector, removed `e.preventDefault()`, added `aria-expanded` toggle); logo + icon `width`/`height` added
+  - `search.njk`: visually-hidden label added; clear icon `alt` + dimensions added
+  - `footer.njk`: logo + back-to-top icon `width`/`height` added
+  - `accordion.js`: removed `e.preventDefault()` (no-op on `<button>`)

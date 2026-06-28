@@ -66,6 +66,11 @@ header {
     }
 
     .toggle-nav {
+        border: 0;
+        background: transparent;
+        padding: 0;
+        font: inherit;
+        cursor: pointer;
         display: none;
         height: 2rem;
         width: 2rem;

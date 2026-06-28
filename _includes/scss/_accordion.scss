@@ -1,3 +1,13 @@
+.accordion-header {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    text-align: inherit;
+    font: inherit;
+    cursor: pointer;
+    width: 100%;
+}
+
 .accordion-button {
     display: grid !important;
     justify-self: center;

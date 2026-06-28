@@ -60,7 +60,8 @@
             box-shadow: 0 0 0 var(--s-b) var(--grey-50);
         }
         
-        a {
+        a,
+        .accordion-header {
             text-decoration: none;
             display: grid;
             grid-template-columns: 20% 1fr 20%;
@@ -99,7 +100,7 @@
 }
 
 .all-event-details li {
-    a {
+    .accordion-header {
         grid-template-columns: 1fr 1fr var(--s-xxxl);
 
         div:first-child {
