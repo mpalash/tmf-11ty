@@ -203,3 +203,14 @@ The `.accordion-header` SCSS reset is in `_accordion.scss`. The grid layout styl
   - C6: Vercel confirmed as canonical host; deprecation comment added to `netlify.toml`
   - C7: `test-markup.njk` and `subscribe-netlify.njk` marked with `{# INACTIVE: ... #}` header comments
   - C8: Parvus wired from `node_modules/parvus/dist/js/parvus.esm.min.js` (passthrough copy to `js/parvus.esm.min.js`); `events.njk` now uses `{% js %}` bundle with `import Parvus from '/js/parvus.esm.min.js'` + init — no separate `<script>` tag; `public/js/parvus.min.js` retained on disk
+- **2026-06-28 (continued)**: Phase D performance: third-party & asset pipeline:
+  - D1: Lenis `<script>` moved to `<body>` footer with `defer`, placed before `smoothScroll.js`; Lenis CSS converted to non-blocking `<link rel="preload" as="style" onload="this.rel='stylesheet'">` with `<noscript>` fallback
+  - D2: GSAP + Lenis + animation scripts wrapped in `{% if usesAnimations != false %}` in `base.njk`; `content/search.njk` opts out with `usesAnimations: false` in front matter — saves ~300KB of scripts on the search page
+  - D3: `fuse.js@6.6.2` installed; `node_modules/fuse.js/dist/fuse.min.js` added to passthrough copy as `js/fuse.min.js`; CDN reference in `search.njk` replaced with `/js/fuse.min.js`
+  - D4: Typekit `<link rel="stylesheet">` → `<link rel="preload" as="style" onload="...">` with `<noscript>` fallback in `head-seo.njk` — no longer render-blocking
+  - D5: GTM `<script async>` + inline `gtag` config moved from `<head>` to end of `<body>` in `base.njk`; external script now uses `defer` instead of `async`
+  - D6: `vidMask_lo.webm` encoded via ffmpeg VP9 (198KB vs 603KB MP4 — 67% smaller); `hero.njk` serves WebM first, MP4 as fallback
+  - D7: Already done — Eleventy Image Transform plugin converts all `<img>` tags to `<picture>` with AVIF/WebP; hero preserves `loading="eager"`, `decoding="sync"`, `fetchpriority="high"`
+  - D8: `lossless: true` removed from `eleventyImageTransformPlugin` `sharpOptions`
+  - D9: `widths` updated to `[400, 600, 800, 1200, 1600, "auto"]`; all images now generate 400w/600w variants for mobile
+  - D10: Already done — Eleventy Image Transform plugin already processes event thumbnail `<img>` tags into `<picture>` elements

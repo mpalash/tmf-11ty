@@ -2,8 +2,8 @@
 <html lang="{{ meta.language }}">
 	<head>
 		{% include "components/head-seo.njk" %}
-		<script src="https://cdn.jsdelivr.net/npm/lenis@1.3.17/dist/lenis.min.js"></script>
-		<link href="https://cdn.jsdelivr.net/npm/lenis@1.3.17/dist/lenis.min.css" rel="stylesheet">
+		<link rel="preload" as="style" href="https://cdn.jsdelivr.net/npm/lenis@1.3.17/dist/lenis.min.css" onload="this.rel='stylesheet'">
+		<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.3.17/dist/lenis.min.css"></noscript>
 	</head>
 	<body>
 		<a href="#skip" class="visually-hidden">Skip to main content</a>
@@ -22,6 +22,8 @@
 		<script type="module" src="{% getBundleFileUrl "js" %}"></script>
 
 		<script defer src="/js/heroReveal.js"></script>
+		{% if usesAnimations != false %}
+		<script defer src="https://cdn.jsdelivr.net/npm/lenis@1.3.17/dist/lenis.min.js"></script>
 		<script defer src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/gsap.min.js"></script>
 		<script defer src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/ScrollTrigger.min.js"></script>
 		<script defer src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/SplitText.min.js"></script>
@@ -30,6 +32,7 @@
 		<script defer src="/js/headingAnimations-v2.js"></script>
 		<script defer src="/js/imgReveal.js"></script>
 		<script defer src="/js/columnScrollAnimation.js"></script>
+		{% endif %}
 
 		{% if page.url == '/search/' %}
 			<script>
@@ -37,5 +40,13 @@
 					.then(response => response.json());
 			</script>
 		{% endif %}
+
+		<script>
+		  window.dataLayer = window.dataLayer || [];
+		  function gtag(){dataLayer.push(arguments);}
+		  gtag('js', new Date());
+		  gtag('config', 'G-7RRZHZW6MG');
+		</script>
+		<script defer src="https://www.googletagmanager.com/gtag/js?id=G-7RRZHZW6MG"></script>
 	</body>
 </html>

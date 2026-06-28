@@ -51,7 +51,8 @@ export default async function(eleventyConfig) {
 	eleventyConfig
 		.addPassthroughCopy({
 			"./public/": "/",
-			"node_modules/parvus/dist/js/parvus.esm.min.js": "js/parvus.esm.min.js"
+			"node_modules/parvus/dist/js/parvus.esm.min.js": "js/parvus.esm.min.js",
+			"node_modules/fuse.js/dist/fuse.min.js": "js/fuse.min.js"
 		})
 		.addPassthroughCopy("./content/feed/pretty-atom-feed.xsl");
 
@@ -84,11 +85,10 @@ export default async function(eleventyConfig) {
 		formats: ["avif", "svg", "webp", "auto"],
 		sharpOptions: {
 			animated: true,
-			lossless: true,
 			loop: 0
 		},
 
-		widths: [800, 1200, 1600, "auto"],
+		widths: [400, 600, 800, 1200, 1600, "auto"],
 
 		svgShortCircuit: true,
 		outputDir: "./_site/images/",

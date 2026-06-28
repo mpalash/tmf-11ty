@@ -3,6 +3,7 @@ layout: layouts/base.njk
 permalink: /search/
 title: Search
 excludeFromSearch: true
+usesAnimations: false
 ---
 
 <div class="search-container">
@@ -17,7 +18,7 @@ excludeFromSearch: true
     <div id="search-results"></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+<script src="/js/fuse.min.js"></script>
 <script>
 // Search functionality with URL parameter support
 document.addEventListener('DOMContentLoaded', function() {
