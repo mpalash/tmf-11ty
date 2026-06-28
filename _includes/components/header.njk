@@ -21,7 +21,8 @@
         </ul>
     </nav>
 </header>
-<script>
+{% js %}
+(function() {
     const body = document.querySelector('body');
     const toggleNav = document.querySelector('.toggle-nav');
     const nav = document.querySelector('nav');
@@ -94,4 +95,5 @@
         hiddenClass: 'hidden',
         visibleClass: 'visible',
     });
-</script>
+})();
+{% endjs %}

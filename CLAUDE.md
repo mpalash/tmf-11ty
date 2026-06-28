@@ -47,24 +47,39 @@ Hygraph CMS (GraphQL API) → `_data/*.js` fetch at build time → Nunjucks temp
 - **Fonts**: Adobe Typekit (peridot-pe-variable) loaded via `<link>` in head-seo.njk with `preconnect`.
 
 ## Active JavaScript Files
-| File | Loaded In | Purpose |
-|------|-----------|---------|
-| `heroReveal.js` | base.njk (global) | Hero video mask reveal + reduced-motion |
-| `smoothScroll.js` | base.njk (global) | Lenis smooth scrolling init |
-| `bgColorTransitionSmooth.js` | base.njk (global) | GSAP-based section bg color transitions |
-| `headingAnimations-v2.js` | base.njk (global) | Blur-focus heading reveal animations |
-| `imgReveal.js` | base.njk (global) | Image clip-path reveal on scroll |
-| `columnScrollAnimation.js` | base.njk (global) | Column stagger animations |
-| `accordion.js` | events.njk | Accordion toggle for event details |
-| `youtube-embed.js` | events.njk | Lazy YouTube embed |
-| `imgFadeIn.js` | events.njk | Image fade-in on load |
-| `eventStatus.js` | eventsList.njk | Past/upcoming badge logic |
-| `eventPosterHover.js` | eventsList.njk | Poster thumbnail hover reveal |
-| `gallery.js` | (loaded per-page) | Image gallery lightbox |
+
+### Global scripts (separate files in `public/js/`, loaded via `<script defer>` in base.njk)
+| File | Purpose |
+|------|---------|
+| `heroReveal.js` | Hero video mask reveal + reduced-motion |
+| `smoothScroll.js` | Lenis smooth scrolling init |
+| `bgColorTransitionSmooth.js` | GSAP-based section bg color transitions |
+| `headingAnimations-v2.js` | Blur-focus heading reveal animations |
+| `imgReveal.js` | Image clip-path reveal on scroll |
+| `columnScrollAnimation.js` | Column stagger animations |
+
+### Per-page logic (inlined into `{% js %}` blocks, see Phase E)
+| Logic | Template | Purpose |
+|-------|----------|---------|
+| Accordion | `events.njk` | Accordion toggle for event details |
+| YouTube embed | `events.njk` | Lazy YouTube embed |
+| Image fade-in | `events.njk` | Image fade-in + caption from alt |
+| Parvus lightbox | `events.njk` | Image lightbox (`import` of vendor ESM) |
+| Event status | `eventsList.njk` | Past/upcoming/ongoing badge logic |
+| Poster hover | `eventsList.njk` | Poster thumbnail hover reveal (GSAP) |
+| Marquee | `banner.njk` | GSAP infinite marquee |
+| Nav toggle + scroll header | `header.njk` | Mobile nav + hide-on-scroll header |
+| Back-to-top | `footer.njk` | Smooth scroll to top |
+| Subscribe form | `subscribe.njk` | Async newsletter form submit |
+| Site search | `search.njk` | Fuse.js fuzzy search (`import` of vendor ESM) |
 
 ### Script Loading Rules
-- **Global scripts** (base.njk): Use `defer`. They appear after GSAP CDN scripts in the HTML, so execution order is correct.
-- **Per-page scripts** (events.njk, eventsList.njk): Do **NOT** use `defer`. These appear inside `{{ content | safe }}` which renders before the GSAP CDN scripts. Without `defer`, they execute during HTML parsing when `document.readyState === 'loading'`, so their `DOMContentLoaded` listeners fire after all `defer` scripts (including GSAP) have completed.
+- **Global scripts** (base.njk): separate `public/js/*.js` files loaded via `<script defer>`.
+- **Per-page scripts** (Phase E): inlined into `{% js %}{% endjs %}` paired shortcodes and bundled by `eleventy-plugin-bundle` into **one hashed module per page**, emitted to `_site/dist/` and loaded via `<script type="module" src="{% getBundleFileUrl 'js' %}">`.
+  - The module `<script>` tag is placed **after** the deferred GSAP/animation scripts in base.njk. Module scripts are deferred and execute in document order, so this guarantees GSAP has loaded before the bundle runs — important because some IIFEs call their `init()` immediately (when `readyState !== 'loading'`) and bail if `gsap` is undefined.
+  - Each moved script is wrapped in an IIFE (or was already one) so top-level declarations don't collide when all `{% js %}` blocks on a page concatenate into a single module.
+  - Vendor libs (Parvus, Fuse) are pulled in via top-level ES `import` from passthrough-copied ESM builds (`/js/parvus.esm.min.js`, `/js/fuse.esm.min.js`).
+  - Production: the `eleventy.after` terser hook minifies both `_site/js/` (script mode) and `_site/dist/` (module mode, preserves `import`).
 
 ## Video Masking Technique (Hero Section)
 **Files**: `_includes/components/hero.njk`, `_includes/scss/_hero.scss`, `public/vid/vidMask_lo.mp4`
@@ -214,3 +229,11 @@ The `.accordion-header` SCSS reset is in `_accordion.scss`. The grid layout styl
   - D8: `lossless: true` removed from `eleventyImageTransformPlugin` `sharpOptions`
   - D9: `widths` updated to `[400, 600, 800, 1200, 1600, "auto"]`; all images now generate 400w/600w variants for mobile
   - D10: Already done — Eleventy Image Transform plugin already processes event thumbnail `<img>` tags into `<picture>` elements
+- **2026-06-28 (continued)**: Phase E per-page script bundling (E1):
+  - Migrated all per-page `<script>` tags into `{% js %}{% endjs %}` paired shortcodes across `events.njk`, `eventsList.njk`, `subscribe.njk`, `banner.njk`, `header.njk`, `footer.njk`, `search.njk`. Eleventy now emits one hashed module per page to `_site/dist/` (loaded by the existing `{% getBundleFileUrl "js" %}` in `base.njk`).
+  - Moved the `<script type="module">` bundle tag in `base.njk` to **after** the deferred GSAP/animation scripts — guarantees GSAP is loaded before the bundle module runs (module scripts are deferred and execute in document order). This fixes the timing hazard for IIFEs that call `init()` immediately when `readyState !== 'loading'` and bail if `gsap` is undefined (e.g. poster hover).
+  - Wrapped previously-top-level scripts (accordion/youtube classes in `events.njk`, `header.njk` consts/class, `footer.njk`, `subscribe.njk`) in IIFEs so declarations don't collide when all `{% js %}` blocks on a page concatenate into one module. Added null guards to `subscribe`/`footer`. Already-IIFE scripts (marquee, imgFadeIn, eventStatus, eventPosterHover) moved as-is.
+  - Inlined and deleted the now-redundant first-party files: `public/js/{accordion,youtube-embed,imgFadeIn,eventStatus,eventPosterHover}.js`.
+  - `search.njk` now uses `import Fuse from '/js/fuse.esm.min.js'` (the ESM build) instead of the UMD `<script src>` — a UMD bundled into a module breaks (`this` is `undefined` at module top level). Passthrough switched from `fuse.min.js` → `fuse.esm.min.js` in `eleventy.config.js`.
+  - Extended the production `eleventy.after` terser hook to also minify `_site/dist/` in **module mode** (preserves `import` statements); `_site/js/` still minified in script mode.
+  - Verified: clean production build passes; 13/13 pages get exactly one `/dist/*.js` module; bundles minified with imports intact; zero dangling references to removed files; accordion/search/eventStatus/posterHover/subscribe/marquee/header-scroll/back-to-top all wired through the bundle. The "Per-page scripts must NOT use defer" rule is obsolete and was replaced in the Script Loading Rules section above.

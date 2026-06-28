@@ -52,7 +52,7 @@ export default async function(eleventyConfig) {
 		.addPassthroughCopy({
 			"./public/": "/",
 			"node_modules/parvus/dist/js/parvus.esm.min.js": "js/parvus.esm.min.js",
-			"node_modules/fuse.js/dist/fuse.min.js": "js/fuse.min.js"
+			"node_modules/fuse.js/dist/fuse.esm.min.js": "js/fuse.esm.min.js"
 		})
 		.addPassthroughCopy("./content/feed/pretty-atom-feed.xsl");
 
@@ -138,22 +138,27 @@ export default async function(eleventyConfig) {
 	eleventyConfig.on('eleventy.after', async () => {
 		if (process.env.NODE_ENV !== 'production') return;
 
-		const jsDir = path.join('_site', 'js');
-		if (!fs.existsSync(jsDir)) return;
-
-		const files = fs.readdirSync(jsDir).filter(f => f.endsWith('.js') && !f.endsWith('.min.js'));
-
-		for (const file of files) {
-			const filePath = path.join(jsDir, file);
-			const code = fs.readFileSync(filePath, 'utf-8');
-			const result = await minify(code, {
-				compress: { drop_console: true },
-				mangle: true
-			});
-			if (result.code) {
-				fs.writeFileSync(filePath, result.code);
+		async function minifyDir(dir, { module = false } = {}) {
+			if (!fs.existsSync(dir)) return;
+			const files = fs.readdirSync(dir).filter(f => f.endsWith('.js') && !f.endsWith('.min.js'));
+			for (const file of files) {
+				const filePath = path.join(dir, file);
+				const code = fs.readFileSync(filePath, 'utf-8');
+				const result = await minify(code, {
+					module,
+					compress: { drop_console: true },
+					mangle: true
+				});
+				if (result.code) {
+					fs.writeFileSync(filePath, result.code);
+				}
 			}
 		}
+
+		// Global classic scripts (loaded via <script defer src>).
+		await minifyDir(path.join('_site', 'js'));
+		// Per-page bundles (loaded via <script type="module">; use ES imports).
+		await minifyDir(path.join('_site', 'dist'), { module: true });
 	});
 
 	// Features to make your build faster (when you need them)

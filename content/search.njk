@@ -18,8 +18,9 @@ usesAnimations: false
     <div id="search-results"></div>
 </div>
 
-<script src="/js/fuse.min.js"></script>
-<script>
+{% js %}
+import Fuse from '/js/fuse.esm.min.js';
+
 // Search functionality with URL parameter support
 document.addEventListener('DOMContentLoaded', function() {
   const searchInput = document.getElementById('search-input');
@@ -157,4 +158,4 @@ document.addEventListener('DOMContentLoaded', function() {
     return div.innerHTML;
   }
 });
-</script>
+{% endjs %}

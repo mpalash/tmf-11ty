@@ -29,14 +29,17 @@
     </nav>
     <div class="copyright">{{ meta.copyrightNotice | md | safe }}</div>
 </footer>
-<script>
-    var btn = document.getElementById('back-to-top');
+{% js %}
+(function() {
+    const btn = document.getElementById('back-to-top');
+    if (!btn) return;
 
     btn.addEventListener('click', function(e) {
-    e.preventDefault();
-    window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
+        e.preventDefault();
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
     });
-    });
-</script>
+})();
+{% endjs %}
