@@ -194,3 +194,12 @@ The `.accordion-header` SCSS reset is in `_accordion.scss`. The grid layout styl
   - `search.njk`: visually-hidden label added; clear icon `alt` + dimensions added
   - `footer.njk`: logo + back-to-top icon `width`/`height` added
   - `accordion.js`: removed `e.preventDefault()` (no-op on `<button>`)
+- **2026-06-28 (continued)**: Phase C build & structure cleanups completed:
+  - C1: `--color-grey-light: var(--grey-50)` and `--border-major: 1px solid var(--grey-200)` added to `_variables.scss` — resolves undefined token refs in `_modal.scss`
+  - C2: `body:after` → `body.debug:after` in `_debug.scss` — grid overlay now opt-in only
+  - C3: `_heading-animations.scss` — extracted `@mixin heading-animate-words` for `.word`/`.animated .word` rules; three duplicate selector pairs collapsed to two nested blocks; CSS output identical
+  - C4: `search-index.njk` pages loop — trailing comma now conditional: `{%- if not loop.last or timelines | length > 0 -%},{%- endif -%}`; output JSON always valid
+  - C5: `metadata.language` and `metadata.url` merged into `meta.js` (added to both CMS success path and fallback); `base.njk` and `sitemap.xml.njk` updated to use `meta.*`; `_data/metadata.js` deleted
+  - C6: Vercel confirmed as canonical host; deprecation comment added to `netlify.toml`
+  - C7: `test-markup.njk` and `subscribe-netlify.njk` marked with `{# INACTIVE: ... #}` header comments
+  - C8: Parvus wired from `node_modules/parvus/dist/js/parvus.esm.min.js` (passthrough copy to `js/parvus.esm.min.js`); `events.njk` now uses `{% js %}` bundle with `import Parvus from '/js/parvus.esm.min.js'` + init — no separate `<script>` tag; `public/js/parvus.min.js` retained on disk

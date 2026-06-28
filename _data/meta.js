@@ -133,6 +133,9 @@ async function getMeta() {
             meta.siteUrl = rootURL;
         }
 
+        meta.language = 'en';
+        meta.url = '';
+
         // Log empty or missing fields
         Object.entries(meta).forEach(([key, value]) => {
             if (!value || (Array.isArray(value) && value.length === 0)) {
@@ -150,6 +153,8 @@ async function getMeta() {
             title: "Tyeb Mehta Foundation",
             description: "Established in 2013, the Foundation endeavours to expand the legacy of Tyeb Mehta by fostering a deeper understanding of his practice and broadening the ongoing discourse on Indian Modern and Contemporary art.Established in 2013, the Foundation endeavours to expand the legacy of Tyeb Mehta by fostering a deeper understanding of his practice and broadening the ongoing discourse on Indian Modern and Contemporary art.",
             siteUrl: rootURL || "http://localhost:8080",
+            language: 'en',
+            url: '',
         };
 
         debug('Fallback data:', fallbackData);

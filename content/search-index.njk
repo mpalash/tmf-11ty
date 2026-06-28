@@ -73,7 +73,7 @@ eleventyExcludeFromCollections: true
             "title": "{{ p.title }}",
             "excerpt": "{{ p.seo.description | md | striptags }}",
             "content": "{{ contentParts | join(' ') }}"
-        },
+        }{%- if not loop.last or timelines | length > 0 -%},{%- endif -%}
     {%- endfor -%}
 
     {%- for t in timelines -%}

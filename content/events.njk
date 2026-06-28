@@ -109,11 +109,11 @@ layout: layouts/base.njk
 <script src="/js/accordion.js"></script>
 <script src="/js/youtube-embed.js"></script>
 <script src="/js/imgFadeIn.js"></script>
-<script src="/js/parvus.min.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        if (document.querySelector('.lightbox')) {
-            new Parvus();
-        }
-    });
-</script>
+{% js %}
+import Parvus from '/js/parvus.esm.min.js';
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.querySelector('.lightbox')) {
+        new Parvus();
+    }
+});
+{% endjs %}

@@ -3,28 +3,33 @@
  * Subtle, artistic transitions for the Tyeb Mehta Foundation
  */
 
+@mixin heading-animate-words {
+    .word {
+        display: inline-block;
+        opacity: 0;
+        /* No margin - spacing comes from text nodes between spans */
+        will-change: filter, opacity, transform;
+    }
+
+    &.animated .word {
+        opacity: 1 !important;
+        filter: none !important;
+        transform: none !important;
+    }
+}
+
 /* Base styles for animatable headings */
-.heading-animate,
-section[data-layout="heroHomepage"] .page-hero-text p.heading-animate {
+.heading-animate {
     /* Headings remain visible - JS handles word opacity */
     visibility: visible;
+    @include heading-animate-words;
 }
 
-/* Word animation styles */
-.heading-animate .word,
-section[data-layout="heroHomepage"] .page-hero-text p .word {
-    display: inline-block;
-    opacity: 0;
-    /* No margin - spacing comes from text nodes between spans */
-    will-change: filter, opacity, transform;
-}
-
-/* Completed animation state */
-.heading-animate.animated .word,
-section[data-layout="heroHomepage"] .page-hero-text p.animated .word {
-    opacity: 1 !important;
-    filter: none !important;
-    transform: none !important;
+section[data-layout="heroHomepage"] .page-hero-text p {
+    &.heading-animate {
+        visibility: visible;
+    }
+    @include heading-animate-words;
 }
 
 /* Optional: Smooth transition for non-JS fallback */
