@@ -21,6 +21,7 @@ _includes/
   components/      # Nunjucks partials (hero, header, footer, etc.)
   scss/            # SCSS partials (prefixed with _)
 _data/             # Data files (fetch from Hygraph CMS via GraphQL)
+  _lib/hygraph.js  # Shared fetchHygraph() helper (env, POST, TTL cache, debug) + shared GraphQL snippets
   meta.js          # Site metadata, nav links, SEO defaults
   pages.js         # CMS pages
   events.js        # CMS events
@@ -36,7 +37,9 @@ eleventy.config.js # Eleventy configuration
 ```
 
 ## Data Flow
-Hygraph CMS (GraphQL API) → `_data/*.js` fetch at build time → Nunjucks templates render HTML → Eleventy outputs to `_site/`
+Hygraph CMS (GraphQL API) → `_data/_lib/hygraph.js` `fetchHygraph()` (TTL-cached via `@11ty/eleventy-fetch`) → `_data/*.js` (query + post-processing) → Nunjucks templates render HTML → Eleventy outputs to `_site/`
+
+Each `_data/*.js` file is a thin wrapper: a GraphQL query string + a `fetchHygraph(query, label)` call + post-processing (e.g. events sort, meta fallback). The helper handles env vars, the POST, error handling, debug logging, and caching. Responses are cached in `.cache/` keyed on the query body — distinct queries cache separately. Cache duration: **1h in dev** (warm rebuilds skip the CMS network entirely), **0s in production** (always fresh); override with `GRAPH_CACHE_DURATION` (e.g. `0s`, `5m`, `1d`). Shared GraphQL snippets (`dest`, `seoImage`) are exported from `hygraph.js` to DRY the queries.
 
 ## Key Conventions
 - **SCSS**: Partials prefixed with `_`, imported via `@use` in `styles.scss`. Design tokens are CSS custom properties defined in `_variables.scss`.
@@ -104,9 +107,10 @@ Hygraph CMS (GraphQL API) → `_data/*.js` fetch at build time → Nunjucks temp
 
 ## Environment Variables
 ```
-GRAPH_TOKEN=   # Hygraph API bearer token
-GRAPH_PATH=    # Hygraph GraphQL endpoint URL
-ROOT_URL=      # Site URL override (optional)
+GRAPH_TOKEN=            # Hygraph API bearer token
+GRAPH_PATH=             # Hygraph GraphQL endpoint URL
+ROOT_URL=               # Site URL override (optional)
+GRAPH_CACHE_DURATION=   # Optional eleventy-fetch TTL override (e.g. 0s, 5m, 1h, 1d). Default: 1h dev / 0s prod
 ```
 
 ## Worktree / Fresh Clone Setup
@@ -237,3 +241,10 @@ The `.accordion-header` SCSS reset is in `_accordion.scss`. The grid layout styl
   - `search.njk` now uses `import Fuse from '/js/fuse.esm.min.js'` (the ESM build) instead of the UMD `<script src>` — a UMD bundled into a module breaks (`this` is `undefined` at module top level). Passthrough switched from `fuse.min.js` → `fuse.esm.min.js` in `eleventy.config.js`.
   - Extended the production `eleventy.after` terser hook to also minify `_site/dist/` in **module mode** (preserves `import` statements); `_site/js/` still minified in script mode.
   - Verified: clean production build passes; 13/13 pages get exactly one `/dist/*.js` module; bundles minified with imports intact; zero dangling references to removed files; accordion/search/eventStatus/posterHover/subscribe/marquee/header-scroll/back-to-top all wired through the bundle. The "Per-page scripts must NOT use defer" rule is obsolete and was replaced in the Script Loading Rules section above.
+- **2026-06-29**: Phase F — CMS data layer (F1–F4):
+  - F1: new `_data/_lib/hygraph.js` exports `fetchHygraph(query, label)` (env-var loading via dotenv, POST, error handling, debug logging) plus `debug`, `rootURL`, and shared GraphQL snippets `dest` (LinkButton destination union) and `seoImage` (SEO block, jmd only). Each `_data/*.js` is now query string + helper call + post-processing: meta 55, events 59, pages 36, timelines 36 lines (were 175/179/153/133).
+  - F2: requests wrapped in `@11ty/eleventy-fetch` (`type:'json'`, `fetchOptions` POST). Cache key includes the POST `body` (RemoteAssetCache.js:52) so the four same-URL queries cache separately under `.cache/`. Duration: `1h` dev / `0s` prod, overridable via `GRAPH_CACHE_DURATION`. Warm dev rebuild drops CMS fetch from 60–240ms to 0–1ms (build 8.4s → 0.6s).
+  - F3: removed the dev-only `isDevelopment ? mutate+_timestamp : passthrough` wrapper (and per-file dotenv/isDevelopment/debug boilerplate). `_timestamp` was set but never read by any template.
+  - F4: trimmed only fields with no current or anticipated use. Dropped `jlg`/`url`/`caption` from `seo.image` (head-seo reads only `.jmd`); removed duplicate `mimeType`s; reduced oversized `first:` counts (events/pages 100→50, timelines 100→25, gallery/content 100→50). Image `mimeType`/`height`/`width` are **retained on all images** (incl. `seo.image`), and `googleMapsUrl`, `gallery.notes`, `dates.dateTimeDisplay` are **retained** — kept by request for likely future use even though no template references them yet.
+  - Gotcha: timeline hero `destination` intentionally omits `__typename` (original did too) — it can't reuse the shared `dest` snippet, kept inline. Adding `__typename` could activate a dormant linkButton branch and change output.
+  - Verified byte-identical: production build's `search-index.json` and `sitemap.xml` are exact-hash matches; all 13 HTML pages differ only in the per-build `currentBuildDate` comment. `.cache` and `.env` already gitignored.
