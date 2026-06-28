@@ -1,0 +1,23 @@
+{#-
+  Shared image-reveal partial (Phase H1).
+  Params:
+    i           image object with url, caption, width, height
+    isFullWidth bool — whether the parent .image-wrapper is data-layout="fullWidth"
+
+  Emits the reveal markup at build time. Orientation, the 75vh ("cover") rule and
+  the aspect-ratio padding are pre-computed here so there is zero DOM mutation or
+  layout shift at runtime. imgReveal.js only runs the IntersectionObserver + GSAP
+  reveal; all sizing comes from data-reveal-mode / data-orientation CSS in
+  _img-reveal.scss plus the inline padding-bottom below.
+-#}
+{%- set aspect = i.width / i.height -%}
+{%- if aspect > 1.2 -%}{%- set orientation = "landscape" -%}
+{%- elif aspect < 0.8 -%}{%- set orientation = "portrait" -%}
+{%- else -%}{%- set orientation = "square" -%}{%- endif -%}
+{%- set use75vh = isFullWidth and (orientation == "portrait" or orientation == "square") -%}
+<div class="image" data-orientation="{{ orientation }}">
+    <div class="image-reveal-wrapper" data-orientation="{{ orientation }}" data-reveal-mode="{{ "cover" if use75vh else "aspect" }}"{% if not use75vh %} style="padding-bottom: {{ (i.height / i.width * 100) | round(4) }}%"{% endif %}>
+        <img src="{{ i.url }}" alt="{{ i.caption }}" />
+    </div>
+    {%- if i.caption %}<span class="image-caption">{{ i.caption | md | safe }}</span>{% endif -%}
+</div>

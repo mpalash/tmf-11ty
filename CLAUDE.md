@@ -55,10 +55,10 @@ Each `_data/*.js` file is a thin wrapper: a GraphQL query string + a `fetchHygra
 | File | Purpose |
 |------|---------|
 | `heroReveal.js` | Hero video mask reveal + reduced-motion |
-| `smoothScroll.js` | Lenis smooth scrolling init |
-| `bgColorTransitionSmooth.js` | GSAP-based section bg color transitions |
+| `smoothScroll.js` | Lenis init — the **single scroll source of truth** (`lenis.on('scroll', ScrollTrigger.update)` drives all ScrollTriggers; `gsap.ticker` drives `lenis.raf`) |
+| `bgColorTransitionSmooth.js` | Section bg-color via scrubbed GSAP ScrollTrigger tweens on `body.backgroundColor` (Phase H2 — no per-frame ticker) |
 | `headingAnimations-v2.js` | Blur-focus heading reveal animations |
-| `imgReveal.js` | Image clip-path reveal on scroll |
+| `imgReveal.js` | IntersectionObserver + GSAP clip-path reveal only; markup/sizing emitted at build time by `components/imageReveal.njk` (Phase H1) |
 | `columnScrollAnimation.js` | Column stagger animations |
 
 ### Per-page logic (inlined into `{% js %}` blocks, see Phase E)
@@ -71,7 +71,7 @@ Each `_data/*.js` file is a thin wrapper: a GraphQL query string + a `fetchHygra
 | Event status | `eventsList.njk` | Past/upcoming/ongoing badge logic |
 | Poster hover | `eventsList.njk` | Poster thumbnail hover reveal (GSAP) |
 | Marquee | `banner.njk` | GSAP infinite marquee |
-| Nav toggle + scroll header | `header.njk` | Mobile nav + hide-on-scroll header |
+| Nav toggle + header sentinel | `header.njk` | Mobile nav + IntersectionObserver header hide/show via `.header-sentinel` (Phase H3) |
 | Back-to-top | `footer.njk` | Smooth scroll to top |
 | Subscribe form | `subscribe.njk` | Async newsletter form submit |
 | Site search | `search.njk` | Fuse.js fuzzy search (`import` of vendor ESM) |
@@ -248,3 +248,10 @@ The `.accordion-header` SCSS reset is in `_accordion.scss`. The grid layout styl
   - F4: trimmed only fields with no current or anticipated use. Dropped `jlg`/`url`/`caption` from `seo.image` (head-seo reads only `.jmd`); removed duplicate `mimeType`s; reduced oversized `first:` counts (events/pages 100→50, timelines 100→25, gallery/content 100→50). Image `mimeType`/`height`/`width` are **retained on all images** (incl. `seo.image`), and `googleMapsUrl`, `gallery.notes`, `dates.dateTimeDisplay` are **retained** — kept by request for likely future use even though no template references them yet.
   - Gotcha: timeline hero `destination` intentionally omits `__typename` (original did too) — it can't reuse the shared `dest` snippet, kept inline. Adding `__typename` could activate a dormant linkButton branch and change output.
   - Verified byte-identical: production build's `search-index.json` and `sitemap.xml` are exact-hash matches; all 13 HTML pages differ only in the per-build `currentBuildDate` comment. `.cache` and `.env` already gitignored.
+- **2026-06-29**: Phase H — scroll system consolidation (H1–H4):
+  - H1: image-reveal DOM mutation moved to build time. New `_includes/components/imageReveal.njk` partial emits `.image > .image-reveal-wrapper > img` with pre-computed `data-orientation`, `data-reveal-mode` ("aspect" vs "cover"=75vh) and inline `padding-bottom` (from CMS `i.width`/`i.height`, retained in Phase F). `pages.njk`/`timelines.njk` now `{% include %}` it (Nunjucks include shares context — set `isFullWidth` in scope first; there is no Liquid-style `with`). `imgReveal.js` reduced to IntersectionObserver + GSAP clip-path reveal only. Sizing that JS used to inline now lives in `_img-reveal.scss` keyed on `[data-reveal-mode]`/`[data-orientation]`. Reserving image boxes at first paint makes CLS ~0 (was a post-load reflow). Verified: all 19 timeline images byte-match the pre-phase layout (wrapper W/H, display mode, object-fit). Dropped the dead `data-aspect` attribute.
+  - H2: `bgColorTransitionSmooth.js` rewritten — one scrubbed `ScrollTrigger` tween per `[data-bg-color]` section animating `body.backgroundColor` from the previous color (`scrub: 0.5`, `start: 'top bottom'`, `end: 'center center'`). Deleted the hex interpolation, the `gsap.ticker.add` per-frame writer, and the manual resize handler (ScrollTrigger auto-refreshes).
+  - H3: `ScrollHeaderController` scroll listener replaced with an IntersectionObserver on a `.header-sentinel` div (absolutely positioned, `height: var(--nav-height)`, anchored to the top — out of the body grid). Off-screen → `hidden`, on-screen → `visible`. Note: there is **no CSS** for `header.hidden`/`header.visible`, so this is currently a no-op visually (header is `position: sticky`); the refactor's value is removing the per-event scroll listener while keeping the class hooks for future styling.
+  - H4: only scroll source is Lenis — `grep "addEventListener('scroll'|onscroll|gsap.ticker.add"` over `public/js` is clean except smoothScroll's Lenis RAF/`lenis.on('scroll', …)` bridge.
+  - **Gotcha (dev only)**: editing a SCSS *partial* under `_includes/scss/` during `npm start` does **not** recompile `styles.css` (Eleventy incremental doesn't track `@use` deps). Touch `content/css/styles.scss` (or restart) to force it. Full production builds compile correctly.
+  - **Verification limit**: IntersectionObserver-driven behaviors (reveal trigger, header hide) couldn't be live-tested via browser automation — the automated tab is backgrounded (`visibilityState: 'hidden'`), which throttles IO/paint. Layout, CLS-reservation, bg-color scrub, and JS init were all verified; a quick manual scroll on a foreground tab is recommended to confirm reveal/header feel.

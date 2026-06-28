@@ -10,6 +10,47 @@
         height: 100%;
         will-change: transform, opacity;
     }
+
+    // Aspect-ratio mode (Phase H1): wrapper carries an inline padding-bottom and
+    // height:0; the picture is absolutely positioned to fill the padded box.
+    // Replaces the per-image inline styles previously written by imgReveal.js.
+    &[data-reveal-mode='aspect'] {
+        position: relative;
+        height: 0;
+
+        picture {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        &[data-orientation='landscape'] img {
+            object-fit: contain;
+            object-position: center;
+        }
+        &[data-orientation='portrait'] img,
+        &[data-orientation='square'] img {
+            object-fit: cover;
+            object-position: center;
+        }
+    }
+
+    // Cover mode (Phase H1): fullWidth portrait/square images get a fixed 75vh
+    // box with the image scaled to height (the .image[data-orientation] img rule
+    // in _timelines.scss handles object-fit/height for the fullWidth case).
+    &[data-reveal-mode='cover'] {
+        display: flex;
+        align-items: flex-start;
+        justify-content: flex-start;
+        height: 75vh;
+        min-height: 75vh;
+
+        picture {
+            height: 100%;
+            width: auto;
+            max-width: 100%;
+        }
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {

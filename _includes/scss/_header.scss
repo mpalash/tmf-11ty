@@ -148,3 +148,13 @@ header {
     }
 
 }
+// Off-flow sentinel for IntersectionObserver-driven header hide/show (Phase H3).
+// Absolutely positioned so it does not occupy a row in the body grid.
+.header-sentinel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px;
+    height: var(--nav-height);
+    pointer-events: none;
+}

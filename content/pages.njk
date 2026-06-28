@@ -29,17 +29,11 @@ layout: layouts/base.njk
                 {% include "components/linkButton.njk" %}
             {% endif %}
             {% if c.__typename == 'Image' %}
+                {% set isFullWidth = false %}
                 <div class="image-wrapper">
-                    <div class="image">
-                        {% for i in c.images %}
-                            <img
-                                src="{{ i.url }}"
-                                alt="{{ i.caption }}" />
-                            {% if i.caption %}
-                                <span class="image-caption">{{ i.caption | md | safe }}</span>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
+                    {% for i in c.images %}
+                        {% include "components/imageReveal.njk" %}
+                    {% endfor %}
                 </div>
             {% endif %}
         {%- endfor -%}
