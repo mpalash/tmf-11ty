@@ -19,43 +19,42 @@ usesAnimations: false
 </div>
 
 {% js %}
-import Fuse from '/js/fuse.esm.min.js';
-
-// Search functionality with URL parameter support
-document.addEventListener('DOMContentLoaded', function() {
+// Incremental site search powered by Pagefind (index built at /pagefind/).
+(function() {
   const searchInput = document.getElementById('search-input');
   const searchResults = document.getElementById('search-results');
   const clearButton = document.getElementById('clear-search');
-  let fuse;
-  let searchTimeout;
+  if (!searchInput || !searchResults) return;
 
-  // Get search term from URL parameters
-  function getSearchParam() {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('q') || '';
+  let searchTimeout;
+  let pagefindPromise = null;
+  const MAX_RESULTS = 20;
+
+  // Lazy-load and init Pagefind once.
+  function loadPagefind() {
+    if (!pagefindPromise) {
+      pagefindPromise = import('/pagefind/pagefind.js')
+        .then(async (pf) => { await pf.init(); return pf; })
+        .catch((err) => { console.error('Failed to load Pagefind:', err); pagefindPromise = null; throw err; });
+    }
+    return pagefindPromise;
   }
 
-  // Update URL with search term
+  function getSearchParam() {
+    return new URLSearchParams(window.location.search).get('q') || '';
+  }
+
   function updateURL(query) {
     const url = new URL(window.location);
-    if (query) {
-      url.searchParams.set('q', query);
-    } else {
-      url.searchParams.delete('q');
-    }
+    if (query) url.searchParams.set('q', query);
+    else url.searchParams.delete('q');
     window.history.replaceState({}, '', url);
   }
 
-  // Set initial search value from URL
-  const initialQuery = getSearchParam();
-  searchInput.value = initialQuery;
-
-  // Show/hide clear button based on input value
   function toggleClearButton() {
     clearButton.style.display = searchInput.value ? 'block' : 'none';
   }
 
-  // Clear search
   function clearSearch() {
     searchInput.value = '';
     searchResults.innerHTML = '';
@@ -64,68 +63,29 @@ document.addEventListener('DOMContentLoaded', function() {
     searchInput.focus();
   }
 
-  // Initial clear button visibility
-  toggleClearButton();
+  function escapeHTML(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
 
-  // Fetch search index
-  fetch('/search-index.json')
-    .then(response => response.json())
-    .then(data => {
-      // Initialize Fuse.js
-      const options = {
-        keys: ['title', 'excerpt', 'content'],
-        includeScore: true,
-        threshold: 0.3,
-        ignoreLocation: true
-      };
-      fuse = new Fuse(data.searchIndex, options);
-
-      // Perform initial search if URL has query
-      if (initialQuery) {
-        performSearch(initialQuery);
-      }
-
-      // Handle search input
-      searchInput.addEventListener('input', function(e) {
-        const query = e.target.value;
-        toggleClearButton();
-
-        // Debounce search for better performance
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-          performSearch(query);
-          updateURL(query);
-        }, 150);
-      });
-
-      // Handle clear button click
-      clearButton.addEventListener('click', clearSearch);
-
-      // Handle escape key to clear search
-      searchInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-          clearSearch();
-        }
-      });
-
-      // Handle back/forward browser navigation
-      window.addEventListener('popstate', function() {
-        const query = getSearchParam();
-        searchInput.value = query;
-        toggleClearButton();
-        performSearch(query);
-      });
-    })
-    .catch(error => console.error('Error loading search index:', error));
-
-  function performSearch(query) {
+  async function performSearch(query) {
     if (query.length < 2) {
       searchResults.innerHTML = '';
       return;
     }
-
-    const results = fuse.search(query);
-    displayResults(results, query);
+    try {
+      const pf = await loadPagefind();
+      const search = await pf.search(query);
+      // Guard against a stale debounced response overwriting a newer query.
+      if (searchInput.value.trim() !== query.trim()) return;
+      const results = await Promise.all(
+        search.results.slice(0, MAX_RESULTS).map((r) => r.data())
+      );
+      displayResults(results, query);
+    } catch (err) {
+      searchResults.innerHTML = '<p class="no-search-result">Search is unavailable right now.</p>';
+    }
   }
 
   function displayResults(results, query) {
@@ -133,29 +93,47 @@ document.addEventListener('DOMContentLoaded', function() {
       searchResults.innerHTML = `<p class="no-search-result">No results found for “${escapeHTML(query)}”</p>`;
       return;
     }
-
-    // <p>${results.length} result${results.length !== 1 ? 's' : ''} for "${escapeHTML(query)}"</p>
-    const html = `
-      ${results.map(result => {
-        const item = result.item;
-        return `
-          <a href="${item.url}" class="search-result">
-            <h3>${escapeHTML(item.title)}</h3>
-            <p>${escapeHTML(item.excerpt)}</p>
-            <span class="read-more badge">Read more</span>
-          </a>
-        `;
-      }).join('')}
-    `;
-
-    searchResults.innerHTML = html;
+    searchResults.innerHTML = results.map((r) => {
+      const title = (r.meta && r.meta.title) ? escapeHTML(r.meta.title) : escapeHTML(r.url);
+      // r.excerpt is sanitised HTML (with <mark> highlights) generated by Pagefind
+      // from the site's own indexed content.
+      return `
+        <a href="${r.url}" class="search-result">
+          <h3>${title}</h3>
+          <p>${r.excerpt}</p>
+          <span class="read-more badge">Read more</span>
+        </a>`;
+    }).join('');
   }
 
-  // Helper function to escape HTML for security
-  function escapeHTML(str) {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-  }
-});
+  // Init from URL, wire up events.
+  const initialQuery = getSearchParam();
+  searchInput.value = initialQuery;
+  toggleClearButton();
+  loadPagefind(); // warm the index
+  if (initialQuery) performSearch(initialQuery);
+
+  searchInput.addEventListener('input', function(e) {
+    const query = e.target.value;
+    toggleClearButton();
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      performSearch(query);
+      updateURL(query);
+    }, 150);
+  });
+
+  clearButton.addEventListener('click', clearSearch);
+
+  searchInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') clearSearch();
+  });
+
+  window.addEventListener('popstate', function() {
+    const query = getSearchParam();
+    searchInput.value = query;
+    toggleClearButton();
+    performSearch(query);
+  });
+})();
 {% endjs %}

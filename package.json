@@ -36,12 +36,12 @@
 		"@11ty/eleventy-plugin-syntaxhighlight": "^5.0.0",
 		"cross-env": "^7.0.3",
 		"luxon": "^3.5.0",
+		"pagefind": "^1.5.2",
 		"terser": "^5.46.0"
 	},
 	"dependencies": {
 		"@11ty/eleventy-fetch": "^5.1.0",
 		"dotenv": "^16.4.5",
-		"fuse.js": "^6.6.2",
 		"markdown-it": "^14.1.0",
 		"markdown-it-anchor": "^9.2.0",
 		"parvus": "^3.0.0",

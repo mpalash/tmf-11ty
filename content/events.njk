@@ -7,7 +7,7 @@ permalink: "events/{{ event.title | slugify }}/index.html"
 section: "event"
 layout: layouts/base.njk
 ---
-<article class="{{ section }} {{ event.title | slugify }}">
+<article class="{{ section }} {{ event.title | slugify }}" data-pagefind-meta="title:{{ event.title }}">
     <section data-layout='hero'>
         {% set hero = event.hero %}
         {% include "components/hero.njk" %}

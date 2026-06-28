@@ -74,14 +74,14 @@ Each `_data/*.js` file is a thin wrapper: a GraphQL query string + a `fetchHygra
 | Nav toggle + header sentinel | `header.njk` | Mobile nav + IntersectionObserver header hide/show via `.header-sentinel` (Phase H3) |
 | Back-to-top | `footer.njk` | Smooth scroll to top |
 | Subscribe form | `subscribe.njk` | Async newsletter form submit |
-| Site search | `search.njk` | Fuse.js fuzzy search (`import` of vendor ESM) |
+| Site search | `search.njk` | Pagefind incremental search (dynamic `import('/pagefind/pagefind.js')`, Phase: pagefind migration) |
 
 ### Script Loading Rules
 - **Global scripts** (base.njk): separate `public/js/*.js` files loaded via `<script defer>`.
 - **Per-page scripts** (Phase E): inlined into `{% js %}{% endjs %}` paired shortcodes and bundled by `eleventy-plugin-bundle` into **one hashed module per page**, emitted to `_site/dist/` and loaded via `<script type="module" src="{% getBundleFileUrl 'js' %}">`.
   - The module `<script>` tag is placed **after** the deferred GSAP/animation scripts in base.njk. Module scripts are deferred and execute in document order, so this guarantees GSAP has loaded before the bundle runs — important because some IIFEs call their `init()` immediately (when `readyState !== 'loading'`) and bail if `gsap` is undefined.
   - Each moved script is wrapped in an IIFE (or was already one) so top-level declarations don't collide when all `{% js %}` blocks on a page concatenate into a single module.
-  - Vendor libs (Parvus, Fuse) are pulled in via top-level ES `import` from passthrough-copied ESM builds (`/js/parvus.esm.min.js`, `/js/fuse.esm.min.js`).
+  - Vendor lib Parvus is pulled in via top-level ES `import` from the passthrough-copied ESM build (`/js/parvus.esm.min.js`). Search uses Pagefind via a runtime dynamic `import('/pagefind/pagefind.js')` (generated post-build, see below).
   - Production: the `eleventy.after` terser hook minifies both `_site/js/` (script mode) and `_site/dist/` (module mode, preserves `import`).
 
 ## Video Masking Technique (Hero Section)
@@ -255,3 +255,11 @@ The `.accordion-header` SCSS reset is in `_accordion.scss`. The grid layout styl
   - H4: only scroll source is Lenis — `grep "addEventListener('scroll'|onscroll|gsap.ticker.add"` over `public/js` is clean except smoothScroll's Lenis RAF/`lenis.on('scroll', …)` bridge.
   - **Gotcha (dev only)**: editing a SCSS *partial* under `_includes/scss/` during `npm start` does **not** recompile `styles.css` (Eleventy incremental doesn't track `@use` deps). Touch `content/css/styles.scss` (or restart) to force it. Full production builds compile correctly.
   - **Verification limit**: IntersectionObserver-driven behaviors (reveal trigger, header hide) couldn't be live-tested via browser automation — the automated tab is backgrounded (`visibilityState: 'hidden'`), which throttles IO/paint. Layout, CLS-reservation, bg-color scrub, and JS init were all verified; a quick manual scroll on a foreground tab is recommended to confirm reveal/header feel.
+- **2026-06-29**: Pagefind search migration (replaces Fuse + monolithic `search-index.json`):
+  - Build step: `eleventy.config.js` `eleventy.after` runs the Pagefind Node API (`createIndex` → `addDirectory({path:'_site'})` → `writeFiles`), in **both dev and prod** so `/pagefind/` is served on `npm start` too. It `fs.rmSync`'s `_site/pagefind` first — `writeFiles()` doesn't prune, so content-hashed fragments would otherwise accumulate across rebuilds.
+  - Indexing scope: `base.njk` `<main{% if not excludeFromSearch %} data-pagefind-body{% endif %}>` — only `<main>` content is indexed (header/banner/footer excluded automatically), and the search page (`excludeFromSearch: true`) is skipped. Each `<article>` carries `data-pagefind-meta="title:{{ <type>.title }}"` so results get the CMS title — needed because the **homepage has no `<h1>`** in main (its result title would otherwise be empty).
+  - `search.njk` rewritten: dynamic `import('/pagefind/pagefind.js')` + `pf.search()`; custom UI preserved (`.search-result` cards, `r.meta.title`, `r.excerpt` is Pagefind-generated HTML with `<mark>` highlights). Stale-response guard drops results if the input changed during the async search.
+  - Removed: `content/search-index.njk`, the dead `searchIndex` collection, the redundant `searchIndexPromise` prefetch in `base.njk`, the `fuse.js` dependency + its passthrough.
+  - **Events are now searchable** (the old `search-index.json` only indexed pages + timelines). This is intentional "better" coverage — to restore the old exclusion, add `excludeFromSearch: true` to `content/events.njk` front matter (drops `data-pagefind-body`).
+  - **Payload tradeoff (honest):** for a site this small Pagefind is *heavier* upfront, not smaller — first search loads `pagefind.js` (~45KB) + `wasm.en` (~73KB) + index shard (~20KB) ≈ 137KB vs the old Fuse (~24KB) + `search-index.json` (~20KB) ≈ 44KB. Pagefind's fixed WASM engine dominates at this scale; its incremental advantage only wins once the monolithic index would be large (hundreds of KB). What *is* better: full-content BM25 ranking, highlighted excerpts, no upfront-blocking JSON load, and per-query fragments (~666b) loaded on demand.
+  - Verified: index built (12 pages, correct CMS titles, search page excluded, events included); all `/pagefind/` assets serve 200; production minified search bundle preserves the dynamic import. Live in-browser search couldn't be automation-tested (Pagefind's WASM stalls in a backgrounded tab — `visibilityState: 'hidden'`); a foreground manual check is recommended. Index *content* was verified offline by decompressing fragments.

@@ -7,7 +7,7 @@ permalink: "{%- if page.id !== meta.homepage.id -%}{{ page.title | slugify }}/{%
 section: "page"
 layout: layouts/base.njk
 ---
-<article class="{% if page.id == meta.homepage.id %}home{% endif %} {{ section }} {{ page.title | slugify }}">
+<article class="{% if page.id == meta.homepage.id %}home{% endif %} {{ section }} {{ page.title | slugify }}" data-pagefind-meta="title:{{ page.title }}">
     {%- for s in page.pageSections-%}
         <section data-layout={{ s.layout }} data-bg-color={% if s.bgColor.hex %}{{ s.bgColor.hex }}{% else %}#fff{% endif %}>
         {%- for c in s.content -%}

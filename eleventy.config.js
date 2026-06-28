@@ -3,6 +3,7 @@ import * as path from "path";
 import * as fs from "fs";
 import * as sass from "sass";
 import { minify } from "terser";
+import * as pagefind from "pagefind";
 import { eleventyImageTransformPlugin } from "@11ty/eleventy-img";
 
 import pluginFilters from "./_config/filters.js";
@@ -51,8 +52,7 @@ export default async function(eleventyConfig) {
 	eleventyConfig
 		.addPassthroughCopy({
 			"./public/": "/",
-			"node_modules/parvus/dist/js/parvus.esm.min.js": "js/parvus.esm.min.js",
-			"node_modules/fuse.js/dist/fuse.esm.min.js": "js/fuse.esm.min.js"
+			"node_modules/parvus/dist/js/parvus.esm.min.js": "js/parvus.esm.min.js"
 		})
 		.addPassthroughCopy("./content/feed/pretty-atom-feed.xsl");
 
@@ -109,18 +109,6 @@ export default async function(eleventyConfig) {
 		}
 	});
 
-	// Create a search index collection
-	eleventyConfig.addCollection("searchIndex", function(collectionApi) {
-		return collectionApi.getAll()
-		.filter(item => item.url && item.url !== '/search/' && !item.data.excludeFromSearch)
-		.map(item => ({
-			url: item.url,
-			title: item.data.title || '',
-			excerpt: item.data.excerpt || item.data.content?.substr(0, 200) || '',
-			tags: item.data.tags || [],
-		}));
-  	});
-
 	// Filters
 	eleventyConfig.addPlugin(pluginFilters);
 
@@ -159,6 +147,20 @@ export default async function(eleventyConfig) {
 		await minifyDir(path.join('_site', 'js'));
 		// Per-page bundles (loaded via <script type="module">; use ES imports).
 		await minifyDir(path.join('_site', 'dist'), { module: true });
+	});
+
+	// Build the Pagefind index from the rendered HTML (replaces fuse + the
+	// monolithic search-index.json). Runs in both dev and prod so /pagefind/ is
+	// available on the dev server too. Indexes only [data-pagefind-body] regions.
+	eleventyConfig.on('eleventy.after', async () => {
+		const outDir = path.join('_site', 'pagefind');
+		// writeFiles() does not prune stale files; clear first so content-hashed
+		// fragments from previous builds don't accumulate (esp. on the dev server).
+		fs.rmSync(outDir, { recursive: true, force: true });
+		const { index } = await pagefind.createIndex();
+		await index.addDirectory({ path: '_site' });
+		await index.writeFiles({ outputPath: outDir });
+		await pagefind.close();
 	});
 
 	// Features to make your build faster (when you need them)

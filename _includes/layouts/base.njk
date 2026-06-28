@@ -11,7 +11,7 @@
 		{% include "components/banner.njk" %}
 		{% include "components/header.njk" %}
 
-		<main id="skip">
+		<main id="skip"{% if not excludeFromSearch %} data-pagefind-body{% endif %}>
 			{{ content | safe }}
 			{# {% include "components/test-markup.njk" %} #}
 		</main>
@@ -35,13 +35,6 @@
 		<!-- Per-page bundled scripts: placed after the deferred GSAP/animation
 		     scripts so GSAP is guaranteed available when the module executes. -->
 		<script type="module" src="{% getBundleFileUrl "js" %}"></script>
-
-		{% if page.url == '/search/' %}
-			<script>
-				const searchIndexPromise = fetch('/search-index.json')
-					.then(response => response.json());
-			</script>
-		{% endif %}
 
 		<script>
 		  window.dataLayer = window.dataLayer || [];
