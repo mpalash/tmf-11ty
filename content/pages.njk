@@ -11,31 +11,7 @@ layout: layouts/base.njk
     {%- for s in page.pageSections-%}
         <section data-layout={{ s.layout }} data-bg-color={% if s.bgColor.hex %}{{ s.bgColor.hex }}{% else %}#fff{% endif %}>
         {%- for c in s.content -%}
-            {% if c.__typename == 'Hero' %}
-                {% set hero = c %}
-                {% set icon = "icon-eye" %}
-                {% include "components/hero.njk" %}
-            {% endif %}
-            {% if c.__typename == 'Text' %}
-                <div class="text-wrapper">
-                    <div class="text">
-                    {{ c.textmd | md | safe }}
-                    </div>
-                </div>
-            {% endif %}
-            {% if c.__typename == 'LinkButton' %}
-                {% set l = c %}
-                {% set icon = "icon-arrow-right" %}
-                {% include "components/linkButton.njk" %}
-            {% endif %}
-            {% if c.__typename == 'Image' %}
-                {% set isFullWidth = false %}
-                <div class="image-wrapper">
-                    {% for i in c.images %}
-                        {% include "components/imageReveal.njk" %}
-                    {% endfor %}
-                </div>
-            {% endif %}
+            {% include "components/blocks/_" + (c.__typename | lower) + ".njk" ignore missing %}
         {%- endfor -%}
         </section>
     {%- endfor -%}

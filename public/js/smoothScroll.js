@@ -54,9 +54,6 @@
   // Disable lag smoothing
   gsap.ticker.lagSmoothing(0);
 
-  // Expose Lenis globally
-  window.lenis = lenis;
-
   // Smooth scroll to anchor links
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function(e) {

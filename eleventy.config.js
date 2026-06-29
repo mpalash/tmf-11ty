@@ -53,7 +53,10 @@ export default async function(eleventyConfig) {
 	eleventyConfig
 		.addPassthroughCopy({
 			"./public/": "/",
-			"node_modules/parvus/dist/js/parvus.esm.min.js": "js/parvus.esm.min.js"
+			"node_modules/parvus/dist/js/parvus.esm.min.js": "js/parvus.esm.min.js",
+			// ESM helper modules imported by per-page {% js %} bundles at runtime.
+			"_includes/js/accordion.js": "js/accordion.js",
+			"_includes/js/youtubeEmbed.js": "js/youtubeEmbed.js"
 		})
 		.addPassthroughCopy("./content/feed/pretty-atom-feed.xsl");
 
@@ -136,8 +139,11 @@ export default async function(eleventyConfig) {
 				for (const file of files) {
 					const filePath = path.join(dir, file);
 					const code = fs.readFileSync(filePath, 'utf-8');
+					// ESM files (e.g. the /js/ helper modules) must be minified in
+					// module mode so terser doesn't choke on top-level export/import.
+					const isModule = module || /^\s*(export|import)\s/m.test(code);
 					const result = await minify(code, {
-						module,
+						module: isModule,
 						compress: { drop_console: true },
 						mangle: true
 					});

@@ -108,6 +108,8 @@ layout: layouts/base.njk
 </article>
 {% js %}
 import Parvus from '/js/parvus.esm.min.js';
+import { Accordion } from '/js/accordion.js';
+import { YouTubeEmbed } from '/js/youtubeEmbed.js';
 
 document.addEventListener('DOMContentLoaded', function() {
     if (document.querySelector('.lightbox')) {
@@ -115,213 +117,25 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-/* GSAP Accordion — a reusable accordion with smooth animations */
-(function() {
-    const PRM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    class Accordion {
-        constructor(element, options = {}) {
-            this.accordion = element;
-            this.options = {
-                duration: options.duration || 0.5,
-                ease: options.ease || 'power2.inOut',
-                openFirst: options.openFirst !== false, // true by default
-                ...options
-            };
-            // Reduced motion: collapse/expand instantly (no height/opacity tween).
-            if (PRM) this.options.duration = 0;
-
-            this.items = Array.from(this.accordion.querySelectorAll('.accordion-item'));
-            this.headers = Array.from(this.accordion.querySelectorAll('.accordion-header'));
-            this.contents = Array.from(this.accordion.querySelectorAll('.accordion-content'));
-
-            this.init();
-        }
-
-        init() {
-            // Set initial heights to 0 for all except first (if openFirst is true)
-            this.contents.forEach((content, index) => {
-                const header = this.headers[index];
-                const button = header.querySelector('.accordion-button');
-                const isFirst = index === 0 && this.options.openFirst;
-
-                if (isFirst) {
-                    gsap.set(content, { height: 'auto' });
-                    header.classList.add('active');
-                    header.setAttribute('aria-expanded', 'true');
-                    if (button) {
-                        button.classList.add('open');
-                    }
-                } else {
-                    gsap.set(content, { height: 0 });
-                    header.classList.remove('active');
-                    header.setAttribute('aria-expanded', 'false');
-                    if (button) {
-                        button.classList.remove('open');
-                    }
-                }
-            });
-
-            this.headers.forEach((header, index) => {
-                header.addEventListener('click', () => {
-                    this.toggle(index);
-                });
-            });
-        }
-
-        toggle(index) {
-            const header = this.headers[index];
-            const isActive = header.classList.contains('active');
-
-            if (isActive) {
-                this.close(index);
-            } else {
-                this.headers.forEach((h, i) => {
-                    if (h.classList.contains('active')) {
-                        this.close(i);
-                    }
-                });
-                this.open(index);
-            }
-        }
-
-        open(index) {
-            const header = this.headers[index];
-            const content = this.contents[index];
-            const inner = content.querySelector('.accordion-content-inner');
-            const button = header.querySelector('.accordion-button');
-
-            header.classList.add('active');
-            header.setAttribute('aria-expanded', 'true');
-
-            if (button) {
-                button.classList.add('open');
-            }
-
-            gsap.fromTo(content,
-                { height: 0 },
-                {
-                    height: 'auto',
-                    duration: this.options.duration,
-                    ease: this.options.ease,
-                    onStart: () => {
-                        content.style.overflow = 'hidden';
-                    },
-                    onComplete: () => {
-                        content.style.overflow = 'visible';
-                    }
-                }
-            );
-
-            gsap.fromTo(inner,
-                { opacity: 0, y: -20 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: this.options.duration * 0.8,
-                    ease: this.options.ease,
-                    delay: this.options.duration * 0.2
-                }
-            );
-        }
-
-        close(index) {
-            const header = this.headers[index];
-            const content = this.contents[index];
-            const inner = content.querySelector('.accordion-content-inner');
-            const button = header.querySelector('.accordion-button');
-
-            header.classList.remove('active');
-            header.setAttribute('aria-expanded', 'false');
-
-            if (button) {
-                button.classList.remove('open');
-            }
-
-            gsap.to(inner, {
-                opacity: 0,
-                y: -10,
-                duration: this.options.duration * 0.5,
-                ease: this.options.ease
-            });
-
-            gsap.to(content, {
-                height: 0,
-                duration: this.options.duration,
-                ease: this.options.ease,
-                onStart: () => {
-                    content.style.overflow = 'hidden';
-                }
-            });
-        }
+/* Accordion init (class in /js/accordion.js) */
+document.addEventListener('DOMContentLoaded', () => {
+    const accordionElement = document.querySelector('.accordion');
+    if (!accordionElement) {
+        return;
     }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        const accordionElement = document.querySelector('.accordion');
-        if (!accordionElement) {
-            return;
-        }
-        new Accordion(accordionElement, {
-            duration: 0.5,
-            ease: 'power2.inOut',
-            openFirst: true
-        });
+    new Accordion(accordionElement, {
+        duration: 0.5,
+        ease: 'power2.inOut',
+        openFirst: true
     });
-})();
+});
 
-/* Responsive YouTube embed with lazy loading */
-(function() {
-    class YouTubeEmbed {
-        constructor(element) {
-            this.element = element;
-            this.videoId = element.dataset.videoId;
-            this.thumbnail = element.dataset.thumbnail || `https://img.youtube.com/vi/${this.videoId}/maxresdefault.jpg`;
-            this.init();
-        }
-
-        init() {
-            this.element.classList.add('youtube-embed-wrapper');
-
-            const thumbnail = document.createElement('img');
-            thumbnail.src = this.thumbnail;
-            thumbnail.alt = 'Video thumbnail';
-            thumbnail.className = 'youtube-thumbnail';
-
-            const playButton = document.createElement('button');
-            playButton.className = 'youtube-play-button';
-            playButton.setAttribute('aria-label', 'Play video');
-            playButton.innerHTML = `
-                <svg viewBox="0 0 68 48" width="68" height="48">
-                    <path d="M66.52,7.74c-0.78-2.93-2.49-5.41-5.42-6.19C55.79,.13,34,0,34,0S12.21,.13,6.9,1.55 C3.97,2.33,2.27,4.81,1.48,7.74C0.06,13.05,0,24,0,24s0.06,10.95,1.48,16.26c0.78,2.93,2.49,5.41,5.42,6.19 C12.21,47.87,34,48,34,48s21.79-0.13,27.1-1.55c2.93-0.78,4.64-3.26,5.42-6.19C67.94,34.95,68,24,68,24S67.94,13.05,66.52,7.74z" fill="#f00"></path>
-                    <path d="M 45,24 27,14 27,34" fill="#fff"></path>
-                </svg>
-            `;
-
-            this.element.appendChild(thumbnail);
-            this.element.appendChild(playButton);
-
-            playButton.addEventListener('click', () => this.loadVideo());
-        }
-
-        loadVideo() {
-            const iframe = document.createElement('iframe');
-            iframe.src = `https://www.youtube-nocookie.com/embed/${this.videoId}?autoplay=1&rel=0`;
-            iframe.setAttribute('frameborder', '0');
-            iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
-            iframe.setAttribute('allowfullscreen', '');
-            iframe.className = 'youtube-iframe';
-
-            this.element.innerHTML = '';
-            this.element.appendChild(iframe);
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('.youtube-embed').forEach(element => {
-            new YouTubeEmbed(element);
-        });
+/* YouTube embed init (class in /js/youtubeEmbed.js) */
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.youtube-embed').forEach(element => {
+        new YouTubeEmbed(element);
     });
-})();
+});
 
 /* Image fade-in + caption rendering from alt text */
 (function() {
