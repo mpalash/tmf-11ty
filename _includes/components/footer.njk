@@ -1,7 +1,7 @@
 <footer>
     <a href="#" id="back-to-top"><img eleventy:ignore src="/img/icon-arrow-up.svg" alt="Back to top" width="24" height="24" /></a>
     <div>
-        <a href="/" class="home-link" title="{{ meta.siteName }}">
+        <a href="/" class="home-link" aria-label="{{ meta.title }}, home" title="{{ meta.siteName }}">
             <img eleventy:ignore src="{{ meta.footerLogo.url }}" alt="{{ meta.footerLogo.caption }}" width="{{ meta.footerLogo.width }}" height="{{ meta.footerLogo.height }}" />
         </a>
         {% for e in meta.emails %}
