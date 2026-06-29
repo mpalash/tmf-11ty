@@ -1,4 +1,0 @@
-# DEPRECATED: Vercel is the canonical host. This file is kept for reference only.
-[build]
-	publish = "_site"
-	command = "npm run build"

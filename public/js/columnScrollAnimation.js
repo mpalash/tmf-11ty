@@ -20,7 +20,6 @@
     },
     startTrigger: 'top 85%',   // When animation starts
     endTrigger: 'top 30%',     // When animation completes
-    debug: false,              // Show ScrollTrigger markers
     anticipatePin: 0
   };
 
@@ -65,23 +64,9 @@
           start: CONFIG.startTrigger,
           end: CONFIG.endTrigger,
           scrub: scrubValue,
-          markers: CONFIG.debug,
+          markers: false,
           id: `cols_3_scroll_${sectionIndex}`,
-          anticipatePin: CONFIG.anticipatePin,
-          
-          // Optional callbacks for debugging
-          onEnter: () => {
-            if (CONFIG.debug) console.log(`Section ${sectionIndex} entered`);
-          },
-          onLeave: () => {
-            if (CONFIG.debug) console.log(`Section ${sectionIndex} left`);
-          },
-          onEnterBack: () => {
-            if (CONFIG.debug) console.log(`Section ${sectionIndex} entered (backwards)`);
-          },
-          onLeaveBack: () => {
-            if (CONFIG.debug) console.log(`Section ${sectionIndex} left (backwards)`);
-          }
+          anticipatePin: CONFIG.anticipatePin
         }
       });
 
@@ -133,61 +118,11 @@
     });
   }
 
-  /**
-   * Update configuration at runtime
-   */
-  function updateConfig(newConfig) {
-    Object.assign(CONFIG, newConfig);
-    
-    // Kill existing ScrollTriggers
-    ScrollTrigger.getAll().forEach(trigger => {
-      if (trigger.vars.id && trigger.vars.id.startsWith('cols_3_scroll_')) {
-        trigger.kill();
-      }
-    });
-    
-    // Reinitialize
-    initScrollLinkedAnimations();
-  }
-
-  /**
-   * Change scrub mode on the fly
-   */
-  function setScrubMode(mode) {
-    if (CONFIG.scrubValues[mode]) {
-      updateConfig({ scrubMode: mode });
-    }
-  }
-
   // Initialize when DOM is ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initScrollLinkedAnimations);
   } else {
     initScrollLinkedAnimations();
   }
-
-  // Public API
-  window.ColumnScrollAnimation = {
-    config: CONFIG,
-    reinit: initScrollLinkedAnimations,
-    refresh: () => ScrollTrigger.refresh(),
-    updateConfig: updateConfig,
-    setScrubMode: setScrubMode,
-    
-    disable: () => {
-      ScrollTrigger.getAll().forEach(trigger => {
-        if (trigger.vars.id && trigger.vars.id.startsWith('cols_3_scroll_')) {
-          trigger.disable();
-        }
-      });
-    },
-    enable: () => {
-      ScrollTrigger.getAll().forEach(trigger => {
-        if (trigger.vars.id && trigger.vars.id.startsWith('cols_3_scroll_')) {
-          trigger.enable();
-        }
-      });
-    }
-  };
 
 })();
