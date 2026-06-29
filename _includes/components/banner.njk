@@ -1,14 +1,13 @@
 <div id="banner">
     <div class="marquee">
         <div class="marquee__track">
-            {# First copy is the readable, interactive one for screen readers. #}
+            {# First copy is the readable one for screen readers. #}
             <span class="marquee__text">{{ meta.banner | md | safe }}</span>
-            {# Visual duplicates for the seamless scroll: hidden from SR and made
-               non-focusable via `inert` (so any links inside aren't tabbable —
-               aria-hidden must not contain focusable elements). #}
-            <span class="marquee__text" aria-hidden="true" inert>{{ meta.banner | md | safe }}</span>
-            <span class="marquee__text" aria-hidden="true" inert>{{ meta.banner | md | safe }}</span>
-            <span class="marquee__text" aria-hidden="true" inert>{{ meta.banner | md | safe }}</span>
+            {# Visual duplicates for the seamless scroll: hidden from SR via
+               aria-hidden but left clickable (no inert). #}
+            <span class="marquee__text" aria-hidden="true">{{ meta.banner | md | safe }}</span>
+            <span class="marquee__text" aria-hidden="true">{{ meta.banner | md | safe }}</span>
+            <span class="marquee__text" aria-hidden="true">{{ meta.banner | md | safe }}</span>
         </div>
     </div>
 </div>
