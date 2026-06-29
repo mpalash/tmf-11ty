@@ -139,6 +139,10 @@ header {
 
             a {
                 font-size: var(--fs-md);
+                // Touch-target minimum (WCAG 2.5.5) — mobile dropdown only.
+                min-height: 44px;
+                display: flex;
+                align-items: center;
             }
         }
 

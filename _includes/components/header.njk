@@ -13,7 +13,7 @@
                 {% include "components/headerFooterLinkButton.njk" %}
             {% endfor %}
             <li class="nav-item">
-                <a href="/search/" title="Search site" {% if permalink == '/search/' %}aria-current="page"{% endif %}>
+                <a href="/search/" title="Search site" aria-label="Search" {% if permalink == '/search/' %}aria-current="page"{% endif %}>
                     <img eleventy:ignore class="icon search" src="/img/icon-search.svg" alt="" width="24" height="24" />
                     <span>Search</span>
                 </a>

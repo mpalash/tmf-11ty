@@ -20,6 +20,14 @@ footer {
         right: var(--s-l);
         padding: 0;
         z-index: 10;
+        // Touch-target minimum (WCAG 2.5.5). Absolutely positioned, so this
+        // expands the hit area without affecting layout; the icon stays pinned
+        // to the top-right corner (its original position).
+        min-width: 44px;
+        min-height: 44px;
+        display: flex;
+        align-items: flex-start;
+        justify-content: flex-end;
 
         img {
             width: var(--s-m);
