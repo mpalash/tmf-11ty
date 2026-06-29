@@ -32,6 +32,7 @@ export default async function(eleventyConfig) {
 					this.config.dir.sass,
 					path.dirname(inputPath)
 				],
+				style: isDev ? "expanded" : "compressed",
 				sourceMap: isDev
 			});
 
@@ -122,45 +123,50 @@ export default async function(eleventyConfig) {
 		return (new Date()).toISOString();
 	});
 
-	// Minify JS in production builds
+	// Single post-build hook: (1) minify JS in production, then (2) build the
+	// Pagefind index.
 	eleventyConfig.on('eleventy.after', async () => {
-		if (process.env.NODE_ENV !== 'production') return;
+		const isProd = process.env.NODE_ENV === 'production';
 
-		async function minifyDir(dir, { module = false } = {}) {
-			if (!fs.existsSync(dir)) return;
-			const files = fs.readdirSync(dir).filter(f => f.endsWith('.js') && !f.endsWith('.min.js'));
-			for (const file of files) {
-				const filePath = path.join(dir, file);
-				const code = fs.readFileSync(filePath, 'utf-8');
-				const result = await minify(code, {
-					module,
-					compress: { drop_console: true },
-					mangle: true
-				});
-				if (result.code) {
-					fs.writeFileSync(filePath, result.code);
+		// 1. Minify JS in production builds.
+		if (isProd) {
+			async function minifyDir(dir, { module = false } = {}) {
+				if (!fs.existsSync(dir)) return;
+				const files = fs.readdirSync(dir).filter(f => f.endsWith('.js') && !f.endsWith('.min.js'));
+				for (const file of files) {
+					const filePath = path.join(dir, file);
+					const code = fs.readFileSync(filePath, 'utf-8');
+					const result = await minify(code, {
+						module,
+						compress: { drop_console: true },
+						mangle: true
+					});
+					if (result.code) {
+						fs.writeFileSync(filePath, result.code);
+					}
 				}
 			}
+
+			// Global classic scripts (loaded via <script defer src>).
+			await minifyDir(path.join('_site', 'js'));
+			// Per-page bundles (loaded via <script type="module">; use ES imports).
+			await minifyDir(path.join('_site', 'dist'), { module: true });
 		}
 
-		// Global classic scripts (loaded via <script defer src>).
-		await minifyDir(path.join('_site', 'js'));
-		// Per-page bundles (loaded via <script type="module">; use ES imports).
-		await minifyDir(path.join('_site', 'dist'), { module: true });
-	});
-
-	// Build the Pagefind index from the rendered HTML (replaces fuse + the
-	// monolithic search-index.json). Runs in both dev and prod so /pagefind/ is
-	// available on the dev server too. Indexes only [data-pagefind-body] regions.
-	eleventyConfig.on('eleventy.after', async () => {
-		const outDir = path.join('_site', 'pagefind');
-		// writeFiles() does not prune stale files; clear first so content-hashed
-		// fragments from previous builds don't accumulate (esp. on the dev server).
-		fs.rmSync(outDir, { recursive: true, force: true });
-		const { index } = await pagefind.createIndex();
-		await index.addDirectory({ path: '_site' });
-		await index.writeFiles({ outputPath: outDir });
-		await pagefind.close();
+		// 2. Build the Pagefind index from the rendered HTML (replaces fuse + the
+		// monolithic search-index.json). Indexes only [data-pagefind-body] regions.
+		// Skipped on the dev server (it's an expensive WASM pass on every rebuild)
+		// unless PAGEFIND=1 is set — use `PAGEFIND=1 npm start` to test search in dev.
+		if (isProd || process.env.PAGEFIND === '1') {
+			const outDir = path.join('_site', 'pagefind');
+			// writeFiles() does not prune stale files; clear first so content-hashed
+			// fragments from previous builds don't accumulate.
+			fs.rmSync(outDir, { recursive: true, force: true });
+			const { index } = await pagefind.createIndex();
+			await index.addDirectory({ path: '_site' });
+			await index.writeFiles({ outputPath: outDir });
+			await pagefind.close();
+		}
 	});
 
 	// Features to make your build faster (when you need them)
