@@ -20,11 +20,18 @@
 
   gsap.registerPlugin(ScrollTrigger);
 
+  const PRM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const DEFAULT_COLOR = '#ffffff';
 
   function init() {
     const sections = gsap.utils.toArray('[data-bg-color]');
     if (sections.length === 0) return;
+
+    // Reduced motion: keep the body at the default color, no scroll-scrubbed tween.
+    if (PRM) {
+      gsap.set(document.body, { backgroundColor: DEFAULT_COLOR });
+      return;
+    }
 
     // Start at the default color; each section tweens from the previous color.
     gsap.set(document.body, { backgroundColor: DEFAULT_COLOR });

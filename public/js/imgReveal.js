@@ -9,11 +9,28 @@
 (function() {
   'use strict';
 
+  const PRM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   function init() {
     if (typeof gsap === 'undefined') return;
 
     const containers = document.querySelectorAll('main .image-wrapper .image');
     if (containers.length === 0) return;
+
+    // Reduced motion: reveal every image immediately, no clip-path animation.
+    if (PRM) {
+      containers.forEach(function(container) {
+        const wrapper = container.querySelector('.image-reveal-wrapper');
+        if (!wrapper) return;
+        const img = wrapper.querySelector('img');
+        if (!img) return;
+        if (img.loading === 'lazy') img.loading = 'eager';
+        gsap.set(wrapper, { clipPath: 'inset(0 0% 0 0)' });
+        gsap.set(img, { opacity: 1, scale: 1 });
+        container.dataset.revealed = 'true';
+      });
+      return;
+    }
 
     // Initial hidden state: wrapper clipped, image faded + slightly scaled.
     containers.forEach(function(container) {

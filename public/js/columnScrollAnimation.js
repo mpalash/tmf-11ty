@@ -7,6 +7,8 @@
 (function() {
   'use strict';
 
+  const PRM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   // Configuration
   const CONFIG = {
     slideDistance: 256,        // Distance to slide up from (pixels)
@@ -56,6 +58,12 @@
       // Remove data-animate to prevent conflicts
       section.removeAttribute('data-animate');
       columns.forEach(col => col.removeAttribute('data-animate'));
+
+      // Reduced motion: show columns in place, skip the scroll-linked slide-up.
+      if (PRM) {
+        gsap.set(columns, { opacity: 1, y: 0 });
+        return;
+      }
 
       // Create scroll-linked timeline
       const timeline = gsap.timeline({

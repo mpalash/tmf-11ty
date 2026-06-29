@@ -117,6 +117,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 /* GSAP Accordion — a reusable accordion with smooth animations */
 (function() {
+    const PRM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     class Accordion {
         constructor(element, options = {}) {
             this.accordion = element;
@@ -126,6 +128,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 openFirst: options.openFirst !== false, // true by default
                 ...options
             };
+            // Reduced motion: collapse/expand instantly (no height/opacity tween).
+            if (PRM) this.options.duration = 0;
 
             this.items = Array.from(this.accordion.querySelectorAll('.accordion-item'));
             this.headers = Array.from(this.accordion.querySelectorAll('.accordion-header'));

@@ -130,6 +130,8 @@
 (function() {
     'use strict';
 
+    const PRM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     const CONFIG = {
         OFFSET_X: 30,
         OFFSET_Y: -180,
@@ -139,6 +141,13 @@
         SHOW_EASE: 'power2.out',
         HIDE_EASE: 'power2.out'
     };
+
+    // Reduced motion: show/hide the poster instantly, no fade/scale tween.
+    if (PRM) {
+        CONFIG.SHOW_DELAY = 0;
+        CONFIG.SHOW_DURATION = 0;
+        CONFIG.HIDE_DURATION = 0;
+    }
 
     let posterThumbnail;
     let posterImg;

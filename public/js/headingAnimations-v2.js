@@ -6,6 +6,8 @@
 (function() {
   'use strict';
 
+  const PRM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   // Configuration
   const CONFIG = {
     // Global randomization setting
@@ -196,6 +198,15 @@
     const allElements = [...headings, ...heroParagraphs];
 
     if (allElements.length === 0) return;
+
+    // Reduced motion: show final state immediately, skip the blur-focus reveal.
+    if (PRM) {
+      allElements.forEach(element => {
+        if (element.dataset.noAnimate !== undefined) return;
+        element.classList.add('heading-animate', 'animated');
+      });
+      return;
+    }
 
     // Create observer
     const observer = new IntersectionObserver(onIntersect, CONFIG.observerOptions);
