@@ -1,97 +1,64 @@
 <header>
-    <a href="/" class="home-link" title="{{ meta.siteName }}">
-        <img eleventy:ignore src="{{ meta.headerLogo.url }}" alt="{{ meta.headerLogo.caption }}" />
+    <a href="/" class="home-link" aria-label="{{ meta.title }}, home" title="{{ meta.siteName }}">
+        <img eleventy:ignore src="{{ meta.headerLogo.url }}" alt="{{ meta.headerLogo.caption }}" width="{{ meta.headerLogo.width }}" height="{{ meta.headerLogo.height }}" />
     </a>
-    <a class="toggle-nav" href="#">
-        <img eleventy:ignore class="icon menu" src="/img/icon-menu.svg" />
-        <img eleventy:ignore class="icon close" src="/img/icon-close.svg" />
-    </a>
-    <nav>
+    <button type="button" class="toggle-nav" aria-expanded="false" aria-controls="primary-nav" aria-label="Toggle navigation">
+        <img eleventy:ignore class="icon menu" src="/img/icon-menu.svg" alt="Open menu" width="24" height="24" />
+        <img eleventy:ignore class="icon close" src="/img/icon-close.svg" alt="Close" width="24" height="24" />
+    </button>
+    <nav id="primary-nav">
         <h2 class="visually-hidden">Top level navigation menu</h2>
         <ul class="nav">
             {% for l in meta.headerNavLinks %}
                 {% include "components/headerFooterLinkButton.njk" %}
             {% endfor %}
             <li class="nav-item">
-                <a href="/search/" title="Search site" {% if permalink == '/search/' %}aria-current="page"{% endif %}>
-                    <img eleventy:ignore class="icon search" src="/img/icon-search.svg" />
+                <a href="/search/" title="Search site" aria-label="Search" {% if permalink == '/search/' %}aria-current="page"{% endif %}>
+                    <img eleventy:ignore class="icon search" src="/img/icon-search.svg" alt="" width="24" height="24" />
                     <span>Search</span>
                 </a>
             </li>
         </ul>
     </nav>
 </header>
-<script>
-    const body = document.querySelector('body');
-    const toggleNav = document.querySelector('a.toggle-nav');
+<div class="header-sentinel" aria-hidden="true"></div>
+{% js %}
+(function() {
+    const toggleNav = document.querySelector('.toggle-nav');
     const nav = document.querySelector('nav');
 
-    toggleNav.addEventListener('click', (e) => {
-        e.preventDefault();
-        nav.classList.toggle('active');
-        toggleNav.classList.toggle('active');
-        // body.classList.toggle('disable-scroll');
-    });
-
-    class ScrollHeaderController {
-        constructor(options = {}) {
-            this.options = {
-                header: document.querySelector('header'),
-                hiddenClass: 'header-hidden',
-                visibleClass: 'header-visible',
-                ...options
-            };
-
-            // Initial state
-            this.lastScrollY = window.scrollY;
-            this.handleScroll = this.handleScroll.bind(this);
-            this.init();
-        }
-
-        init() {
-            this.options.header.classList.add(this.options.visibleClass);            
-            window.addEventListener('scroll', this.handleScroll, { passive: true });
-        }
-
-        handleScroll() {
-            const currentScrollY = window.scrollY;
-
-            // Always show header when scrolled to top
-            if (currentScrollY < 100) {
-                this.options.header.classList.remove(this.options.hiddenClass);
-                this.options.header.classList.add(this.options.visibleClass);
-                this.lastScrollY = currentScrollY;
-                return;
-            }
-            
-            // Determine scroll direction and update immediately
-            if (currentScrollY > this.lastScrollY) {
-                // Scrolling down - hide header
-                if (!this.options.header.classList.contains(this.options.hiddenClass)) {
-                    this.options.header.classList.remove(this.options.visibleClass);
-                    this.options.header.classList.add(this.options.hiddenClass);
-                }
-            } else if (currentScrollY < this.lastScrollY) {
-                // Scrolling up - show header
-                if (!this.options.header.classList.contains(this.options.visibleClass)) {
-                    this.options.header.classList.remove(this.options.hiddenClass);
-                    this.options.header.classList.add(this.options.visibleClass);
-                }
-            }
-
-            this.lastScrollY = currentScrollY;
-        }
-
-        destroy() {
-            window.removeEventListener('scroll', this.handleScroll);
-            this.options.header.classList.remove(this.options.hiddenClass);
-            this.options.header.classList.remove(this.options.visibleClass);
-        }
+    if (toggleNav && nav) {
+        toggleNav.addEventListener('click', () => {
+            nav.classList.toggle('active');
+            toggleNav.classList.toggle('active');
+            toggleNav.setAttribute('aria-expanded', nav.classList.contains('active') ? 'true' : 'false');
+        });
     }
 
-    const header = new ScrollHeaderController({
-        header: document.querySelector('header'),
-        hiddenClass: 'hidden',
-        visibleClass: 'visible',
-    });
-</script>
+    // Header hide/show via a sentinel placed just below the header. When the
+    // sentinel scrolls off-screen the header hides; when it returns, it shows.
+    // Replaces the per-scroll-event ScrollHeaderController listener.
+    const header = document.querySelector('header');
+    const sentinel = document.querySelector('.header-sentinel');
+
+    if (header && sentinel && 'IntersectionObserver' in window) {
+        header.classList.add('visible');
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    header.classList.remove('hidden');
+                    header.classList.add('visible');
+                } else {
+                    header.classList.remove('visible');
+                    header.classList.add('hidden');
+                }
+            });
+        });
+
+        observer.observe(sentinel);
+    } else if (header) {
+        header.classList.add('visible');
+    }
+})();
+{% endjs %}

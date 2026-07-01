@@ -21,6 +21,7 @@ _includes/
   components/      # Nunjucks partials (hero, header, footer, etc.)
   scss/            # SCSS partials (prefixed with _)
 _data/             # Data files (fetch from Hygraph CMS via GraphQL)
+  _lib/hygraph.js  # Shared fetchHygraph() helper (env, POST, TTL cache, debug) + shared GraphQL snippets
   meta.js          # Site metadata, nav links, SEO defaults
   pages.js         # CMS pages
   events.js        # CMS events
@@ -36,7 +37,9 @@ eleventy.config.js # Eleventy configuration
 ```
 
 ## Data Flow
-Hygraph CMS (GraphQL API) → `_data/*.js` fetch at build time → Nunjucks templates render HTML → Eleventy outputs to `_site/`
+Hygraph CMS (GraphQL API) → `_data/_lib/hygraph.js` `fetchHygraph()` (TTL-cached via `@11ty/eleventy-fetch`) → `_data/*.js` (query + post-processing) → Nunjucks templates render HTML → Eleventy outputs to `_site/`
+
+Each `_data/*.js` file is a thin wrapper: a GraphQL query string + a `fetchHygraph(query, label)` call + post-processing (e.g. events sort, meta fallback). The helper handles env vars, the POST, error handling, debug logging, and caching. Responses are cached in `.cache/` keyed on the query body — distinct queries cache separately. Cache duration: **1h in dev** (warm rebuilds skip the CMS network entirely), **0s in production** (always fresh); override with `GRAPH_CACHE_DURATION` (e.g. `0s`, `5m`, `1d`). Shared GraphQL snippets (`dest`, `seoImage`) are exported from `hygraph.js` to DRY the queries.
 
 ## Key Conventions
 - **SCSS**: Partials prefixed with `_`, imported via `@use` in `styles.scss`. Design tokens are CSS custom properties defined in `_variables.scss`.
@@ -47,24 +50,39 @@ Hygraph CMS (GraphQL API) → `_data/*.js` fetch at build time → Nunjucks temp
 - **Fonts**: Adobe Typekit (peridot-pe-variable) loaded via `<link>` in head-seo.njk with `preconnect`.
 
 ## Active JavaScript Files
-| File | Loaded In | Purpose |
-|------|-----------|---------|
-| `heroReveal.js` | base.njk (global) | Hero video mask reveal + reduced-motion |
-| `smoothScroll.js` | base.njk (global) | Lenis smooth scrolling init |
-| `bgColorTransitionSmooth.js` | base.njk (global) | GSAP-based section bg color transitions |
-| `headingAnimations-v2.js` | base.njk (global) | Blur-focus heading reveal animations |
-| `imgReveal.js` | base.njk (global) | Image clip-path reveal on scroll |
-| `columnScrollAnimation.js` | base.njk (global) | Column stagger animations |
-| `accordion.js` | events.njk | Accordion toggle for event details |
-| `youtube-embed.js` | events.njk | Lazy YouTube embed |
-| `imgFadeIn.js` | events.njk | Image fade-in on load |
-| `eventStatus.js` | eventsList.njk | Past/upcoming badge logic |
-| `eventPosterHover.js` | eventsList.njk | Poster thumbnail hover reveal |
-| `gallery.js` | (loaded per-page) | Image gallery lightbox |
+
+### Global scripts (separate files in `public/js/`, loaded via `<script defer>` in base.njk)
+| File | Purpose |
+|------|---------|
+| `heroReveal.js` | Hero video mask reveal + reduced-motion |
+| `smoothScroll.js` | Lenis init — the **single scroll source of truth** (`lenis.on('scroll', ScrollTrigger.update)` drives all ScrollTriggers; `gsap.ticker` drives `lenis.raf`) |
+| `bgColorTransitionSmooth.js` | Section bg-color via scrubbed GSAP ScrollTrigger tweens on `body.backgroundColor` (Phase H2 — no per-frame ticker) |
+| `headingAnimations-v2.js` | Blur-focus heading reveal animations |
+| `imgReveal.js` | IntersectionObserver + GSAP clip-path reveal only; markup/sizing emitted at build time by `components/imageReveal.njk` (Phase H1) |
+| `columnScrollAnimation.js` | Column stagger animations |
+
+### Per-page logic (inlined into `{% js %}` blocks, see Phase E)
+| Logic | Template | Purpose |
+|-------|----------|---------|
+| Accordion | `events.njk` | Class in `_includes/js/accordion.js` (ESM), `import`ed by the bundle + init in `events.njk` (Phase 5) |
+| YouTube embed | `events.njk` | Class in `_includes/js/youtubeEmbed.js` (ESM), `import`ed by the bundle + init in `events.njk` (Phase 5) |
+| Image fade-in | `events.njk` | Image fade-in + caption from alt |
+| Parvus lightbox | `events.njk` | Image lightbox (`import` of vendor ESM) |
+| Event status | `eventsList.njk` | Past/upcoming/ongoing badge logic |
+| Poster hover | `eventsList.njk` | Poster thumbnail hover reveal (GSAP) |
+| Marquee | `banner.njk` | CSS animation (`_banner.scss` `.marquee__track`); no JS (was GSAP) |
+| Nav toggle + header sentinel | `header.njk` | Mobile nav + IntersectionObserver header hide/show via `.header-sentinel` (Phase H3) |
+| Back-to-top | `footer.njk` | Smooth scroll to top |
+| Subscribe form | `subscribe.njk` | Async newsletter form submit |
+| Site search | `search.njk` | Pagefind incremental search (dynamic `import('/pagefind/pagefind.js')`, Phase: pagefind migration) |
 
 ### Script Loading Rules
-- **Global scripts** (base.njk): Use `defer`. They appear after GSAP CDN scripts in the HTML, so execution order is correct.
-- **Per-page scripts** (events.njk, eventsList.njk): Do **NOT** use `defer`. These appear inside `{{ content | safe }}` which renders before the GSAP CDN scripts. Without `defer`, they execute during HTML parsing when `document.readyState === 'loading'`, so their `DOMContentLoaded` listeners fire after all `defer` scripts (including GSAP) have completed.
+- **Global scripts** (base.njk): separate `public/js/*.js` files loaded via `<script defer>`.
+- **Per-page scripts** (Phase E): inlined into `{% js %}{% endjs %}` paired shortcodes and bundled by `eleventy-plugin-bundle` into **one hashed module per page**, emitted to `_site/dist/` and loaded via `<script type="module" src="{% getBundleFileUrl 'js' %}">`.
+  - The module `<script>` tag is placed **after** the deferred GSAP/animation scripts in base.njk. Module scripts are deferred and execute in document order, so this guarantees GSAP has loaded before the bundle runs — important because some IIFEs call their `init()` immediately (when `readyState !== 'loading'`) and bail if `gsap` is undefined.
+  - Each moved script is wrapped in an IIFE (or was already one) so top-level declarations don't collide when all `{% js %}` blocks on a page concatenate into a single module.
+  - Vendor lib Parvus is pulled in via top-level ES `import` from the passthrough-copied ESM build (`/js/parvus.esm.min.js`). Search uses Pagefind via a runtime dynamic `import('/pagefind/pagefind.js')` (generated post-build, see below).
+  - Production: the `eleventy.after` terser hook minifies both `_site/js/` (script mode) and `_site/dist/` (module mode, preserves `import`).
 
 ## Video Masking Technique (Hero Section)
 **Files**: `_includes/components/hero.njk`, `_includes/scss/_hero.scss`, `public/vid/vidMask_lo.mp4`
@@ -89,9 +107,10 @@ Hygraph CMS (GraphQL API) → `_data/*.js` fetch at build time → Nunjucks temp
 
 ## Environment Variables
 ```
-GRAPH_TOKEN=   # Hygraph API bearer token
-GRAPH_PATH=    # Hygraph GraphQL endpoint URL
-ROOT_URL=      # Site URL override (optional)
+GRAPH_TOKEN=            # Hygraph API bearer token
+GRAPH_PATH=             # Hygraph GraphQL endpoint URL
+ROOT_URL=               # Site URL override (optional)
+GRAPH_CACHE_DURATION=   # Optional eleventy-fetch TTL override (e.g. 0s, 5m, 1h, 1d). Default: 1h dev / 0s prod
 ```
 
 ## Worktree / Fresh Clone Setup
@@ -124,6 +143,30 @@ At the end of each Claude Code session, update this file with:
 
 This ensures mistakes are not repeated and learning is iterative across sessions.
 
+## Phase B — Accessibility (COMPLETE)
+
+### SCSS edits — DONE
+- `_accordion.scss` — added `.accordion-header` button reset (border/bg/padding/font/cursor/width)
+- `_header.scss` — added button resets to `.toggle-nav` block
+- `_events.scss` — `li a` selector expanded to `li a, .accordion-header`; `.all-event-details li a` changed to `.all-event-details li .accordion-header`
+- `_typography.scss` — `h1::before { animation }` wrapped in `@media (prefers-reduced-motion: no-preference)`
+
+### Template/JS edits — DONE
+
+- **B1** `content/events.njk`: accordion `<a class="accordion-header">` → `<button type="button" ... aria-expanded="false" aria-controls="accordion-panel-{{ detailIdx }}">` ; `<div class="accordion-content">` → `<div class="accordion-content" id="accordion-panel-{{ detailIdx }}">`
+- **B2** `_includes/components/header.njk`: hamburger `<a class="toggle-nav">` → `<button type="button" ... aria-expanded="false" aria-controls="primary-nav" aria-label="Toggle navigation">` ; `<nav>` → `<nav id="primary-nav">` ; inline script updated: querySelector uses `.toggle-nav`, removed `e.preventDefault()`, added `aria-expanded` toggle after class toggle
+- **B3** Icon alt text: `header.njk` icons (`Open menu`, `Close`, `""`) ; `events.njk` expand/collapse (`Expand`, `Collapse`) ; `search.njk` clear icon (`Clear search`)
+- **B4** `content/search.njk`: `<label for="search-input" class="visually-hidden">Search the site</label>` added before input
+- **B5** Already done (typography SCSS)
+- **B6** width/height on all icon/logo `<img>` tags: logos use CMS dimensions (`meta.headerLogo.width/height`, `meta.footerLogo.width/height`); icons use `width="24" height="24"`; expand/collapse use `width="64" height="64"`
+- **B7** `content/events.njk` lightbox: `aria-label="View image: {{ i.caption }}"` added to each `<a class="lightbox">`
+- **B8** Contrast fix: `.image-caption` changed from `var(--grey-500)` (#838178, 3.91:1 FAIL) to `var(--grey-600)` (#5f5e57, ~5.9:1 PASS AA) in `_globals.scss`. Other `--grey-500` usages (`_parvus.scss`, `_timelines.scss`) are on dark backgrounds and were not changed.
+
+### Key architectural note
+The `.accordion-header` SCSS reset is in `_accordion.scss`. The grid layout styling the header row comes from `_events.scss`. Both must be present for the button to look correct. `accordion.js` `e.preventDefault()` removed (was needed for `<a>`, no-op on `<button>`).
+
+---
+
 ## Change Log
 - **2026-03-02**: Initial CLAUDE.md created. Codebase audit completed:
   - Fixed CSS syntax error (`_globals.scss:183` missing comma in selector list)
@@ -152,3 +195,120 @@ This ensures mistakes are not repeated and learning is iterative across sessions
   - Added `terser` as devDependency for production JS minification
   - Added `eleventy.after` event in `eleventy.config.js` — minifies all JS files in `_site/js/` during production builds with `drop_console: true` (strips any remaining console calls)
   - New file: `public/js/heroReveal.js` — hero video mask reveal logic
+- **2026-06-28**: Phase A refactors (Steps 1–10) and Phase B SCSS (partial):
+  - Step 1: Hoisted `markdownIt` instance to module scope in `_config/filters.js` — gotcha: the `quotes` string `'""'''` uses Unicode curly quotes as content (U+201C/D/18/19) with ASCII `'` (U+0027) as JS string delimiters; Edit tool replaced delimiters with curly variants causing SyntaxError; fixed via Python byte-level replacement
+  - Step 2: Removed `import fetch from 'node-fetch'` from all four `_data/*.js` files; Node ≥18 global `fetch` takes over; `package.json` untouched
+  - Step 3: Removed `checkAndInit` polling loop from `headingAnimations-v2.js`; DOMContentLoaded now calls `init()` directly; `typeof gsap === 'undefined'` guard retained
+  - Step 4: Extracted `buildColorStops(sections, colorStops)` in `bgColorTransitionSmooth.js` — mutates array in-place so GSAP ticker keeps live reference; resize handler reduced to single call
+  - Step 5: Removed `maximum-scale=1.0` from viewport meta in `head-seo.njk` (WCAG 1.4.4)
+  - Step 6: `.DS_Store` already in `.gitignore` — no-op
+  - Step 7: `@media (max-width: 1024px)` in `_variables.scss` trimmed from 10 tokens to 2 (only `--s-xxxl` and `--s-xxl` actually differ)
+  - Step 8: New file `_includes/scss/_breakpoints.scss` — `@mixin bp($name)` with sm/tablet/mid/desktop/wide breakpoints; `@use 'breakpoints' as *` added to `styles.scss`; no CSS output change (mixin unused)
+  - Step 9: `.visually-hidden:focus, .visually-hidden:focus-visible` added to `_reset.scss` — skip link at `base.njk:9` and `<main id="skip">` at line 14 already exist
+  - Step 10: Input `:focus-visible` split from `:active, :focus` in `_globals.scss`; `box-shadow: 0 0 0 2px var(--sky-300)` added to `:focus-visible` only
+  - Phase B SCSS: accordion-header button reset (`_accordion.scss`), toggle-nav button reset (`_header.scss`), `a`→`.accordion-header` selectors in `_events.scss`, `prefers-reduced-motion` guard on `h1::before` animation (`_typography.scss`) — all built and verified
+- **2026-06-28 (continued)**: Phase B template/JS edits (B1–B7) completed, build verified:
+  - `events.njk`: accordion `<a>` → `<button>` with `aria-expanded`/`aria-controls`; panel `id` added; lightbox `aria-label` added; expand/collapse icons got `alt` + dimensions
+  - `header.njk`: hamburger `<a>` → `<button>` with `aria-expanded`/`aria-controls`/`aria-label`; `<nav id="primary-nav">`; script updated (selector, removed `e.preventDefault()`, added `aria-expanded` toggle); logo + icon `width`/`height` added
+  - `search.njk`: visually-hidden label added; clear icon `alt` + dimensions added
+  - `footer.njk`: logo + back-to-top icon `width`/`height` added
+  - `accordion.js`: removed `e.preventDefault()` (no-op on `<button>`)
+- **2026-06-28 (continued)**: Phase C build & structure cleanups completed:
+  - C1: `--color-grey-light: var(--grey-50)` and `--border-major: 1px solid var(--grey-200)` added to `_variables.scss` — resolves undefined token refs in `_modal.scss`
+  - C2: `body:after` → `body.debug:after` in `_debug.scss` — grid overlay now opt-in only
+  - C3: `_heading-animations.scss` — extracted `@mixin heading-animate-words` for `.word`/`.animated .word` rules; three duplicate selector pairs collapsed to two nested blocks; CSS output identical
+  - C4: `search-index.njk` pages loop — trailing comma now conditional: `{%- if not loop.last or timelines | length > 0 -%},{%- endif -%}`; output JSON always valid
+  - C5: `metadata.language` and `metadata.url` merged into `meta.js` (added to both CMS success path and fallback); `base.njk` and `sitemap.xml.njk` updated to use `meta.*`; `_data/metadata.js` deleted
+  - C6: Vercel confirmed as canonical host; deprecation comment added to `netlify.toml`
+  - C7: `test-markup.njk` and `subscribe-netlify.njk` marked with `{# INACTIVE: ... #}` header comments
+  - C8: Parvus wired from `node_modules/parvus/dist/js/parvus.esm.min.js` (passthrough copy to `js/parvus.esm.min.js`); `events.njk` now uses `{% js %}` bundle with `import Parvus from '/js/parvus.esm.min.js'` + init — no separate `<script>` tag; `public/js/parvus.min.js` retained on disk
+- **2026-06-28 (continued)**: Phase D performance: third-party & asset pipeline:
+  - D1: Lenis `<script>` moved to `<body>` footer with `defer`, placed before `smoothScroll.js`; Lenis CSS converted to non-blocking `<link rel="preload" as="style" onload="this.rel='stylesheet'">` with `<noscript>` fallback
+  - D2: GSAP + Lenis + animation scripts wrapped in `{% if usesAnimations != false %}` in `base.njk`; `content/search.njk` opts out with `usesAnimations: false` in front matter — saves ~300KB of scripts on the search page
+  - D3: `fuse.js@6.6.2` installed; `node_modules/fuse.js/dist/fuse.min.js` added to passthrough copy as `js/fuse.min.js`; CDN reference in `search.njk` replaced with `/js/fuse.min.js`
+  - D4: Typekit `<link rel="stylesheet">` → `<link rel="preload" as="style" onload="...">` with `<noscript>` fallback in `head-seo.njk` — no longer render-blocking
+  - D5: GTM `<script async>` + inline `gtag` config moved from `<head>` to end of `<body>` in `base.njk`; external script now uses `defer` instead of `async`
+  - D6: `vidMask_lo.webm` encoded via ffmpeg VP9 (198KB vs 603KB MP4 — 67% smaller); `hero.njk` serves WebM first, MP4 as fallback
+  - D7: Already done — Eleventy Image Transform plugin converts all `<img>` tags to `<picture>` with AVIF/WebP; hero preserves `loading="eager"`, `decoding="sync"`, `fetchpriority="high"`
+  - D8: `lossless: true` removed from `eleventyImageTransformPlugin` `sharpOptions`
+  - D9: `widths` updated to `[400, 600, 800, 1200, 1600, "auto"]`; all images now generate 400w/600w variants for mobile
+  - D10: Already done — Eleventy Image Transform plugin already processes event thumbnail `<img>` tags into `<picture>` elements
+- **2026-06-28 (continued)**: Phase E per-page script bundling (E1):
+  - Migrated all per-page `<script>` tags into `{% js %}{% endjs %}` paired shortcodes across `events.njk`, `eventsList.njk`, `subscribe.njk`, `banner.njk`, `header.njk`, `footer.njk`, `search.njk`. Eleventy now emits one hashed module per page to `_site/dist/` (loaded by the existing `{% getBundleFileUrl "js" %}` in `base.njk`).
+  - Moved the `<script type="module">` bundle tag in `base.njk` to **after** the deferred GSAP/animation scripts — guarantees GSAP is loaded before the bundle module runs (module scripts are deferred and execute in document order). This fixes the timing hazard for IIFEs that call `init()` immediately when `readyState !== 'loading'` and bail if `gsap` is undefined (e.g. poster hover).
+  - Wrapped previously-top-level scripts (accordion/youtube classes in `events.njk`, `header.njk` consts/class, `footer.njk`, `subscribe.njk`) in IIFEs so declarations don't collide when all `{% js %}` blocks on a page concatenate into one module. Added null guards to `subscribe`/`footer`. Already-IIFE scripts (marquee, imgFadeIn, eventStatus, eventPosterHover) moved as-is.
+  - Inlined and deleted the now-redundant first-party files: `public/js/{accordion,youtube-embed,imgFadeIn,eventStatus,eventPosterHover}.js`.
+  - `search.njk` now uses `import Fuse from '/js/fuse.esm.min.js'` (the ESM build) instead of the UMD `<script src>` — a UMD bundled into a module breaks (`this` is `undefined` at module top level). Passthrough switched from `fuse.min.js` → `fuse.esm.min.js` in `eleventy.config.js`.
+  - Extended the production `eleventy.after` terser hook to also minify `_site/dist/` in **module mode** (preserves `import` statements); `_site/js/` still minified in script mode.
+  - Verified: clean production build passes; 13/13 pages get exactly one `/dist/*.js` module; bundles minified with imports intact; zero dangling references to removed files; accordion/search/eventStatus/posterHover/subscribe/marquee/header-scroll/back-to-top all wired through the bundle. The "Per-page scripts must NOT use defer" rule is obsolete and was replaced in the Script Loading Rules section above.
+- **2026-06-29**: Phase F — CMS data layer (F1–F4):
+  - F1: new `_data/_lib/hygraph.js` exports `fetchHygraph(query, label)` (env-var loading via dotenv, POST, error handling, debug logging) plus `debug`, `rootURL`, and shared GraphQL snippets `dest` (LinkButton destination union) and `seoImage` (SEO block, jmd only). Each `_data/*.js` is now query string + helper call + post-processing: meta 55, events 59, pages 36, timelines 36 lines (were 175/179/153/133).
+  - F2: requests wrapped in `@11ty/eleventy-fetch` (`type:'json'`, `fetchOptions` POST). Cache key includes the POST `body` (RemoteAssetCache.js:52) so the four same-URL queries cache separately under `.cache/`. Duration: `1h` dev / `0s` prod, overridable via `GRAPH_CACHE_DURATION`. Warm dev rebuild drops CMS fetch from 60–240ms to 0–1ms (build 8.4s → 0.6s).
+  - F3: removed the dev-only `isDevelopment ? mutate+_timestamp : passthrough` wrapper (and per-file dotenv/isDevelopment/debug boilerplate). `_timestamp` was set but never read by any template.
+  - F4: trimmed only fields with no current or anticipated use. Dropped `jlg`/`url`/`caption` from `seo.image` (head-seo reads only `.jmd`); removed duplicate `mimeType`s; reduced oversized `first:` counts (events/pages 100→50, timelines 100→25, gallery/content 100→50). Image `mimeType`/`height`/`width` are **retained on all images** (incl. `seo.image`), and `googleMapsUrl`, `gallery.notes`, `dates.dateTimeDisplay` are **retained** — kept by request for likely future use even though no template references them yet.
+  - Gotcha: timeline hero `destination` intentionally omits `__typename` (original did too) — it can't reuse the shared `dest` snippet, kept inline. Adding `__typename` could activate a dormant linkButton branch and change output.
+  - Verified byte-identical: production build's `search-index.json` and `sitemap.xml` are exact-hash matches; all 13 HTML pages differ only in the per-build `currentBuildDate` comment. `.cache` and `.env` already gitignored.
+- **2026-06-29**: Phase H — scroll system consolidation (H1–H4):
+  - H1: image-reveal DOM mutation moved to build time. New `_includes/components/imageReveal.njk` partial emits `.image > .image-reveal-wrapper > img` with pre-computed `data-orientation`, `data-reveal-mode` ("aspect" vs "cover"=75vh) and inline `padding-bottom` (from CMS `i.width`/`i.height`, retained in Phase F). `pages.njk`/`timelines.njk` now `{% include %}` it (Nunjucks include shares context — set `isFullWidth` in scope first; there is no Liquid-style `with`). `imgReveal.js` reduced to IntersectionObserver + GSAP clip-path reveal only. Sizing that JS used to inline now lives in `_img-reveal.scss` keyed on `[data-reveal-mode]`/`[data-orientation]`. Reserving image boxes at first paint makes CLS ~0 (was a post-load reflow). Verified: all 19 timeline images byte-match the pre-phase layout (wrapper W/H, display mode, object-fit). Dropped the dead `data-aspect` attribute.
+  - H2: `bgColorTransitionSmooth.js` rewritten — one scrubbed `ScrollTrigger` tween per `[data-bg-color]` section animating `body.backgroundColor` from the previous color (`scrub: 0.5`, `start: 'top bottom'`, `end: 'center center'`). Deleted the hex interpolation, the `gsap.ticker.add` per-frame writer, and the manual resize handler (ScrollTrigger auto-refreshes).
+  - H3: `ScrollHeaderController` scroll listener replaced with an IntersectionObserver on a `.header-sentinel` div (absolutely positioned, `height: var(--nav-height)`, anchored to the top — out of the body grid). Off-screen → `hidden`, on-screen → `visible`. Note: there is **no CSS** for `header.hidden`/`header.visible`, so this is currently a no-op visually (header is `position: sticky`); the refactor's value is removing the per-event scroll listener while keeping the class hooks for future styling.
+  - H4: only scroll source is Lenis — `grep "addEventListener('scroll'|onscroll|gsap.ticker.add"` over `public/js` is clean except smoothScroll's Lenis RAF/`lenis.on('scroll', …)` bridge.
+  - **Gotcha (dev only)**: editing a SCSS *partial* under `_includes/scss/` during `npm start` does **not** recompile `styles.css` (Eleventy incremental doesn't track `@use` deps). Touch `content/css/styles.scss` (or restart) to force it. Full production builds compile correctly.
+  - **Verification limit**: IntersectionObserver-driven behaviors (reveal trigger, header hide) couldn't be live-tested via browser automation — the automated tab is backgrounded (`visibilityState: 'hidden'`), which throttles IO/paint. Layout, CLS-reservation, bg-color scrub, and JS init were all verified; a quick manual scroll on a foreground tab is recommended to confirm reveal/header feel.
+- **2026-06-29**: Pagefind search migration (replaces Fuse + monolithic `search-index.json`):
+  - Build step: `eleventy.config.js` `eleventy.after` runs the Pagefind Node API (`createIndex` → `addDirectory({path:'_site'})` → `writeFiles`). **As of Phase 4 this is gated** — it runs in production always, but is **skipped on the dev server unless `PAGEFIND=1`** (use `PAGEFIND=1 npm start` to test search in dev). It `fs.rmSync`'s `_site/pagefind` first — `writeFiles()` doesn't prune, so content-hashed fragments would otherwise accumulate across rebuilds.
+  - Indexing scope: `base.njk` `<main{% if not excludeFromSearch %} data-pagefind-body{% endif %}>` — only `<main>` content is indexed (header/banner/footer excluded automatically), and the search page (`excludeFromSearch: true`) is skipped. Each `<article>` carries `data-pagefind-meta="title:{{ <type>.title }}"` so results get the CMS title — needed because the **homepage has no `<h1>`** in main (its result title would otherwise be empty).
+  - `search.njk` rewritten: dynamic `import('/pagefind/pagefind.js')` + `pf.search()`; custom UI preserved (`.search-result` cards, `r.meta.title`, `r.excerpt` is Pagefind-generated HTML with `<mark>` highlights). Stale-response guard drops results if the input changed during the async search.
+  - Removed: `content/search-index.njk`, the dead `searchIndex` collection, the redundant `searchIndexPromise` prefetch in `base.njk`, the `fuse.js` dependency + its passthrough.
+  - **Events are now searchable** (the old `search-index.json` only indexed pages + timelines). This is intentional "better" coverage — to restore the old exclusion, add `excludeFromSearch: true` to `content/events.njk` front matter (drops `data-pagefind-body`).
+  - **Payload tradeoff (honest):** for a site this small Pagefind is *heavier* upfront, not smaller — first search loads `pagefind.js` (~45KB) + `wasm.en` (~73KB) + index shard (~20KB) ≈ 137KB vs the old Fuse (~24KB) + `search-index.json` (~20KB) ≈ 44KB. Pagefind's fixed WASM engine dominates at this scale; its incremental advantage only wins once the monolithic index would be large (hundreds of KB). What *is* better: full-content BM25 ranking, highlighted excerpts, no upfront-blocking JSON load, and per-query fragments (~666b) loaded on demand.
+  - Verified: index built (12 pages, correct CMS titles, search page excluded, events included); all `/pagefind/` assets serve 200; production minified search bundle preserves the dynamic import. Live in-browser search couldn't be automation-tested (Pagefind's WASM stalls in a backgrounded tab — `visibilityState: 'hidden'`); a foreground manual check is recommended. Index *content* was verified offline by decompressing fragments.
+- **2026-06-29**: REFACTOR_PLAN.md Phase 1 — cruft removal (delete-with-confirmation):
+  - Deleted (user-confirmed, all verified unreferenced): `public/js/gallery.js`, `public/js/parvus.min.js` (UMD build superseded by the passthrough `parvus.esm.min.js`), `_includes/components/subscribe-netlify.njk`, `netlify.toml` (Vercel is canonical; no consumer in config/package.json), and the `AUDIT_FIXES.md` scratchpad (its 10 points already folded into this change log). **Kept** `_includes/components/test-markup.njk` per user choice.
+  - Stripped dead debug machinery from `public/js/columnScrollAnimation.js`: removed `CONFIG.debug`, the four `if (CONFIG.debug) console.log` ScrollTrigger callbacks (`markers: CONFIG.debug` → `markers: false`), and the entire `window.ColumnScrollAnimation` public API block plus its now-unused `updateConfig`/`setScrubMode` helpers (none called anywhere). Core init + ScrollTrigger setup + fallback untouched.
+  - Phase 1 step 4 (untrack `public/img/.DS_Store`) was a **no-op** — `git ls-files` shows no `.DS_Store` is tracked (the on-disk ones are already gitignored and untracked).
+  - Verified: dev build succeeds with no new warnings (the pre-existing "Meta Data: url is empty" warning was present in the baseline too). `diff -r` against a pre-phase `_site`: zero added/removed files (`gallery.js`/`parvus.min.js` were never passthrough-copied to `_site/js/`), all 13 HTML pages differ only in the `currentBuildDate` comment, and `_site/js/columnScrollAnimation.js` differs only by the intended strip.
+- **2026-06-29**: REFACTOR_PLAN.md Phase 2 — accessibility & SEO quick wins (no visual change at default/mouse state):
+  - **Focus-visible ring** — added `a/button/[role=button]/.accordion-header :focus-visible` rule in `_globals.scss` (`outline: 2px solid var(--sky-300)`); nested inside the file's `:root` wrapper so it compiles to `:root a:focus-visible …`. Keyboard-only; mouse users unaffected.
+  - **Touch targets (WCAG 2.5.5)** — header nav links got `min-height: 44px; display:flex; align-items:center` **scoped to `@media (max-width:1024px)`** only: the desktop header height is driven by the 32px logo, so an unscoped 44px rule would have grown the desktop header. Mobile nav is a toggled dropdown, so taller links don't affect the header bar. `#back-to-top` got `min-width/min-height:44px` + `display:flex; align-items:flex-start; justify-content:flex-end` — it's `position:absolute`, so the hit area expands with zero layout impact and the icon stays pinned to its original top-right corner.
+  - **`#clear-search` `<a href="#">` → `<button type="button" aria-label="Clear search">`** in `search.njk`; added a button reset (`border:0; background:transparent; padding:0; cursor:pointer`) to the existing `#clear-search` SCSS so the shown button is visually identical to the former link. JS unchanged — it selects by `getElementById('clear-search')` and toggles `style.display`, both fine on a `<button>`.
+  - **SEO**: removed non-standard `<meta name="language" content="EN">` (covered by `<html lang>`); fixed `og:image:width` `1600` → `1200` to match the 1200px SEO image resize in `hygraph.js`; added `<link rel="canonical">` per page.
+  - **Search icon SR name** — added `aria-label="Search"` to the header search `<a>` (its `<span>Search</span>` is `display:none` at desktop, leaving it otherwise unlabeled). **Back-to-top** — `href="#top"` → `href="#"` (no `#top` target existed; JS `preventDefault` handles the click).
+  - **Canonical caveat (flagged):** CMS `meta.siteUrl` = `tyebmehtafoundation.org` with **no URL scheme** (same scheme-less value already in `og:url`/`twitter:site`, and the sitemap `<loc>`s are path-only because `meta.url` is empty). A literal scheme-less canonical would resolve *relative* and break, so the implementation guards it: `{% if 'http' not in canonicalBase %}{% set canonicalBase = 'https://' + canonicalBase %}{% endif %}` — correct in dev (CMS value) and prod (if `ROOT_URL` already carries a scheme it's left as-is). **Proper upstream fix** (out of scope here): set `siteUrl`/`ROOT_URL` with `https://`, which would also fix `og:url`, `twitter:site`, and the sitemap absolute URLs.
+  - Verified: dev + production builds succeed, no new warnings; full-file `_site` diffs show only the intended head/template changes (build-date aside); compiled `styles.css` diff is exactly the four new rule blocks; canonical renders correct per-page paths with scheme; clear-search button still wired in the minified prod bundle; pagefind built. **Not browser-verified** (no foreground tab): keyboard focus-ring appearance, mobile 44px target feel, and back-to-top icon position — recommend a quick manual pass.
+- **2026-06-29**: REFACTOR_PLAN.md Phase 3 — reduced-motion coverage (default-motion users unaffected; PRM = `window.matchMedia('(prefers-reduced-motion: reduce)').matches`, captured once at load):
+  - Each GSAP animation now early-returns to its final/static state when `PRM` is true, *before* the existing animation code (so the default path is byte-for-byte the same logic):
+    - `headingAnimations-v2.js` — adds `heading-animate animated` to each target and returns (no word-splitting, no blur-focus tween). The `.animated` class also reveals `.with-underline`/`gradient-reveal` final states so no content is lost.
+    - `imgReveal.js` — reveals every image immediately (`clipPath: inset(0 0% 0 0)`, `opacity:1`, `scale:1`, `loading=eager`, `dataset.revealed='true'`) and skips the IntersectionObserver/timeline.
+    - `bgColorTransitionSmooth.js` — sets `body` to `#ffffff` and returns (no scroll-scrubbed ScrollTriggers).
+    - `columnScrollAnimation.js` — `gsap.set(columns, {opacity:1, y:0})` per grid section, skips the scrubbed slide-up timeline.
+    - `events.njk` accordion (`{% js %}`) — forces `options.duration = 0` so open/close snap instantly (orchestration, `aria-expanded`, overflow handling all preserved; just no height/opacity tween).
+    - `eventsList.njk` poster hover (`{% js %}`) — zeroes `SHOW_DELAY/SHOW_DURATION/HIDE_DURATION` so the poster shows/hides instantly; mouse-follow positioning is kept (it's direct manipulation, not auto-motion).
+  - Note: `_heading-animations.scss` and `_img-reveal.scss` already had `@media (prefers-reduced-motion: reduce)` `!important` fallbacks, so content was technically visible under PRM before this; the JS guards additionally skip the now-pointless animation *work* (word-splitting, observers, ticker-free ScrollTriggers) and remove the one-frame hidden→shown flash.
+  - Verified: dev + prod builds clean, no new warnings; the four passthrough `_site/js/*.js` files each carry the guard; only the event-detail (accordion) and talks-and-exhibitions (poster) `/dist/` bundles re-hashed — homepage and `the-artist` bundles are unchanged, proving no collateral churn; every non-bundle/non-build-date HTML diff is empty; PRM guards survive prod minification. **Not browser-verified** (backgrounded automation tab throttles paint): the actual reduced-motion rendering — recommend a manual DevTools *Rendering → Emulate prefers-reduced-motion: reduce* pass across homepage, an event detail, and the events list, then toggle back to confirm default motion is identical.
+- **2026-06-29**: REFACTOR_PLAN.md Phase 4 — build-output optimizations (no visual change; smaller bytes on the wire):
+  - **SCSS compressed in production** — `sass.compileString` now gets `style: isDev ? "expanded" : "compressed"` in `eleventy.config.js`. Prod `_site/css/styles.css` dropped **71,133 → 41,553 bytes (~42%)**. Dev output is byte-identical (expanded is already sass's default; the only dev-CSS delta this phase is the hero video `opacity:0` rule from step 5, below).
+  - **Combined the two `eleventy.after` hooks into one** — runs terser (prod only) first, then Pagefind. Single hook, easier to reason about.
+  - **Pagefind gated in dev** — `if (isProd || process.env.PAGEFIND === '1')`. Skips the expensive WASM indexing pass on every dev rebuild; **search in dev now requires `PAGEFIND=1 npm start`**. Always runs in production. (Documented in the Pagefind section above.)
+  - **Removed the hero `<link rel="preload" as="video" href=...mp4>`** from `head-seo.njk`. The `<video preload="auto">` already self-loads, and the preload pointed at the **MP4** while WebM browsers (Chrome/FF) actually use the WebM `<source>` — so it was forcing a ~603KB MP4 double-download for the majority. Removing it (the plan's "preload nothing" option) eliminates that waste with no Safari regression (Safari loads its MP4 via the element regardless).
+  - **Removed inline `style="opacity:0"`** from the hero `<video>` and `<img>` in `hero.njk`. The img's hidden initial state was already in `_hero.scss` (`img { opacity: 0 }`); the **video had no CSS equivalent**, so I moved `opacity: 0` into the `_hero.scss` `video {}` rule (a visible white first frame would otherwise flash through `mix-blend-mode: screen`). `heroReveal.js` still sets `opacity:1` on image-load; reduced-motion still `display:none`s the video. Behavior identical.
+  - Verified: dev build clean and **fast** (pagefind skipped); dev CSS diff is exactly the one `video{opacity:0}` line; no `rel=preload as=video` and no hero inline opacity remain in output; prod build clean with CSS compressed to a single line, JS minified, Pagefind index built, search bundle's dynamic `import('/pagefind/pagefind.js')` intact. **Not browser-verified** (backgrounded tab): hero reveal timing with/without reduced-motion — recommend a quick manual check that the mask reveal still plays and the image fades in.
+- **2026-06-29**: Bug fix — marquee disabled on the search page. The banner marquee was GSAP-driven, but `content/search.njk` sets `usesAnimations: false` (Phase D2) so GSAP isn't loaded there — the marquee logged `GSAP not loaded - marquee animation disabled` and sat static. Rewrote it as a **CSS animation**: `.marquee__track { animation: marquee-scroll 30s linear infinite }` + `@keyframes marquee-scroll { 0 → translateX(-50%) }` in `_banner.scss`, with a `@media (prefers-reduced-motion: reduce)` `animation: none` guard; removed the entire GSAP `{% js %}` block from `banner.njk`. `-50%` is seamless because the track holds 4 identical copies (shifting by 2 copies, margins included, lands copy 3/4 where 1/2 began) — and it's *more* correct than the old JS, which measured `offsetWidth` (margins excluded → a subtle jump each loop) and had no resize handling. Now runs on every page incl. search, with zero GSAP dependency. Verified (clean build): warning string gone (0 files), no marquee JS in any `/dist/` bundle, search page still loads 0 GSAP scripts, CSS animation + PRM guard compiled.
+- **2026-06-29**: REFACTOR_PLAN.md Phase 5 — code structure (steps 1, 2, 4; **step 3 skipped by decision**). Pure refactor, behavior/DOM identical:
+  - **Step 1** — extracted the inline `Accordion` and `YouTubeEmbed` classes from `content/events.njk` into ESM modules `_includes/js/accordion.js` and `_includes/js/youtubeEmbed.js` (each `export`s its class; Accordion keeps its Phase-3 reduced-motion `duration=0` guard). `events.njk` now `import`s them and keeps just the init code. Passthrough-copied to `/js/` (alongside `parvus.esm.min.js`) so the runtime `import '/js/accordion.js'` resolves. The terser `minifyDir` helper now **auto-detects ESM** (`/^\s*(export|import)\s/m`) and minifies those files in module mode so top-level `export` survives — verified both modules minify to valid ESM and the event bundle's imports resolve.
+  - **Step 2** — macro-ified the `pages.njk` `__typename` block dispatch. The 4 `{% if %}` branches are replaced with `{% include "components/blocks/_" + (c.__typename | lower) + ".njk" ignore missing %}` and four partials in `_includes/components/blocks/` (`_hero.njk`, `_text.njk`, `_linkbutton.njk` — **lowercase to match `| lower`** — and `_image.njk`). `ignore missing` preserves the old silent-skip of unknown typenames.
+  - **Step 4** — removed the dead `window.lenis = lenis;` export from `smoothScroll.js` (no external readers; the local `lenis` is still used for anchor scrolling).
+  - Verified (dev + prod): no new warnings; every event-page template renders byte-identical (only its `/dist/` bundle re-hashed from the JS move); `pages.njk` pages are **DOM-identical** with only whitespace churn around `<div class="page-hero">` (the macro renders the hero block at a different indent — insignificant inter-block whitespace, no visual change; confirmed via token-stream normalization); all other pages differ only by build-date.
+  - **Step 3 skipped permanently (by decision): "move every `public/js/` global script to ESM and drop the loose `<script defer>` tags in `base.njk`."** It materially changes site-wide script loading/timing (Lenis scroll source, ScrollTrigger init order, the GSAP-before-bundle ordering) for marginal organizational benefit, and its only real verification is interactive scroll/animation behavior. The global `<script defer src>` approach in `base.njk` stays as-is. Steps 1/2/4 stand on their own.
+- **2026-06-29**: REFACTOR_PLAN.md Phase 6 — architectural items (per-item; user selected 1, 2, 5; declined 3 & 4):
+  - **Item 1 (done) — dropped the unused SplitText plugin.** Removed `<script defer src=".../SplitText.min.js">` from `base.njk`. Verified zero references anywhere (headingAnimations-v2 does its own word-splitting) — homepage diff is exactly that one `<script>` line removed, no behavior change, one fewer GSAP-plugin fetch on every animated page.
+  - **Item 2 (no action — already optimized).** Premise was outdated: the build **already** routes the hero `<img id="hero-img">` and the `eventsList` `.event-thumbnail` through the eleventyImageTransformPlugin — both render as `<picture>` with AVIF/WebP + responsive `/images/…-Nw.*` srcset (the plugin transforms the templates' raw `<img>` at build time). Nothing to change.
+  - **Item 5 (evaluated — recommend NO change, not done).** Measured: all 12 content pages carry GSAP-animated content (5–31 heading/`data-bg-color`/`image-wrapper` elements each); only `search.njk` opts out. Flipping `usesAnimations` to opt-in would require `usesAnimations: true` on ~12 pages vs the current single `false` — more boilerplate, no benefit. The opt-out default stays.
+  - **Item 6 (excluded — script is live).** `columnScrollAnimation.js` is **not** dead: the homepage uses `section[data-layout="grid"]`. Kept (already slimmed in Phase 1).
+  - **Items 3 & 4 (declined by user):** scope `* { position: relative }` and the keep/drop-Lenis decision were not pursued.
+- **2026-06-29**: A11y follow-ups (alt text + marquee SR):
+  - **Marquee accessibility (final pattern)** — no `aria-hidden` on the `.marquee` container; the **first** `.marquee__text` copy is the readable one for screen readers. The 3 visual duplicates (needed for the seamless CSS scroll) carry `aria-hidden="true"` only — hidden from SR but left **clickable** (by decision; `inert` was removed so the duplicate copies stay mouse-interactive). Net: the banner is announced once. Caveat: if the banner markdown ever contains a link, the duplicates would place focusable links inside an `aria-hidden` region — revisit then (e.g. `inert`, or `tabindex="-1"`).
+  - **Descriptive link text for the home/logo links** — the header & footer `.home-link`s had `title="{{ meta.siteName }}"` which is **empty** in the CMS, so their accessible name fell back to the logo alt ("Header logo"/"Footer logo") — flagged as non-descriptive. Added `aria-label="{{ meta.title }}, home"` (→ "Tyeb Mehta Foundation, home") to both. Remaining flagged link is **"More"** (a `linkButton` whose CMS `title` is the generic word "More", → `/the-foundation`) — that's a content-authoring issue best fixed by renaming it in Hygraph.
+  - **Filled the last alt-less imgs** (build confirmed 0 remaining): `linkButton.njk` icon → `alt="{{ l.title }}"` and `insta-feed.njk` (inactive) instagram icon → `alt="Follow @tyebmehtafoundation"`. Per request, icons inside buttons take the button's text as alt. Note (accepted tradeoff): on `linkButton` the visible `{{ l.title }}` text repeats the icon alt, so SR announces the label twice — chosen over decorative `alt=""` by decision.
+  - **Explicit width/height on button icons** — added `width="24" height="24"` to the `linkButton` and `insta-feed` icons (the only `.icon`s lacking them; CSS still sizes them via `.icon { width: var(--s-m) }`, so the attributes just reserve a 1:1 box for CLS). Other icons (header/footer/search/accordion) already carried dimensions.
+  - **font-display** — removed the no-op `font-display: swap` from the `body` rule in `_globals.scss` (it's an `@font-face`-only descriptor; ignored on a normal element). The requested "swap for headings / optional for everything else" split is **not achievable in our CSS**: fonts are Adobe Typekit (`roq4hhp.css`) — only `peridot-pe-variable` is loaded (currently `font-display: auto`), `roboto-mono` isn't in the kit (so `.mono` uses system monospace), and headings + body share the *same* `@font-face` (`h1`–`h3` inherit `--font-body`). Two `font-display` values need two `@font-face` rules, which we don't own. To actually change it: set font-display in the Adobe Fonts project (kit-wide), or self-host peridot to split swap/optional. Left on Typekit `auto` by decision.

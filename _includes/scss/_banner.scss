@@ -41,6 +41,15 @@
     &__track {
         display: inline-flex;
         will-change: transform;
+        // CSS-driven infinite scroll (no GSAP dependency, so it runs on
+        // usesAnimations:false pages like search too). The track holds 4
+        // identical copies, so translating by -50% (= 2 copies, margins
+        // included) lands copy 3/4 exactly where copy 1/2 began — seamless.
+        animation: marquee-scroll 30s linear infinite;
+
+        @media (prefers-reduced-motion: reduce) {
+            animation: none;
+        }
     }
 
     &__text {
@@ -52,4 +61,9 @@
     * {
         white-space: nowrap;
     }
+}
+
+@keyframes marquee-scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
 }

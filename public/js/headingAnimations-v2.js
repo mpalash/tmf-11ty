@@ -6,6 +6,8 @@
 (function() {
   'use strict';
 
+  const PRM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   // Configuration
   const CONFIG = {
     // Global randomization setting
@@ -197,6 +199,15 @@
 
     if (allElements.length === 0) return;
 
+    // Reduced motion: show final state immediately, skip the blur-focus reveal.
+    if (PRM) {
+      allElements.forEach(element => {
+        if (element.dataset.noAnimate !== undefined) return;
+        element.classList.add('heading-animate', 'animated');
+      });
+      return;
+    }
+
     // Create observer
     const observer = new IntersectionObserver(onIntersect, CONFIG.observerOptions);
 
@@ -211,22 +222,11 @@
     });
   }
 
-  /**
-   * Wait for GSAP and init
-   */
-  function checkAndInit() {
-    if (typeof gsap !== 'undefined') {
-      init();
-    } else {
-      setTimeout(checkAndInit, 50);
-    }
-  }
-
   // Start
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', checkAndInit);
+    document.addEventListener('DOMContentLoaded', init);
   } else {
-    checkAndInit();
+    init();
   }
 
   // Public API

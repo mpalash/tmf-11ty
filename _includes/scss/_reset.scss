@@ -83,3 +83,18 @@ h6 {
     white-space: nowrap;
     width: 1px;
 }
+
+.visually-hidden:focus,
+.visually-hidden:focus-visible {
+    clip-path: none;
+    height: auto;
+    width: auto;
+    position: fixed;
+    top: var(--s-s);
+    left: var(--s-s);
+    padding: var(--s-s) var(--s-b);
+    background: var(--grey-950);
+    color: var(--white-100);
+    z-index: 10000;
+    white-space: normal;
+}

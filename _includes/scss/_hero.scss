@@ -79,6 +79,10 @@
             pointer-events: none;
             mix-blend-mode: screen;
             background-color: white;
+            // Hidden until heroReveal.js plays it (was an inline style="opacity:0").
+            // mix-blend-mode: screen means a visible white frame would flash the
+            // image white, so it must start hidden.
+            opacity: 0;
 
             @media (prefers-reduced-motion: reduce) {
                 display: none;

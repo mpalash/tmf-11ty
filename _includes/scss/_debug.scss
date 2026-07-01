@@ -9,7 +9,7 @@
     gap: var(--s-l);
 }
 
-body:after {
+body.debug:after {
     content: '';
     position: fixed;
     top: 0;

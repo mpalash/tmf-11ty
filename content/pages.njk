@@ -7,41 +7,11 @@ permalink: "{%- if page.id !== meta.homepage.id -%}{{ page.title | slugify }}/{%
 section: "page"
 layout: layouts/base.njk
 ---
-<article class="{% if page.id == meta.homepage.id %}home{% endif %} {{ section }} {{ page.title | slugify }}">
+<article class="{% if page.id == meta.homepage.id %}home{% endif %} {{ section }} {{ page.title | slugify }}" data-pagefind-meta="title:{{ page.title }}">
     {%- for s in page.pageSections-%}
         <section data-layout={{ s.layout }} data-bg-color={% if s.bgColor.hex %}{{ s.bgColor.hex }}{% else %}#fff{% endif %}>
         {%- for c in s.content -%}
-            {% if c.__typename == 'Hero' %}
-                {% set hero = c %}
-                {% set icon = "icon-eye" %}
-                {% include "components/hero.njk" %}
-            {% endif %}
-            {% if c.__typename == 'Text' %}
-                <div class="text-wrapper">
-                    <div class="text">
-                    {{ c.textmd | md | safe }}
-                    </div>
-                </div>
-            {% endif %}
-            {% if c.__typename == 'LinkButton' %}
-                {% set l = c %}
-                {% set icon = "icon-arrow-right" %}
-                {% include "components/linkButton.njk" %}
-            {% endif %}
-            {% if c.__typename == 'Image' %}
-                <div class="image-wrapper">
-                    <div class="image">
-                        {% for i in c.images %}
-                            <img
-                                src="{{ i.url }}"
-                                alt="{{ i.caption }}" />
-                            {% if i.caption %}
-                                <span class="image-caption">{{ i.caption | md | safe }}</span>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-                </div>
-            {% endif %}
+            {% include "components/blocks/_" + (c.__typename | lower) + ".njk" ignore missing %}
         {%- endfor -%}
         </section>
     {%- endfor -%}

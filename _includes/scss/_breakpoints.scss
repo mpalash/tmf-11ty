@@ -1,0 +1,17 @@
+@mixin bp($name) {
+    $breakpoints: (
+        sm: 480px,
+        tablet: 600px,
+        mid: 720px,
+        desktop: 1024px,
+        wide: 1280px,
+    );
+    $value: map-get($breakpoints, $name);
+    @if $value {
+        @media screen and (min-width: $value) {
+            @content;
+        }
+    } @else {
+        @warn "Unknown breakpoint `#{$name}` in bp().";
+    }
+}

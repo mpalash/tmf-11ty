@@ -63,6 +63,8 @@
     --yellow-950: #250f00;
 
     --color-red: #c20a0a;
+    --color-grey-light: var(--grey-50);
+    --border-major: 1px solid var(--grey-200);
 
     // SPACING
     // Use these variables for padding & margin
@@ -115,13 +117,5 @@
     @media only screen and (max-width: 1024px) {
         --s-xxxl: 72px;
         --s-xxl: 56px;
-        --s-xl: 48px;
-        --s-l: 32px;
-        --s-m: 24px;
-        --s-d: 18px;
-        --s-b: 16px;
-        --s-s: 12px;
-        --s-xs: 8px;
-        --s-xxs: 4px;
     }
 }

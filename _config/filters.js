@@ -1,6 +1,8 @@
 import { DateTime } from "luxon";
 import markdownIt from "markdown-it";
 
+const md = markdownIt({ html: true, breaks: true, typographer: true, quotes: '“”‘’' });
+
 export default function(eleventyConfig) {
 	eleventyConfig.addFilter("readableDate", (dateObj, format, zone) => {
 		// Formatting tokens for Luxon: https://moment.github.io/luxon/#/formatting?id=table-of-tokens
@@ -161,17 +163,9 @@ export default function(eleventyConfig) {
 	// Markdownify
 	eleventyConfig.addFilter("md", value => {
 		if (value != null) {
-			var md = markdownIt({
-				html: true,
-				breaks: true,
-				typographer: true,
-				quotes: '“”‘’'
-			});
-			var rendered = md.render(value);
-			// rendered = rendered.replace(/a href/gi, 'a data-no-swup href');
-			return rendered;
+			return md.render(value);
 		} else {
-			return null
+			return null;
 		}
 	});
 

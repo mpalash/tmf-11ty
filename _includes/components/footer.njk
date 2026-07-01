@@ -1,8 +1,8 @@
 <footer>
-    <a href="#top" id="back-to-top"><img eleventy:ignore src="/img/icon-arrow-up.svg" alt="Back to top" eleventy:ignore /></a>
+    <a href="#" id="back-to-top"><img eleventy:ignore src="/img/icon-arrow-up.svg" alt="Back to top" width="24" height="24" /></a>
     <div>
-        <a href="/" class="home-link" title="{{ meta.siteName }}">
-            <img eleventy:ignore src="{{ meta.footerLogo.url }}" alt="{{ meta.footerLogo.caption }}" />
+        <a href="/" class="home-link" aria-label="{{ meta.title }}, home" title="{{ meta.siteName }}">
+            <img eleventy:ignore src="{{ meta.footerLogo.url }}" alt="{{ meta.footerLogo.caption }}" width="{{ meta.footerLogo.width }}" height="{{ meta.footerLogo.height }}" />
         </a>
         {% for e in meta.emails %}
             <a href="mailto:{{ e }}">{{ e }}</a>
@@ -29,14 +29,17 @@
     </nav>
     <div class="copyright">{{ meta.copyrightNotice | md | safe }}</div>
 </footer>
-<script>
-    var btn = document.getElementById('back-to-top');
+{% js %}
+(function() {
+    const btn = document.getElementById('back-to-top');
+    if (!btn) return;
 
     btn.addEventListener('click', function(e) {
-    e.preventDefault();
-    window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
+        e.preventDefault();
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
     });
-    });
-</script>
+})();
+{% endjs %}

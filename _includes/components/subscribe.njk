@@ -19,10 +19,14 @@
         <p id="formMessage" class="hidden"></p>
   </div>
 </section>
-<script>
-  document.getElementById('subscribeForm').addEventListener('submit', async function(e) {
+{% js %}
+(function() {
+  const subscribeForm = document.getElementById('subscribeForm');
+  if (!subscribeForm) return;
+
+  subscribeForm.addEventListener('submit', async function(e) {
     e.preventDefault();
-    
+
     const form = e.target;
     const submitBtn = document.getElementById('submitBtn');
     const messageDiv = document.getElementById('formMessage');
@@ -60,4 +64,5 @@
       submitBtn.disabled = false;
     }
   });
-</script>
+})();
+{% endjs %}

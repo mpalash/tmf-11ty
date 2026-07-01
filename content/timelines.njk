@@ -7,7 +7,7 @@ permalink: "{{ timeline.title | slugify }}/index.html"
 section: "timeline"
 layout: layouts/base.njk
 ---
-<article class="{{ section }} {{ timeline.title | slugify }}">
+<article class="{{ section }} {{ timeline.title | slugify }}" data-pagefind-meta="title:{{ timeline.title }}">
     <section data-layout='hero'>
         {% set hero = timeline.hero %}
         {% include "components/hero.njk" %}
@@ -24,19 +24,11 @@ layout: layouts/base.njk
                 </div>
             </div>
             {% if e.image.images %}
+                {% set isFullWidth = (e.imageLayout == 'fullWidth') %}
                 <div class="image-wrapper" data-layout={{ e.imageLayout }}>
                     <div class="images">
                         {% for i in e.image.images %}
-                            {% set aspect = i.width / i.height %}
-                            <div class="image">                            
-                                <img
-                                    data-aspect="{% if aspect > 1.2 %}landscape{% else %}portrait{% endif %}"
-                                    src="{{ i.url }}"
-                                    alt="{{ i.caption }}" />
-                                {% if i.caption %}
-                                    <span class="image-caption">{{ i.caption | md | safe }}</span>
-                                {% endif %}
-                            </div>
+                            {% include "components/imageReveal.njk" %}
                         {% endfor %}
                     </div>
                 </div>

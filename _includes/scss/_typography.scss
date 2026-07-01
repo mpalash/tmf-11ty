@@ -36,7 +36,9 @@ h1 {
         border-bottom: 2px solid var(--grey-950);
         transform-origin: top left;
         transform: translate(8px, -36px) rotate(119deg);
-        animation: fade-in 0.3s ease-in 1s 1 both;
+        @media (prefers-reduced-motion: no-preference) {
+            animation: fade-in 0.3s ease-in 1s 1 both;
+        }
     }
 }
 // 40px

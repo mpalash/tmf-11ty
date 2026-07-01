@@ -1,11 +1,11 @@
-/**
- * GSAP Accordion Component
- * A reusable accordion with smooth animations
- */
+/* GSAP Accordion — a reusable accordion with smooth animations.
+ * Imported by content/events.njk via `import { Accordion } from '/js/accordion.js'`.
+ * Depends on the global `gsap` (loaded from CDN before the page module runs). */
 
-class Accordion {
+const PRM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+export class Accordion {
     constructor(element, options = {}) {
-        
         this.accordion = element;
         this.options = {
             duration: options.duration || 0.5,
@@ -13,24 +13,24 @@ class Accordion {
             openFirst: options.openFirst !== false, // true by default
             ...options
         };
-                
+        // Reduced motion: collapse/expand instantly (no height/opacity tween).
+        if (PRM) this.options.duration = 0;
+
         this.items = Array.from(this.accordion.querySelectorAll('.accordion-item'));
         this.headers = Array.from(this.accordion.querySelectorAll('.accordion-header'));
         this.contents = Array.from(this.accordion.querySelectorAll('.accordion-content'));
-        
+
         this.init();
     }
 
-    init() {        
+    init() {
         // Set initial heights to 0 for all except first (if openFirst is true)
         this.contents.forEach((content, index) => {
-            const inner = content.querySelector('.accordion-content-inner');
             const header = this.headers[index];
             const button = header.querySelector('.accordion-button');
             const isFirst = index === 0 && this.options.openFirst;
-                        
+
             if (isFirst) {
-                // Set first item open with proper classes
                 gsap.set(content, { height: 'auto' });
                 header.classList.add('active');
                 header.setAttribute('aria-expanded', 'true');
@@ -38,7 +38,6 @@ class Accordion {
                     button.classList.add('open');
                 }
             } else {
-                // Close all others
                 gsap.set(content, { height: 0 });
                 header.classList.remove('active');
                 header.setAttribute('aria-expanded', 'false');
@@ -48,10 +47,8 @@ class Accordion {
             }
         });
 
-        // Add click handlers
         this.headers.forEach((header, index) => {
-            header.addEventListener('click', (e) => {
-                e.preventDefault();        
+            header.addEventListener('click', () => {
                 this.toggle(index);
             });
         });
@@ -59,8 +56,6 @@ class Accordion {
 
     toggle(index) {
         const header = this.headers[index];
-        const content = this.contents[index];
-        const inner = content.querySelector('.accordion-content-inner');
         const isActive = header.classList.contains('active');
 
         if (isActive) {
@@ -71,12 +66,11 @@ class Accordion {
                     this.close(i);
                 }
             });
-            
             this.open(index);
         }
     }
 
-    open(index) {        
+    open(index) {
         const header = this.headers[index];
         const content = this.contents[index];
         const inner = content.querySelector('.accordion-content-inner');
@@ -84,12 +78,12 @@ class Accordion {
 
         header.classList.add('active');
         header.setAttribute('aria-expanded', 'true');
-        
+
         if (button) {
             button.classList.add('open');
         }
-                
-        gsap.fromTo(content, 
+
+        gsap.fromTo(content,
             { height: 0 },
             {
                 height: 'auto',
@@ -104,7 +98,6 @@ class Accordion {
             }
         );
 
-        // Fade in content
         gsap.fromTo(inner,
             { opacity: 0, y: -20 },
             {
@@ -112,9 +105,7 @@ class Accordion {
                 y: 0,
                 duration: this.options.duration * 0.8,
                 ease: this.options.ease,
-                delay: this.options.duration * 0.2,
-                onComplete: () => {
-                }
+                delay: this.options.duration * 0.2
             }
         );
     }
@@ -127,18 +118,16 @@ class Accordion {
 
         header.classList.remove('active');
         header.setAttribute('aria-expanded', 'false');
-        
+
         if (button) {
             button.classList.remove('open');
         }
-        
+
         gsap.to(inner, {
             opacity: 0,
             y: -10,
             duration: this.options.duration * 0.5,
-            ease: this.options.ease,
-            onComplete: () => {
-            }
+            ease: this.options.ease
         });
 
         gsap.to(content, {
@@ -147,25 +136,7 @@ class Accordion {
             ease: this.options.ease,
             onStart: () => {
                 content.style.overflow = 'hidden';
-            },
-            onComplete: () => {
             }
-        });        
+        });
     }
-
 }
-
-// Initialize accordion when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    const accordionElement = document.querySelector('.accordion');
-    
-    if (!accordionElement) {
-        return;
-    }
-    
-    const accordion = new Accordion(accordionElement, {
-        duration: 0.5,
-        ease: 'power2.inOut',
-        openFirst: true
-    });
-});

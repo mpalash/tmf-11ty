@@ -21,6 +21,11 @@
 }
 #clear-search {
   display: none;
+  // Button reset — keep the visual identical to the former <a> when shown.
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
 }
 #search-results {
   grid-column: 1/-1;

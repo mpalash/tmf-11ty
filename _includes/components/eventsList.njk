@@ -31,5 +31,305 @@
     {% endfor %}
     </ul>
 </section>
-<script src="/js/eventStatus.js"></script>
-<script src="/js/eventPosterHover.js"></script>
+{% js %}
+/* Event status computer — injects upcoming/ongoing/past status at runtime */
+(function() {
+    'use strict';
+
+    function computeEventStatus(dateFrom, dateTo) {
+        const now = new Date();
+
+        if (!dateFrom) {
+            return { status: 'unknown', isUpcoming: false, isPast: true, isOngoing: false };
+        }
+
+        const startDate = new Date(dateFrom);
+        const endDate = dateTo ? new Date(dateTo) : null;
+
+        if (endDate) {
+            if (now < startDate) {
+                return { status: 'upcoming', isUpcoming: true, isPast: false, isOngoing: false };
+            } else if (now >= startDate && now <= endDate) {
+                return { status: 'ongoing', isUpcoming: false, isPast: false, isOngoing: true };
+            } else {
+                return { status: 'past', isUpcoming: false, isPast: true, isOngoing: false };
+            }
+        } else {
+            const eventEndOfDay = new Date(startDate);
+            eventEndOfDay.setHours(23, 59, 59, 999);
+
+            if (now <= eventEndOfDay) {
+                return { status: 'upcoming', isUpcoming: true, isPast: false, isOngoing: false };
+            } else {
+                return { status: 'past', isUpcoming: false, isPast: true, isOngoing: false };
+            }
+        }
+    }
+
+    function processEvents() {
+        const eventElements = document.querySelectorAll('[data-date-from]');
+        if (eventElements.length === 0) return;
+
+        eventElements.forEach(function(element) {
+            const dateFrom = element.getAttribute('data-date-from');
+            const dateTo = element.getAttribute('data-date-to');
+            const statusInfo = computeEventStatus(dateFrom, dateTo);
+
+            element.setAttribute('data-status', statusInfo.status);
+            element.classList.add('event-' + statusInfo.status);
+            element.setAttribute('data-is-upcoming', statusInfo.isUpcoming);
+            element.setAttribute('data-is-past', statusInfo.isPast);
+            element.setAttribute('data-is-ongoing', statusInfo.isOngoing);
+
+            const statusBadge = element.querySelector('.event-status-badge');
+            if (statusBadge) {
+                statusBadge.textContent = statusInfo.status;
+                statusBadge.className = 'event-status-badge badge badge-' + statusInfo.status;
+            }
+        });
+    }
+
+    function processSubEvents() {
+        const subEventElements = document.querySelectorAll('[data-sub-event-date-from]');
+        if (subEventElements.length === 0) return;
+
+        subEventElements.forEach(function(element) {
+            const dateFrom = element.getAttribute('data-sub-event-date-from');
+            const dateTo = element.getAttribute('data-sub-event-date-to');
+            const statusInfo = computeEventStatus(dateFrom, dateTo);
+
+            element.setAttribute('data-sub-event-status', statusInfo.status);
+            element.classList.add('sub-event-' + statusInfo.status);
+
+            const statusBadge = element.querySelector('.sub-event-status-badge');
+            if (statusBadge) {
+                statusBadge.textContent = statusInfo.status;
+                statusBadge.className = 'sub-event-status-badge badge-' + statusInfo.status;
+            }
+        });
+    }
+
+    function init() {
+        processEvents();
+        processSubEvents();
+        // Expose for manual refresh if needed
+        window.updateEventStatus = function() {
+            processEvents();
+            processSubEvents();
+        };
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
+
+/* Poster hover — mouse-following poster thumbnails with GSAP */
+(function() {
+    'use strict';
+
+    const PRM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const CONFIG = {
+        OFFSET_X: 30,
+        OFFSET_Y: -180,
+        SHOW_DELAY: 0.15,
+        SHOW_DURATION: 0.3,
+        HIDE_DURATION: 0.2,
+        SHOW_EASE: 'power2.out',
+        HIDE_EASE: 'power2.out'
+    };
+
+    // Reduced motion: show/hide the poster instantly, no fade/scale tween.
+    if (PRM) {
+        CONFIG.SHOW_DELAY = 0;
+        CONFIG.SHOW_DURATION = 0;
+        CONFIG.HIDE_DURATION = 0;
+    }
+
+    let posterThumbnail;
+    let posterImg;
+    let currentPosterUrl = null;
+    let showTimer = null;
+
+    function createPosterElement() {
+        const poster = document.createElement('div');
+        poster.id = 'posterThumbnail';
+        poster.className = 'poster-thumbnail';
+
+        const picture = document.createElement('picture');
+        const img = document.createElement('img');
+        img.src = '';
+        img.alt = '';
+
+        picture.appendChild(img);
+        poster.appendChild(picture);
+        document.body.appendChild(poster);
+
+        return poster;
+    }
+
+    function init() {
+        if (typeof gsap === 'undefined') {
+            console.error('GSAP library not loaded');
+            return;
+        }
+
+        posterThumbnail = document.getElementById('posterThumbnail');
+        if (!posterThumbnail) {
+            posterThumbnail = createPosterElement();
+        }
+
+        posterImg = posterThumbnail.querySelector('img');
+        if (!posterImg) {
+            console.error('Poster img element not found');
+            return;
+        }
+
+        attachEventListeners();
+    }
+
+    function showPoster(e, posterUrl, posterSrcset, posterSizes) {
+        if (showTimer) {
+            clearTimeout(showTimer);
+        }
+
+        gsap.killTweensOf(posterThumbnail);
+
+        if (posterUrl !== currentPosterUrl) {
+            const picture = posterImg.parentElement;
+
+            if (posterSrcset && picture.tagName === 'PICTURE') {
+                const existingSources = picture.querySelectorAll('source');
+                existingSources.forEach(function(source) {
+                    source.remove();
+                });
+
+                const source = document.createElement('source');
+                source.srcset = posterSrcset;
+                if (posterSizes) {
+                    source.sizes = posterSizes;
+                }
+                picture.insertBefore(source, posterImg);
+            }
+
+            posterImg.src = posterUrl;
+            currentPosterUrl = posterUrl;
+            posterThumbnail.classList.add('loading');
+
+            posterImg.onload = function() {
+                posterThumbnail.classList.remove('loading');
+            };
+            posterImg.onerror = function() {
+                console.error('Failed to load poster:', posterUrl);
+                posterThumbnail.classList.remove('loading');
+            };
+        }
+
+        gsap.set(posterThumbnail, {
+            left: e.clientX + CONFIG.OFFSET_X,
+            top: e.clientY + CONFIG.OFFSET_Y
+        });
+
+        showTimer = setTimeout(function() {
+            gsap.to(posterThumbnail, {
+                opacity: 1,
+                scale: 1,
+                duration: CONFIG.SHOW_DURATION,
+                ease: CONFIG.SHOW_EASE
+            });
+        }, CONFIG.SHOW_DELAY * 1000);
+    }
+
+    function hidePoster() {
+        if (showTimer) {
+            clearTimeout(showTimer);
+            showTimer = null;
+        }
+
+        gsap.killTweensOf(posterThumbnail);
+
+        gsap.to(posterThumbnail, {
+            opacity: 0,
+            scale: 0.8,
+            duration: CONFIG.HIDE_DURATION,
+            ease: CONFIG.HIDE_EASE
+        });
+
+        currentPosterUrl = null;
+    }
+
+    function updatePosition(e) {
+        gsap.set(posterThumbnail, {
+            left: e.clientX + CONFIG.OFFSET_X,
+            top: e.clientY + CONFIG.OFFSET_Y
+        });
+    }
+
+    function getPosterData(item) {
+        const thumbnailImg = item.querySelector('.event-thumbnail');
+        if (!thumbnailImg) return null;
+
+        const src = thumbnailImg.src || thumbnailImg.getAttribute('src');
+        if (!src) return null;
+
+        const pictureElement = thumbnailImg.closest('picture');
+        let srcset = null;
+        let sizes = null;
+
+        if (pictureElement) {
+            const sources = pictureElement.querySelectorAll('source');
+            let selectedSource = null;
+
+            sources.forEach(function(source) {
+                const type = source.getAttribute('type');
+                if (type === 'image/avif' && !selectedSource) {
+                    selectedSource = source;
+                } else if (type === 'image/webp' && (!selectedSource || selectedSource.getAttribute('type') !== 'image/avif')) {
+                    selectedSource = source;
+                }
+            });
+
+            if (selectedSource) {
+                srcset = selectedSource.getAttribute('srcset');
+                sizes = selectedSource.getAttribute('sizes');
+            }
+        }
+
+        if (!srcset) {
+            srcset = thumbnailImg.srcset || thumbnailImg.getAttribute('srcset');
+            sizes = thumbnailImg.sizes || thumbnailImg.getAttribute('sizes');
+        }
+
+        return { src: src, srcset: srcset, sizes: sizes };
+    }
+
+    function attachEventListeners() {
+        const eventItems = document.querySelectorAll('.all-events-list > li');
+        if (eventItems.length === 0) return;
+
+        eventItems.forEach(function(item) {
+            const posterData = getPosterData(item);
+            if (!posterData) return;
+
+            item.addEventListener('mouseenter', function(e) {
+                showPoster(e, posterData.src, posterData.srcset, posterData.sizes);
+            });
+            item.addEventListener('mousemove', function(e) {
+                updatePosition(e);
+            });
+            item.addEventListener('mouseleave', function() {
+                hidePoster();
+            });
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
+{% endjs %}

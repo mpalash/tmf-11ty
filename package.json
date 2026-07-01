@@ -36,6 +36,7 @@
 		"@11ty/eleventy-plugin-syntaxhighlight": "^5.0.0",
 		"cross-env": "^7.0.3",
 		"luxon": "^3.5.0",
+		"pagefind": "^1.5.2",
 		"terser": "^5.46.0"
 	},
 	"dependencies": {

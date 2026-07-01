@@ -1,0 +1,6 @@
+{% set isFullWidth = false %}
+<div class="image-wrapper">
+    {% for i in c.images %}
+        {% include "components/imageReveal.njk" %}
+    {% endfor %}
+</div>

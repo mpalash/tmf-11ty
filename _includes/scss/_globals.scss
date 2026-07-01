@@ -8,7 +8,6 @@
         color: var(--grey-900);
         font-family: var(--font-body);
         line-height: 1.65;
-        font-display: swap;
 
         scroll-behavior: smooth;
         scroll-padding-top: calc(var(--nav-height) + var(--s-xxl));
@@ -96,7 +95,7 @@
         // margin-bottom: var(--s-l);
         user-select: none;
         font-size: var(--fs-sm);
-        color: var(--grey-500);
+        color: var(--grey-600);
         mix-blend-mode: multiply;
         &+picture {
             margin-top: var(--s-l);
@@ -118,6 +117,14 @@
         &:visited {
             color: inherit;
         }
+    }
+    a:focus-visible,
+    button:focus-visible,
+    [role="button"]:focus-visible,
+    .accordion-header:focus-visible {
+        outline: 2px solid var(--sky-300);
+        outline-offset: 2px;
+        border-radius: 2px;
     }
     main a {
         text-decoration: underline;
@@ -181,10 +188,15 @@
         transition: var(--transition-all);
 
         &:active,
-        &:focus,
+        &:focus {
+            outline: none;
+            background-color: var(--white-100);
+        }
+
         &:focus-visible {
             outline: none;
             background-color: var(--white-100);
+            box-shadow: 0 0 0 2px var(--sky-300);
         }
 
         &[type=search] {

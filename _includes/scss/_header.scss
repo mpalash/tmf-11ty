@@ -66,6 +66,11 @@ header {
     }
 
     .toggle-nav {
+        border: 0;
+        background: transparent;
+        padding: 0;
+        font: inherit;
+        cursor: pointer;
         display: none;
         height: 2rem;
         width: 2rem;
@@ -134,6 +139,10 @@ header {
 
             a {
                 font-size: var(--fs-md);
+                // Touch-target minimum (WCAG 2.5.5) — mobile dropdown only.
+                min-height: 44px;
+                display: flex;
+                align-items: center;
             }
         }
 
@@ -142,4 +151,14 @@ header {
         }
     }
 
+}
+// Off-flow sentinel for IntersectionObserver-driven header hide/show (Phase H3).
+// Absolutely positioned so it does not occupy a row in the body grid.
+.header-sentinel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px;
+    height: var(--nav-height);
+    pointer-events: none;
 }
